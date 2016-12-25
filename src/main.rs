@@ -2,6 +2,7 @@ extern crate getopts;
 
 use std::env;
 use std::process::exit;
+use std::io::Write;
 use getopts::Options;
 
 #[derive(Debug)]
@@ -10,6 +11,13 @@ struct CommandOptions {
     dir: String,
     args: Vec<String>,
 }
+
+macro_rules! errorln(
+    ($($arg:tt)*) => { {
+        let r = writeln!(&mut ::std::io::stderr(), $($arg)*);
+        r.expect("failed printing to stderr");
+    } }
+);
 
 enum ParsedArgv {
     Help,
@@ -31,7 +39,7 @@ fn parse_options(argv: Vec<String>) -> Result<ParsedArgv, String> {
 
     if matches.opt_present("h") {
         let brief = format!("Usage: {} [Options] {{Args}}", program);
-        print!("{}", opts.usage(&brief));
+        errorln!("{}", opts.usage(&brief));
         return Ok(ParsedArgv::Help);
     }
 
@@ -52,7 +60,7 @@ fn main() {
     let parsed = match parse_options(argv) {
         Ok(p) => p,
         Err(reason) => {
-            println!("{}", reason);
+            errorln!("{}", reason);
             exit(3);
         },
     };
