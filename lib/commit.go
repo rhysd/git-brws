@@ -1,5 +1,11 @@
 package gitbrws
 
-func CommitURL(o *CmdOptions, args []string) (string, error) {
+import (
+	"fmt"
+	"gopkg.in/src-d/go-git.v4"
+)
+
+func CommitURL(repo *git.Repository, args []string) (string, error) {
+	fmt.Println(repo.IsEmpty())
 	return "", nil
 }

@@ -51,10 +51,10 @@ func NewRepository(url, dir string) (*git.Repository, error) {
 		return nil, err
 	}
 
-	if len(url) == 0 {
+	if len(url) != 0 {
 		r := git.NewMemoryRepository()
 		if err := r.Clone(&git.CloneOptions{URL: url}); err != nil {
-			return nil, err
+			return nil, errors.Wrap(err, "Failed to clone repository into memory for "+url)
 		}
 		return r, nil
 	}

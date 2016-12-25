@@ -28,9 +28,13 @@ func (cmd *Command) Open(args []string) error {
 
 func (cmd *Command) URL(args []string) (string, error) {
 	var u string
-	var err error
 
-	if u, err = CommitURL(cmd.Options, args); err != nil {
+	r, err := NewRepository(cmd.Options.Repo, cmd.Options.Dir)
+	if err != nil {
+		return "", err
+	}
+
+	if u, err = CommitURL(r, args); err != nil {
 		return "", err
 	}
 	if len(u) != 0 {
