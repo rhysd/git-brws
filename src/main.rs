@@ -1,15 +1,18 @@
 extern crate getopts;
 
 use std::env;
+use std::fs;
 use std::process::exit;
 use std::io::Write;
+use std::path::PathBuf;
 use getopts::Options;
 
 #[derive(Debug)]
 struct CommandOptions {
     repo: Option<String>,
-    dir: String,
+    dir: PathBuf,
     args: Vec<String>,
+    url: bool,
 }
 
 macro_rules! errorln(
@@ -25,7 +28,25 @@ enum ParsedArgv {
     Parsed(CommandOptions),
 }
 
-fn parse_options(argv: Vec<String>) -> Result<ParsedArgv, String> {
+type ErrorMsg = String;
+
+fn normalize_repo_format(mut s: String) -> Result<String, ErrorMsg> {
+    if !s.ends_with(".git") {
+        s.push_str(".git");
+    }
+
+    if s.starts_with("git@") || s.starts_with("https://") || s.starts_with("http://") {
+        return Ok(s);
+    }
+
+    match s.chars().filter(|c| *c == '/').count() {
+        1 => Ok(format!("https://github.com/{}", s)),
+        2 => Ok(format!("https://{}", s)),
+        _ => Err(format!("Error: Invalid repository format '{}'. Format must be one of 'user/repo', 'service/user/repo' or Git URL.", s)),
+    }
+}
+
+fn parse_options(argv: Vec<String>) -> Result<ParsedArgv, ErrorMsg> {
     let program = argv[0].clone();
     let mut opts = Options::new();
 
@@ -48,9 +69,20 @@ fn parse_options(argv: Vec<String>) -> Result<ParsedArgv, String> {
         return Ok(ParsedArgv::Version);
     }
 
+    let repo = match matches.opt_str("r") {
+        None => None,
+        Some(r) => Some(normalize_repo_format(r)?),
+    };
+
+    let dir = match matches.opt_str("d") {
+        Some(d) => fs::canonicalize(d).map_err(|e| format!("Error on --dir option: {}", e))?,
+        None => std::env::current_dir().map_err(|e| format!("Error on --dir option: {}", e))?,
+    };
+
     Ok(ParsedArgv::Parsed(CommandOptions {
-        repo: matches.opt_str("r"),
-        dir: matches.opt_str("d").unwrap_or("".to_string()),
+        repo: repo,
+        dir: dir,
+        url: matches.opt_present("u"),
         args: matches.free,
     }))
 }
