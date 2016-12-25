@@ -7,12 +7,12 @@ import (
 	"os"
 )
 
-const Usage = `Usage: git-brws {args} [{options}]
+const Usage = `Usage: git-brws {args} [{flags}]
 
-	TBW: Introduction
+  TBW: Introduction
 
 ARGS:
-	TBW: Describe each arguments
+  TBW: Describe each arguments
 
 FLAGS:`
 
@@ -21,7 +21,8 @@ const Version = "0.0.0"
 func main() {
 	help := flag.Bool("help", false, "Show this help")
 	version := flag.Bool("version", false, "Show version")
-	url := flag.String("url", "", "'user/repo' or URL repository you want to see")
+	repo := flag.String("repo", "", "'user/repo' or .git URL repository you want to see")
+	url := flag.Bool("url", false, "Output URL to stdout instead of opening it in browser")
 	dir := flag.String("dir", "", "Path to directory of your repository")
 
 	flag.Usage = func() {
@@ -42,10 +43,24 @@ func main() {
 		return
 	}
 
-	options := &gitbrws.Options{
-		*url,
-		*dir,
+	c := gitbrws.NewCommand(&gitbrws.CmdOptions{
+		*repo, *dir,
+	})
+
+	fmt.Println("TODO:", *c, flag.Args())
+
+	if *url {
+		o, err := c.URL(flag.Args())
+		if err != nil {
+			fmt.Fprintln(os.Stderr, err)
+			os.Exit(3)
+		}
+		fmt.Println(o)
+		return
 	}
 
-	fmt.Println("TODO:", *options, flag.Args())
+	if err := c.Open(flag.Args()); err != nil {
+		fmt.Fprintln(os.Stderr, err)
+		os.Exit(3)
+	}
 }
