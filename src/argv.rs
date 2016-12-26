@@ -57,7 +57,7 @@ pub fn parse_options(argv: Vec<String>) -> Result<ParsedArgv, ErrorMsg> {
     }
 
     if matches.opt_present("v") {
-        println!("v0.0.0");
+        println!("{}", option_env!("CARGO_PKG_VERSION").unwrap_or("unknown"));
         return Ok(ParsedArgv::Version);
     }
 
