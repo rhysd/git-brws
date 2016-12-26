@@ -2,22 +2,14 @@ extern crate getopts;
 
 use std::env;
 use std::fs;
-use std::path::PathBuf;
 use std::io::Write;
 use self::getopts::Options;
-
-#[derive(Debug)]
-pub struct CommandOptions {
-    repo: Option<String>,
-    dir: PathBuf,
-    args: Vec<String>,
-    url: bool,
-}
+use command;
 
 pub enum ParsedArgv {
     Help,
     Version,
-    Parsed(CommandOptions),
+    Parsed(command::Options, bool),
 }
 
 type ErrorMsg = String;
@@ -71,11 +63,12 @@ pub fn parse_options(argv: Vec<String>) -> Result<ParsedArgv, ErrorMsg> {
         None => env::current_dir().map_err(|e| format!("Error on --dir option: {}", e))?,
     };
 
-    Ok(ParsedArgv::Parsed(CommandOptions {
+    let show_url = matches.opt_present("u");
+
+    Ok(ParsedArgv::Parsed(command::Options {
         repo: repo,
         dir: dir,
-        url: matches.opt_present("u"),
         args: matches.free,
-    }))
+    }, show_url))
 }
 

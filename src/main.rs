@@ -1,5 +1,8 @@
 #[macro_use] mod util;
 mod argv;
+mod git;
+mod command;
+mod operation;
 
 use std::env;
 use std::io::Write;
@@ -16,10 +19,24 @@ fn main() {
         },
     };
 
-    let opts = match parsed {
-        ParsedArgv::Help | ParsedArgv::Version => exit(0),
-        ParsedArgv::Parsed(o) => o,
+    let msg = match parsed {
+        ParsedArgv::Help | ParsedArgv::Version => None,
+        ParsedArgv::Parsed(opts, false) => command::browse(opts),
+        ParsedArgv::Parsed(opts, true) => {
+            match command::url(opts) {
+                Ok(url) => {
+                    println!("{}", url);
+                    None
+                },
+                Err(msg) => Some(msg),
+            }
+        },
     };
 
-    println!("Hello, world! {:?}", opts);
+    if let Some(m) = msg {
+        errorln!("{}", m);
+        exit(3);
+    } else {
+        exit(0);
+    }
 }
