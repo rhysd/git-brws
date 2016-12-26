@@ -2,7 +2,7 @@
 mod argv;
 mod git;
 mod command;
-mod operation;
+mod page;
 
 use std::env;
 use std::io::Write;

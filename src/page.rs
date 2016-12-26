@@ -2,19 +2,19 @@ use command;
 use git;
 
 pub enum Page {
-    Open,
+    Open {
+        branch: String,
+        remote_url: String,
+    },
     Diff {
         lhs: String,
         rhs: String,
+        remote_url: String,
     },
     Commit {
         hash: String,
+        remote_url: String,
     },
-}
-
-pub struct Operation {
-    remote: Option<String>,
-    page: Page,
 }
 
 type ErrorMsg = String;
@@ -35,16 +35,24 @@ impl<'a> BrowsePageParser<'a> {
             return Err("  --repo can't be specified for commit".to_string());
         }
         let hash = self.git.hash(&self.opts.args[0])?;
-        Ok(Page::Commit {hash: hash})
+        let remote_url = if len == 2 {
+            self.git.remote_url(&self.opts.args[1])?
+        } else {
+            self.git.tracking_remote()?.0
+        };
+        Ok(Page::Commit {
+            hash: hash,
+            remote_url: remote_url,
+        })
     }
 }
 
-pub fn parse_operation(opts: command::Options) -> Result<Operation, ErrorMsg> {
+pub fn parse_operation(opts: command::Options) -> Result<Page, ErrorMsg> {
     let mut errors = vec!["Error on parsing command line arguments".to_string()];
 
     let parser = BrowsePageParser {
         opts: &opts,
-        git: git::new(&opts.dir),
+        git: git::new(&opts.dir)?,
     };
 
     match parser.try_parse_commit() {
