@@ -1,4 +1,5 @@
 use std::env;
+use std::str;
 use std::ffi::OsStr;
 use std::path::{Path, PathBuf};
 use std::process::Command;
@@ -20,7 +21,8 @@ impl<'a> Git<'a> {
         if !out.status.success() {
             return Err("Git command exited with non-zero status".to_string())?
         }
-        Ok(format!("{}", String::from_utf8_lossy(&out.stdout)))
+        let s = str::from_utf8(&out.stdout).map_err(|e| format!("Invalid UTF-8 sequence in output of git command: {}", e))?;
+        Ok(s.trim().to_string())
     }
 
     pub fn hash<S: AsRef<str>>(&self, commit: &S) -> Result<String, ErrorMsg> {
