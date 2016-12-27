@@ -15,6 +15,7 @@ pub enum Page {
     },
     FileOrDir {
         relative_path: String,
+        hash: String,
     },
 }
 
@@ -53,8 +54,9 @@ impl<'a> BrowsePageParser<'a> {
     }
 
     fn try_parse_file_or_dir(&self) -> ParseResult {
-        if self.opts.args.len() != 1 {
-            return Err("  Invalid number of arguments for file or directory (1 is expected)".to_string());
+        let len = self.opts.args.len();
+        if len != 1 && len != 2 {
+            return Err("  Invalid number of arguments for file or directory (1..2 is expected)".to_string());
         }
 
         let path = &self.opts.args[0];
@@ -67,8 +69,14 @@ impl<'a> BrowsePageParser<'a> {
             .ok_or("  Failed to convert path into UTF-8 string")?
             .to_string();
 
+        let hash = if len == 2 {
+            self.git.hash(&self.opts.args[1].as_str())
+        } else {
+            self.git.hash(&"HEAD")
+        };
         Ok(Page::FileOrDir {
             relative_path: relative_path,
+            hash: hash?,
         })
     }
 }

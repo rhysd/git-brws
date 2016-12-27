@@ -11,7 +11,7 @@ fn parse_github_url(user: &str, repo: &str, branch: &String, page: &Page) -> Str
         &Page::Open => format!("https://github.com/{}/{}/tree/{}", user, repo, branch),
         &Page::Diff {ref lhs, ref rhs} => format!("https://github.com/{}/{}/compare/{}...{}", user, repo, lhs, rhs),
         &Page::Commit {ref hash} => format!("https://github.com/{}/{}/commit/{}", user, repo, hash),
-        &Page::FileOrDir {ref relative_path} => format!("https://github.com/{}/{}/blob/{}/{}", user, repo, branch, relative_path),
+        &Page::FileOrDir {ref relative_path, ref hash} => format!("https://github.com/{}/{}/blob/{}/{}", user, repo, hash, relative_path),
     }
 }
 
@@ -20,7 +20,7 @@ fn parse_bitbucket_url(user: &str, repo: &str, branch: &String, page: &Page) -> 
         &Page::Open => Ok(format!("https://bitbucket.org/{}/{}/branch/{}", user, repo, branch)),
         &Page::Diff {..} => Err("BitBucket does not support diff between commits (see https://bitbucket.org/site/master/issues/4779/ability-to-diff-between-any-two-commits)".to_string()),
         &Page::Commit {ref hash} => Ok(format!("https://bitbucket.org/{}/{}/commits/{}", user, repo, hash)),
-        &Page::FileOrDir {ref relative_path} => Err(format!("Not implemented! Cannot open file or directory {}. It needs commit hash", relative_path)),
+        &Page::FileOrDir {ref relative_path, ref hash} => Ok(format!("https://bitbucket.org/{}/{}/src/{}/{}", user, repo, hash, relative_path)),
     }
 }
 
