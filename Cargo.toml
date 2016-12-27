@@ -1,7 +1,12 @@
 [package]
 name = "git-brws"
-version = "0.0.0"
+version = "0.1.0"
 authors = ["rhysd <lin90162@yahoo.co.jp>"]
+description = "Command line tool to open a repository, file, commit or diff in your web browser from command line"
+repository = "https://github.com/rhysd/git-brws"
+readme = "README.md"
+include = ["src/*.rs", "Cargo.toml", "LICENSE.txt"]
+license = "MIT"
 
 [dependencies]
 getopts = "0.2"
