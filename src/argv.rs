@@ -1,7 +1,5 @@
 extern crate getopts;
 
-use std::env;
-use std::fs;
 use std::io::Write;
 use std::path::PathBuf;
 use self::getopts::Options;
@@ -16,8 +14,8 @@ pub enum ParsedArgv {
 
 type ErrorMsg = String;
 
-fn normalize_repo_format(mut s: String, dir: &PathBuf) -> Result<String, ErrorMsg> {
-    if let Ok(url) = git::new(dir)?.remote_url(&s) {
+fn normalize_repo_format(mut s: String, git_dir: &PathBuf) -> Result<String, ErrorMsg> {
+    if let Ok(url) = git::new(git_dir)?.remote_url(&s) {
         return Ok(url);
     }
 
@@ -60,20 +58,13 @@ pub fn parse_options(argv: Vec<String>) -> Result<ParsedArgv, ErrorMsg> {
         return Ok(ParsedArgv::Version);
     }
 
-    let dir = match matches.opt_str("d") {
-        Some(d) => {
-            let c = fs::canonicalize(&d).map_err(|e| format!("Error on --dir option: {}", e))?;
-            env::set_current_dir(&c).map_err(|e| format!("Error on setting current direcotry to {}: {}", d, e))?;
-            c
-        },
-        None => env::current_dir().map_err(|e| format!("Error on --dir option: {}", e))?,
-    };
+    let git_dir = git::git_dir(matches.opt_str("d"))?;
 
     let (repo, branch) = match (matches.opt_str("r"), matches.opt_str("b")) {
-        (Some(r), Some(b)) => (normalize_repo_format(r, &dir)?, b),
-        (Some(r), None) => (normalize_repo_format(r, &dir)?, git::new(&dir)?.tracking_remote()?.1),
-        (None, Some(b)) => (git::new(&dir)?.tracking_remote()?.0, b),
-        (None, None) => git::new(&dir)?.tracking_remote()?,
+        (Some(r), Some(b)) => (normalize_repo_format(r, &git_dir)?, b),
+        (Some(r), None) => (normalize_repo_format(r, &git_dir)?, git::new(&git_dir)?.tracking_remote()?.1),
+        (None, Some(b)) => (git::new(&git_dir)?.tracking_remote()?.0, b),
+        (None, None) => git::new(&git_dir)?.tracking_remote()?,
     };
 
     let show_url = matches.opt_present("u");
@@ -81,7 +72,7 @@ pub fn parse_options(argv: Vec<String>) -> Result<ParsedArgv, ErrorMsg> {
     Ok(ParsedArgv::Parsed(command::Options {
         repo: repo,
         branch: branch,
-        dir: dir,
+        git_dir: git_dir,
         args: matches.free,
     }, show_url))
 }

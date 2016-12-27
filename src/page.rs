@@ -61,8 +61,8 @@ impl<'a> BrowsePageParser<'a> {
 
         let entry = fs::canonicalize(path).map_err(|e| format!("  Unable to locate file '{}': {}", path, e))?;
         let relative_path = entry
-            .strip_prefix(&self.opts.dir)
-            .map_err(|e| format!("  Unable locate the file in repository: {}", e))?
+            .strip_prefix(&self.git.root_dir()?)
+            .map_err(|e| format!("  Unable to locate the file in repository: {}", e))?
             .to_str()
             .ok_or("  Failed to convert path into UTF-8 string")?
             .to_string();
@@ -78,7 +78,7 @@ pub fn parse_page(opts: &command::Options) -> Result<Page, ErrorMsg> {
 
     let parser = BrowsePageParser {
         opts: opts,
-        git: git::new(&opts.dir)?,
+        git: git::new(&opts.git_dir)?,
     };
 
     if opts.args.is_empty() {

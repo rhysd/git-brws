@@ -5,7 +5,7 @@ use page::{parse_page, Page};
 pub struct Options {
     pub repo: String,
     pub branch: String,
-    pub dir: PathBuf,
+    pub git_dir: PathBuf,
     pub args: Vec<String>,
 }
 
