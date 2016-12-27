@@ -33,7 +33,7 @@ impl<'a> Git<'a> {
 
     pub fn tracking_remote(&self) -> Result<(String, String), ErrorMsg> {
         let out = self.command(&["rev-parse", "--abbrev-ref", "--symbolic", "@{u}"])?;
-        let mut split = out.split("/");
+        let mut split = out.splitn("/", 2);
         let url = match split.next() {
             None => return Err(format!("Invalid tracking remote name: {}", out)),
             Some(ref u) => self.remote_url(&u)?,

@@ -2,7 +2,7 @@ use std::path::PathBuf;
 
 #[derive(Debug)]
 pub struct Options {
-    pub repo: Option<String>,
+    pub repo: String,
     pub dir: PathBuf,
     pub args: Vec<String>,
 }

@@ -3,8 +3,10 @@ extern crate getopts;
 use std::env;
 use std::fs;
 use std::io::Write;
+use std::path::PathBuf;
 use self::getopts::Options;
 use command;
+use git;
 
 pub enum ParsedArgv {
     Help,
@@ -14,7 +16,11 @@ pub enum ParsedArgv {
 
 type ErrorMsg = String;
 
-fn normalize_repo_format(mut s: String) -> Result<String, ErrorMsg> {
+fn normalize_repo_format(mut s: String, dir: &PathBuf) -> Result<String, ErrorMsg> {
+    if let Ok(url) = git::new(dir)?.remote_url(&s) {
+        return Ok(url);
+    }
+
     if !s.ends_with(".git") {
         s.push_str(".git");
     }
@@ -26,7 +32,7 @@ fn normalize_repo_format(mut s: String) -> Result<String, ErrorMsg> {
     match s.chars().filter(|c| *c == '/').count() {
         1 => Ok(format!("https://github.com/{}", s)),
         2 => Ok(format!("https://{}", s)),
-        _ => Err(format!("Error: Invalid repository format '{}'. Format must be one of 'user/repo', 'service/user/repo' or Git URL.", s)),
+        _ => Err(format!("Error: Invalid repository format '{}'. Format must be one of 'user/repo', 'service/user/repo' or remote name or Git URL.", s)),
     }
 }
 
@@ -53,14 +59,14 @@ pub fn parse_options(argv: Vec<String>) -> Result<ParsedArgv, ErrorMsg> {
         return Ok(ParsedArgv::Version);
     }
 
-    let repo = match matches.opt_str("r") {
-        None => None,
-        Some(r) => Some(normalize_repo_format(r)?),
-    };
-
     let dir = match matches.opt_str("d") {
         Some(d) => fs::canonicalize(d).map_err(|e| format!("Error on --dir option: {}", e))?,
         None => env::current_dir().map_err(|e| format!("Error on --dir option: {}", e))?,
+    };
+
+    let repo = match matches.opt_str("r") {
+        Some(r) => normalize_repo_format(r, &dir)?,
+        None => git::new(&dir)?.tracking_remote()?.0,
     };
 
     let show_url = matches.opt_present("u");
