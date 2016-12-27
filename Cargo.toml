@@ -6,3 +6,4 @@ authors = ["rhysd <lin90162@yahoo.co.jp>"]
 [dependencies]
 getopts = "0.2"
 url = "1.2"
+open = "1.1"
