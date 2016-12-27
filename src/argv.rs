@@ -34,6 +34,31 @@ fn normalize_repo_format(mut s: String, git_dir: &PathBuf) -> Result<String, Err
     }
 }
 
+fn usage(program: &String) -> String {
+    format!(
+        r#"Usage: {} [Options] {{Args}}
+
+  Open a repository, file, commit or diff in your web browser from command line.
+  Please see https://github.com/rhysd/git-brws for more detail.
+
+Example:
+  - Open current repository:
+
+    $ git brws
+
+  - Open a file:
+
+    $ git brws some/file.txt
+
+  - Open specific commit:
+
+    $ git brws HEAD~3
+
+  - Open diff between commits:
+
+    $ git brws HEAD..HEAD~3"#, program)
+}
+
 pub fn parse_options(argv: Vec<String>) -> Result<ParsedArgv, ErrorMsg> {
     let program = argv[0].clone();
     let mut opts = Options::new();
@@ -48,7 +73,7 @@ pub fn parse_options(argv: Vec<String>) -> Result<ParsedArgv, ErrorMsg> {
     let matches = opts.parse(&argv[1..]).map_err(|f| format!("{}", f))?;
 
     if matches.opt_present("h") {
-        let brief = format!("Usage: {} [Options] {{Args}}", program);
+        let brief = usage(&program);
         errorln!("{}", opts.usage(&brief));
         return Ok(ParsedArgv::Help);
     }
