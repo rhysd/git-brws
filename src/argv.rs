@@ -61,8 +61,11 @@ pub fn parse_options(argv: Vec<String>) -> Result<ParsedArgv, ErrorMsg> {
     }
 
     let dir = match matches.opt_str("d") {
-        Some(d) => fs::canonicalize(d).map_err(|e| format!("Error on --dir option: {}", e))?,
-        // XXX: Should use 'git rev-parse --show-cdup' to get proper --git-dir
+        Some(d) => {
+            let c = fs::canonicalize(&d).map_err(|e| format!("Error on --dir option: {}", e))?;
+            env::set_current_dir(&c).map_err(|e| format!("Error on setting current direcotry to {}: {}", d, e))?;
+            c
+        },
         None => env::current_dir().map_err(|e| format!("Error on --dir option: {}", e))?,
     };
 
