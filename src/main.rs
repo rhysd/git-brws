@@ -3,6 +3,7 @@ mod argv;
 mod git;
 mod command;
 mod page;
+mod hosting_service;
 
 use std::env;
 use std::io::Write;
