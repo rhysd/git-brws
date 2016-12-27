@@ -15,6 +15,15 @@ fn parse_github_url(user: &str, repo: &str, branch: &String, page: &Page) -> Str
     }
 }
 
+fn parse_bitbucket_url(user: &str, repo: &str, branch: &String, page: &Page) -> UrlResult {
+    match page {
+        &Page::Open => Ok(format!("https://bitbucket.org/{}/{}/branch/{}", user, repo, branch)),
+        &Page::Diff {..} => Err("BitBucket does not support diff between commits (see https://bitbucket.org/site/master/issues/4779/ability-to-diff-between-any-two-commits)".to_string()),
+        &Page::Commit {ref hash} => Ok(format!("https://bitbucket.org/{}/{}/commits/{}", user, repo, hash)),
+        &Page::FileOrDir {ref relative_path} => Err(format!("Not implemented! Cannot open file or directory {}. It needs commit hash", relative_path)),
+    }
+}
+
 // Note: Parse '/user/repo.git' or '/user/repo' or 'user/repo' into 'user' and 'repo'
 fn user_and_repo_from_path<'a>(path: &'a str) -> Result<(&'a str, &'a str), ErrorMsg> {
     let mut split = path.split('/').skip_while(|s| s.is_empty());
@@ -39,6 +48,7 @@ pub fn parse_url(repo: &String, branch: &String, page: &Page) -> UrlResult {
     let host = url.host_str().ok_or(format!("Failed to parse host from {}", repo))?;
     match host {
         "github.com" => Ok(parse_github_url(user, repo, branch, page)),
+        "bitbucket.org" => parse_bitbucket_url(user, repo, branch, page),
         _ => Err(format!("Unknown hosting service for URL {}", repo)),
     }
 }
