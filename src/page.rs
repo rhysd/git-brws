@@ -47,8 +47,8 @@ impl<'a> BrowsePageParser<'a> {
         let rhs = split.next().ok_or(format!("  Diff format must be specified as LHS..RHS but found {}", self.opts.args[0]))?;
 
         Ok(Page::Diff {
-            lhs: lhs.to_string(),
-            rhs: rhs.to_string(),
+            lhs: self.git.hash(&lhs)?,
+            rhs: self.git.hash(&rhs)?,
         })
     }
 
@@ -90,12 +90,12 @@ pub fn parse_page(opts: &command::Options) -> Result<Page, ErrorMsg> {
         Err(msg) => errors.push(msg),
     }
 
-    match parser.try_parse_commit() {
+    match parser.try_parse_diff() {
         Ok(p) => return Ok(p),
         Err(msg) => errors.push(msg),
     }
 
-    match parser.try_parse_diff() {
+    match parser.try_parse_commit() {
         Ok(p) => return Ok(p),
         Err(msg) => errors.push(msg),
     }
