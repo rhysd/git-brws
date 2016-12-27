@@ -6,3 +6,11 @@ macro_rules! errorln(
     } }
 );
 
+// Note:
+// string::String::insert_str() is not available because it's unstable.
+//   https://github.com/rust-lang/rust/issues/35553
+pub fn insert(target: &mut String, index: usize, replaced: &str) {
+    for c in replaced.chars().rev() {
+        target.insert(index, c);
+    }
+}

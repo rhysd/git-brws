@@ -1,5 +1,6 @@
 use std::path::PathBuf;
-use page::{parse_page, Page};
+use page::parse_page;
+use service;
 
 #[derive(Debug)]
 pub struct Options {
@@ -13,8 +14,7 @@ type ErrorMsg = String;
 
 pub fn url(opts: Options) -> Result<String, ErrorMsg> {
     let page = parse_page(&opts)?;
-    println!("Options: {:?}, Page: {:?}", opts, page);
-    Ok("https://to.be.implemented.com".to_string())
+    service::parse_url(&opts.repo, &opts.branch, &page)
 }
 
 pub fn browse(opts: Options) -> Option<ErrorMsg> {

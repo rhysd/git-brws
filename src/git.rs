@@ -4,6 +4,7 @@ use std::str;
 use std::ffi::OsStr;
 use std::path::{Path, PathBuf};
 use std::process::Command;
+use util;
 
 pub struct Git<'a> {
     command: String,
@@ -32,7 +33,16 @@ impl<'a> Git<'a> {
     }
 
     pub fn remote_url<S: AsRef<str>>(&self, name: &S) -> Result<String, ErrorMsg> {
-        self.command(&["remote", "get-url", name.as_ref()])
+        let mut url = self.command(&["remote", "get-url", name.as_ref()])?;
+        if url.starts_with("git@") {
+            // Note: Convert SSH protocol URL
+            //  git@service.com:user/repo.git -> ssh://git@service.com:22/user/repo.git
+            if let Some(i) = url.find(':') {
+                util::insert(&mut url, i + 1, "22/");
+            }
+            util::insert(&mut url, 0, "ssh://");
+        }
+        Ok(url)
     }
 
     pub fn tracking_remote(&self) -> Result<(String, String), ErrorMsg> {
