@@ -40,12 +40,12 @@ pub fn parse_options(argv: Vec<String>) -> Result<ParsedArgv, ErrorMsg> {
     let program = argv[0].clone();
     let mut opts = Options::new();
 
-    opts.optflag("h", "help", "Print this help");
-    opts.optflag("v", "version", "Show version");
-    opts.optflag("u", "url", "Output URL to STDOUT instead of opening in browser");
     opts.optopt("r", "repo", "Shorthand format (user/repo, service/user/repo) or remote name (e.g. origin) or Git URL you want to see", "REPO");
     opts.optopt("b", "branch", "Branch name of the repository", "BRANCH");
     opts.optopt("d", "dir", "Directory path to your repository", "PATH");
+    opts.optflag("u", "url", "Output URL to STDOUT instead of opening in browser");
+    opts.optflag("h", "help", "Print this help");
+    opts.optflag("v", "version", "Show version");
 
     let matches = opts.parse(&argv[1..]).map_err(|f| format!("{}", f))?;
 
@@ -62,6 +62,7 @@ pub fn parse_options(argv: Vec<String>) -> Result<ParsedArgv, ErrorMsg> {
 
     let dir = match matches.opt_str("d") {
         Some(d) => fs::canonicalize(d).map_err(|e| format!("Error on --dir option: {}", e))?,
+        // XXX: Should use 'git rev-parse --show-cdup' to get proper --git-dir
         None => env::current_dir().map_err(|e| format!("Error on --dir option: {}", e))?,
     };
 

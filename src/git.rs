@@ -1,7 +1,7 @@
 use std::env;
 use std::str;
 use std::ffi::OsStr;
-use std::path::{Path, PathBuf};
+use std::path::PathBuf;
 use std::process::Command;
 
 pub struct Git<'a> {
