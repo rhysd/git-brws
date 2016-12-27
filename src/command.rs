@@ -3,6 +3,7 @@ use std::path::PathBuf;
 #[derive(Debug)]
 pub struct Options {
     pub repo: String,
+    pub branch: String,
     pub dir: PathBuf,
     pub args: Vec<String>,
 }

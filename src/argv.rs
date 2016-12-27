@@ -43,7 +43,8 @@ pub fn parse_options(argv: Vec<String>) -> Result<ParsedArgv, ErrorMsg> {
     opts.optflag("h", "help", "Print this help");
     opts.optflag("v", "version", "Show version");
     opts.optflag("u", "url", "Output URL to STDOUT instead of opening in browser");
-    opts.optopt("r", "repo", "Shorthand format (user/repo, service/user/repo) or Git URL you want to see", "REPO");
+    opts.optopt("r", "repo", "Shorthand format (user/repo, service/user/repo) or remote name (e.g. origin) or Git URL you want to see", "REPO");
+    opts.optopt("b", "branch", "Branch name of the repository", "BRANCH");
     opts.optopt("d", "dir", "Directory path to your repository", "PATH");
 
     let matches = opts.parse(&argv[1..]).map_err(|f| format!("{}", f))?;
@@ -64,15 +65,18 @@ pub fn parse_options(argv: Vec<String>) -> Result<ParsedArgv, ErrorMsg> {
         None => env::current_dir().map_err(|e| format!("Error on --dir option: {}", e))?,
     };
 
-    let repo = match matches.opt_str("r") {
-        Some(r) => normalize_repo_format(r, &dir)?,
-        None => git::new(&dir)?.tracking_remote()?.0,
+    let (repo, branch) = match (matches.opt_str("r"), matches.opt_str("b")) {
+        (Some(r), Some(b)) => (normalize_repo_format(r, &dir)?, b),
+        (Some(r), None) => (normalize_repo_format(r, &dir)?, git::new(&dir)?.tracking_remote()?.1),
+        (None, Some(b)) => (git::new(&dir)?.tracking_remote()?.0, b),
+        (None, None) => git::new(&dir)?.tracking_remote()?,
     };
 
     let show_url = matches.opt_present("u");
 
     Ok(ParsedArgv::Parsed(command::Options {
         repo: repo,
+        branch: branch,
         dir: dir,
         args: matches.free,
     }, show_url))
