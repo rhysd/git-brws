@@ -66,22 +66,24 @@ $ git brws -b develop
 $ git brws -r origin -b develop
 ```
 
-- Open 'upstream' remote of 'develop' branch of @rhysd's 'Shiba' repository
+- Open @rhysd's 'Shiba' repository
 
 ```
-$ git brws upstream develop -repo=rhysd/Shiba
+$ git brws -repo=rhysd/Shiba
 ```
+
+### Open specific file
 
 - Open specific file of current branch of current remote
 
 ```
-$ git brws ./some-file.go
+$ git brws ./some/file.txt
 ```
 
-- Open specific line of the file at current branch of current remote
+- Open specific line of the file
 
 ```
-$ git brws ./some-file.go#L123
+$ git brws ./some/file.txt#L123
 ```
 
 ### Open a specific commit page
