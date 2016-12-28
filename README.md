@@ -122,7 +122,7 @@ $ git brws issues/12
 $ git brws pr/12
 ```
 
-## Related Projedts
+## Related Projects
 
 - [hub browse](https://hub.github.com/)
 - [git open](https://github.com/paulirish/git-open)
@@ -130,7 +130,7 @@ $ git brws pr/12
 
 ## License
 
-Distributed under [the MIT license](LICENSE).
+Distributed under [the MIT license](LICENSE.txt).
 
 ## TODOs
 
