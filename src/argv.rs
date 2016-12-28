@@ -1,6 +1,5 @@
 extern crate getopts;
 
-use std::io::Write;
 use std::path::PathBuf;
 use self::getopts::Options;
 use command;
@@ -8,8 +7,8 @@ use git;
 use util;
 
 pub enum ParsedArgv {
-    Help,
-    Version,
+    Help(String),
+    Version(&'static str),
     Parsed(command::Config, bool),
 }
 
@@ -78,13 +77,11 @@ pub fn parse_options(argv: Vec<String>) -> util::Result<ParsedArgv> {
 
     if matches.opt_present("h") {
         let brief = usage(&program);
-        errorln!("{}", opts.usage(&brief));
-        return Ok(ParsedArgv::Help);
+        return Ok(ParsedArgv::Help(opts.usage(&brief)));
     }
 
     if matches.opt_present("v") {
-        println!("{}", option_env!("CARGO_PKG_VERSION").unwrap_or("unknown"));
-        return Ok(ParsedArgv::Version);
+        return Ok(ParsedArgv::Version(option_env!("CARGO_PKG_VERSION").unwrap_or("unknown")));
     }
 
     let git_dir = git::git_dir(matches.opt_str("d"))?;

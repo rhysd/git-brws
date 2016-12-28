@@ -5,6 +5,9 @@ mod command;
 mod page;
 mod service;
 
+#[cfg(test)]
+mod test;
+
 use std::env;
 use std::io::Write;
 use std::process::exit;
@@ -21,7 +24,14 @@ fn main() {
     };
 
     let msg = match parsed {
-        ParsedArgv::Help | ParsedArgv::Version => None,
+        ParsedArgv::Help(usage) => {
+            errorln!("{}", usage);
+            None
+        },
+        ParsedArgv::Version(version) => {
+            println!("{}", version);
+            None
+        },
         ParsedArgv::Parsed(opts, false) => command::browse(opts),
         ParsedArgv::Parsed(opts, true) => {
             match command::url(opts) {
