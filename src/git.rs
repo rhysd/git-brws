@@ -58,8 +58,15 @@ impl<'a> Git<'a> {
     }
 
     pub fn root_dir(&self) -> util::Result<PathBuf> {
-        let s = self.command(&["rev-parse", "--show-toplevel"])?;
-        Ok(PathBuf::from(s))
+        // XXX:
+        // `git rev-parse` can't be used with --git-dir arguments.
+        // `git --git-dir ../.git rev-parse --show-toplevel` always returns
+        // current working directory.
+        // So here root directory is calculated from git-dir.
+        let p = Path::new(self.git_dir)
+                    .parent()
+                    .ok_or(format!("Cannot locate root directory from git-dir '{}'", self.git_dir))?;
+        Ok(p.to_owned())
     }
 }
 
