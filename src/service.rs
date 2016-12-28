@@ -3,10 +3,9 @@ extern crate url;
 use page::Page;
 use self::url::Url;
 
-type ErrorMsg = String;
-type UrlResult = Result<String, ErrorMsg>;
+use util;
 
-fn parse_github_url(user: &str, repo: &str, branch: &Option<String>, page: &Page) -> String {
+fn build_github_url(user: &str, repo: &str, branch: &Option<String>, page: &Page) -> String {
     match page {
         &Page::Open => if let &Some(ref b) = branch {
             format!("https://github.com/{}/{}/tree/{}", user, repo, b)
@@ -19,7 +18,7 @@ fn parse_github_url(user: &str, repo: &str, branch: &Option<String>, page: &Page
     }
 }
 
-fn parse_bitbucket_url(user: &str, repo: &str, branch: &Option<String>, page: &Page) -> UrlResult {
+fn build_bitbucket_url(user: &str, repo: &str, branch: &Option<String>, page: &Page) -> util::Result<String> {
     match page {
         &Page::Open => if let &Some(ref b) = branch {
             Ok(format!("https://bitbucket.org/{}/{}/branch/{}", user, repo, b))
@@ -32,7 +31,7 @@ fn parse_bitbucket_url(user: &str, repo: &str, branch: &Option<String>, page: &P
     }
 }
 
-fn parse_github_enterprise_url(host: &str, user: &str, repo: &str, branch: &Option<String>, page: &Page) -> String {
+fn build_github_enterprise_url(host: &str, user: &str, repo: &str, branch: &Option<String>, page: &Page) -> String {
     match page {
         &Page::Open => if let &Some(ref b) = branch {
             format!("https://{}/{}/{}/tree/{}", host, user, repo, b)
@@ -45,7 +44,7 @@ fn parse_github_enterprise_url(host: &str, user: &str, repo: &str, branch: &Opti
     }
 }
 
-fn parse_gitlab_url(user: &str, repo: &str, branch: &Option<String>, page: &Page) -> String {
+fn build_gitlab_url(user: &str, repo: &str, branch: &Option<String>, page: &Page) -> String {
     match page {
         &Page::Open => if let &Some(ref b) = branch {
             format!("https://gitlab.com/{}/{}/tree/{}", user, repo, b)
@@ -59,7 +58,7 @@ fn parse_gitlab_url(user: &str, repo: &str, branch: &Option<String>, page: &Page
 }
 
 // Note: Parse '/user/repo.git' or '/user/repo' or 'user/repo' into 'user' and 'repo'
-fn user_and_repo_from_path<'a>(path: &'a str) -> Result<(&'a str, &'a str), ErrorMsg> {
+fn user_and_repo_from_path<'a>(path: &'a str) -> util::Result<(&'a str, &'a str)> {
     let mut split = path.split('/').skip_while(|s| s.is_empty());
     let user = split.next().ok_or(format!("Can't detect user name from path {}", path))?;
     let mut repo = split.next().ok_or(format!("Can't detect repository name from path {}", path))?;
@@ -70,22 +69,20 @@ fn user_and_repo_from_path<'a>(path: &'a str) -> Result<(&'a str, &'a str), Erro
     Ok((user, repo))
 }
 
-// Known URLs
-//
-// GitHub:
-//  https://github.com/user/repo.git
-//  git@github.com:user/repo.git (-> ssh://git@github.com:22/user/repo.git)
-pub fn parse_url(repo: &String, branch: &Option<String>, page: &Page) -> UrlResult {
+// Known URL formats
+//  https://hosting_service.com/user/repo.git
+//  git@hosting_service.com:user/repo.git (-> ssh://git@hosting_service.com:22/user/repo.git)
+pub fn parse_and_build_page_url(repo: &String, page: &Page, branch: &Option<String>) -> util::Result<String> {
     let url = Url::parse(repo).map_err(|e| format!("{}", e))?;
     let path = url.path();
     let (user, repo_name) = user_and_repo_from_path(path)?;
     let host = url.host_str().ok_or(format!("Failed to parse host from {}", repo))?;
     match host {
-        "github.com" => Ok(parse_github_url(user, repo_name, branch, page)),
-        "bitbucket.org" => parse_bitbucket_url(user, repo_name, branch, page),
-        "gitlab.com" => Ok(parse_gitlab_url(user, repo_name, branch, page)),
+        "github.com" => Ok(build_github_url(user, repo_name, branch, page)),
+        "bitbucket.org" => build_bitbucket_url(user, repo_name, branch, page),
+        "gitlab.com" => Ok(build_gitlab_url(user, repo_name, branch, page)),
         host => if host.starts_with("github.") {
-            Ok(parse_github_enterprise_url(host, user, repo_name, branch, page))
+            Ok(build_github_enterprise_url(host, user, repo_name, branch, page))
         } else {
             Err(format!("Unknown hosting service for URL {}", repo))
         },

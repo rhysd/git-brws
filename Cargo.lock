@@ -1,6 +1,6 @@
 [root]
 name = "git-brws"
-version = "0.2.0"
+version = "0.3.0"
 dependencies = [
  "getopts 0.2.14 (registry+https://github.com/rust-lang/crates.io-index)",
  "open 1.1.1 (registry+https://github.com/rust-lang/crates.io-index)",

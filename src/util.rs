@@ -14,3 +14,6 @@ pub fn insert(target: &mut String, index: usize, inserted: &str) {
         target.insert(index, c);
     }
 }
+
+pub type ErrorMsg = String;
+pub type Result<T> = ::std::result::Result<T, ErrorMsg>;

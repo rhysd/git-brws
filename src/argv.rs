@@ -5,6 +5,7 @@ use std::path::PathBuf;
 use self::getopts::Options;
 use command;
 use git;
+use util;
 
 pub enum ParsedArgv {
     Help,
@@ -12,9 +13,7 @@ pub enum ParsedArgv {
     Parsed(command::Config, bool),
 }
 
-type ErrorMsg = String;
-
-fn normalize_repo_format(mut s: String, git_dir: &PathBuf) -> Result<String, ErrorMsg> {
+fn normalize_repo_format(mut s: String, git_dir: &PathBuf) -> util::Result<String> {
     if let Ok(url) = git::new(git_dir)?.remote_url(&s) {
         return Ok(url);
     }
@@ -60,7 +59,7 @@ Example:
     $ git brws HEAD~3..HEAD"#, program)
 }
 
-pub fn parse_options(argv: Vec<String>) -> Result<ParsedArgv, ErrorMsg> {
+pub fn parse_options(argv: Vec<String>) -> util::Result<ParsedArgv> {
     let program = argv[0].clone();
     let mut opts = Options::new();
 
