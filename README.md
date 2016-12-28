@@ -69,7 +69,13 @@ $ git brws -r origin -b develop
 - Open @rhysd's 'Shiba' repository
 
 ```
-$ git brws -repo=rhysd/Shiba
+$ git brws -r rhysd/Shiba
+```
+
+- Open a repository specified by directory
+
+```
+$ git brws -d ~/.go/src/github.com/rhysd/dot-github
 ```
 
 ### Open specific file
@@ -80,7 +86,7 @@ $ git brws -repo=rhysd/Shiba
 $ git brws ./some/file.txt
 ```
 
-- Open specific line of the file
+- Open specific line of the file (NOT YET)
 
 ```
 $ git brws ./some/file.txt#L123
@@ -134,7 +140,7 @@ Distributed under [the MIT license](LICENSE.txt).
 
 ## TODOs
 
-Please see [the project page](https://github.com/rhysd/git-brws/projects).
+Please see [the project page](https://github.com/rhysd/git-brws/projects/1).
 
 ## Development
 
