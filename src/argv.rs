@@ -41,7 +41,7 @@ fn usage(program: &String) -> String {
   GitHub, Bitbucket, GitLab, GitHub Enterprise are supported as hosting service.
   Please see https://github.com/rhysd/git-brws for more detail.
 
-Example:
+Examples:
   - Open current repository:
 
     $ git brws
@@ -56,7 +56,11 @@ Example:
 
   - Open diff between commits:
 
-    $ git brws HEAD~3..HEAD"#, program)
+    $ git brws HEAD~3..HEAD
+
+  - Open line 123 of file:
+
+    $ git brws some/file.txt#L123"#, program)
 }
 
 pub fn parse_options(argv: Vec<String>) -> util::Result<ParsedArgv> {

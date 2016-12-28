@@ -1,7 +1,8 @@
 extern crate url;
 
-use page::Page;
+use std::path::Path;
 use self::url::Url;
+use page::Page;
 
 use util;
 
@@ -14,7 +15,8 @@ fn build_github_url(user: &str, repo: &str, branch: &Option<String>, page: &Page
         },
         &Page::Diff {ref lhs, ref rhs} => format!("https://github.com/{}/{}/compare/{}...{}", user, repo, lhs, rhs),
         &Page::Commit {ref hash} => format!("https://github.com/{}/{}/commit/{}", user, repo, hash),
-        &Page::FileOrDir {ref relative_path, ref hash} => format!("https://github.com/{}/{}/blob/{}/{}", user, repo, hash, relative_path),
+        &Page::FileOrDir {ref relative_path, ref hash, line: None} => format!("https://github.com/{}/{}/blob/{}/{}", user, repo, hash, relative_path),
+        &Page::FileOrDir {ref relative_path, ref hash, line: Some(line)} => format!("https://github.com/{}/{}/blob/{}/{}#L{}", user, repo, hash, relative_path, line),
     }
 }
 
@@ -27,7 +29,15 @@ fn build_bitbucket_url(user: &str, repo: &str, branch: &Option<String>, page: &P
         },
         &Page::Diff {..} => Err("BitBucket does not support diff between commits (see https://bitbucket.org/site/master/issues/4779/ability-to-diff-between-any-two-commits)".to_string()),
         &Page::Commit {ref hash} => Ok(format!("https://bitbucket.org/{}/{}/commits/{}", user, repo, hash)),
-        &Page::FileOrDir {ref relative_path, ref hash} => Ok(format!("https://bitbucket.org/{}/{}/src/{}/{}", user, repo, hash, relative_path)),
+        &Page::FileOrDir {ref relative_path, ref hash, line: None} => Ok(format!("https://bitbucket.org/{}/{}/src/{}/{}", user, repo, hash, relative_path)),
+        &Page::FileOrDir {ref relative_path, ref hash, line: Some(line)} => {
+            let file = Path::new(relative_path)
+                .file_name()
+                .ok_or(format!("Cannot get file name from path: {}", relative_path))?
+                .to_str()
+                .ok_or(format!("Cannot convert path to UTF8 string: {}", relative_path))?;
+            Ok(format!("https://bitbucket.org/{}/{}/src/{}/{}#{}-{}", user, repo, hash, relative_path, file, line))
+        },
     }
 }
 
@@ -40,7 +50,8 @@ fn build_github_enterprise_url(host: &str, user: &str, repo: &str, branch: &Opti
         },
         &Page::Diff {ref lhs, ref rhs} => format!("https://{}/{}/{}/compare/{}...{}", host, user, repo, lhs, rhs),
         &Page::Commit {ref hash} => format!("https://{}/{}/{}/commit/{}", host, user, repo, hash),
-        &Page::FileOrDir {ref relative_path, ref hash} => format!("https://{}/{}/{}/blob/{}/{}", host, user, repo, hash, relative_path),
+        &Page::FileOrDir {ref relative_path, ref hash, line: None} => format!("https://{}/{}/{}/blob/{}/{}", host, user, repo, hash, relative_path),
+        &Page::FileOrDir {ref relative_path, ref hash, line: Some(line)} => format!("https://{}/{}/{}/blob/{}/{}#L{}", host, user, repo, hash, relative_path, line),
     }
 }
 
@@ -53,7 +64,8 @@ fn build_gitlab_url(user: &str, repo: &str, branch: &Option<String>, page: &Page
         },
         &Page::Diff {ref lhs, ref rhs} => format!("https://gitlab.com/{}/{}/compare/{}...{}", user, repo, lhs, rhs),
         &Page::Commit {ref hash} => format!("https://gitlab.com/{}/{}/commit/{}", user, repo, hash),
-        &Page::FileOrDir {ref relative_path, ref hash} => format!("https://gitlab.com/{}/{}/blob/{}/{}", user, repo, hash, relative_path),
+        &Page::FileOrDir {ref relative_path, ref hash, line: None} => format!("https://gitlab.com/{}/{}/blob/{}/{}", user, repo, hash, relative_path),
+        &Page::FileOrDir {ref relative_path, ref hash, line: Some(line)} => format!("https://gitlab.com/{}/{}/blob/{}/{}#L{}", user, repo, hash, relative_path, line),
     }
 }
 

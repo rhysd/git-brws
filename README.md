@@ -87,7 +87,7 @@ $ git brws -d ~/.go/src/github.com/rhysd/dot-github
 $ git brws ./some/file.txt
 ```
 
-- Open specific line of the file (NOT YET)
+- Open specific line of the file
 
 ```
 $ git brws ./some/file.txt#L123

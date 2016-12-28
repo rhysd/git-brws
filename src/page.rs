@@ -17,6 +17,7 @@ pub enum Page {
     FileOrDir {
         relative_path: String,
         hash: String,
+        line: Option<usize>,
     },
 }
 
@@ -51,13 +52,28 @@ impl<'a> BrowsePageParser<'a> {
         })
     }
 
+    fn parse_path_and_line(&self) -> (&str, Option<usize>) {
+        let arg = &self.cfg.args[0];
+        let line_start = match arg.find('#') {
+            Some(i) => i,
+            None => return (arg.as_str(), None),
+        };
+        let mut idx = line_start;
+        if arg.chars().nth(idx + 1) == Some('L') {
+            // Skip 'L' of file#L123
+            idx += 1;
+        }
+        let line = (&arg[idx+1..]).parse().ok();
+        (&arg[..line_start], line)
+    }
+
     fn try_parse_file_or_dir(&self) -> util::Result<Page> {
         let len = self.cfg.args.len();
         if len != 1 && len != 2 {
             return Err("  Invalid number of arguments for file or directory (1..2 is expected)".to_string());
         }
 
-        let path = &self.cfg.args[0];
+        let (path, line) = self.parse_path_and_line();
 
         let entry = fs::canonicalize(path).map_err(|e| format!("  Unable to locate file '{}': {}", path, e))?;
         let relative_path = entry
@@ -75,6 +91,7 @@ impl<'a> BrowsePageParser<'a> {
         Ok(Page::FileOrDir {
             relative_path: relative_path,
             hash: hash?,
+            line: line,
         })
     }
 }
