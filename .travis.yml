@@ -1,7 +1,9 @@
 language: rust
 rust: stable
 before_script:
+    - git --version
     - git checkout $TRAVIS_BRANCH # Attach git again for tests
+    - git rev-parse HEAD
 script:
     - cargo build
     - cargo test --verbose
