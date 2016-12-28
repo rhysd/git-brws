@@ -6,36 +6,52 @@ use self::url::Url;
 type ErrorMsg = String;
 type UrlResult = Result<String, ErrorMsg>;
 
-fn parse_github_url(user: &str, repo: &str, branch: &String, page: &Page) -> String {
+fn parse_github_url(user: &str, repo: &str, branch: &Option<String>, page: &Page) -> String {
     match page {
-        &Page::Open => format!("https://github.com/{}/{}/tree/{}", user, repo, branch),
+        &Page::Open => if let &Some(ref b) = branch {
+            format!("https://github.com/{}/{}/tree/{}", user, repo, b)
+        } else {
+            format!("https://github.com/{}/{}", user, repo)
+        },
         &Page::Diff {ref lhs, ref rhs} => format!("https://github.com/{}/{}/compare/{}...{}", user, repo, lhs, rhs),
         &Page::Commit {ref hash} => format!("https://github.com/{}/{}/commit/{}", user, repo, hash),
         &Page::FileOrDir {ref relative_path, ref hash} => format!("https://github.com/{}/{}/blob/{}/{}", user, repo, hash, relative_path),
     }
 }
 
-fn parse_bitbucket_url(user: &str, repo: &str, branch: &String, page: &Page) -> UrlResult {
+fn parse_bitbucket_url(user: &str, repo: &str, branch: &Option<String>, page: &Page) -> UrlResult {
     match page {
-        &Page::Open => Ok(format!("https://bitbucket.org/{}/{}/branch/{}", user, repo, branch)),
+        &Page::Open => if let &Some(ref b) = branch {
+            Ok(format!("https://bitbucket.org/{}/{}/branch/{}", user, repo, b))
+        } else {
+            Ok(format!("https://bitbucket.org/{}/{}", user, repo))
+        },
         &Page::Diff {..} => Err("BitBucket does not support diff between commits (see https://bitbucket.org/site/master/issues/4779/ability-to-diff-between-any-two-commits)".to_string()),
         &Page::Commit {ref hash} => Ok(format!("https://bitbucket.org/{}/{}/commits/{}", user, repo, hash)),
         &Page::FileOrDir {ref relative_path, ref hash} => Ok(format!("https://bitbucket.org/{}/{}/src/{}/{}", user, repo, hash, relative_path)),
     }
 }
 
-fn parse_github_enterprise_url(host: &str, user: &str, repo: &str, branch: &String, page: &Page) -> String {
+fn parse_github_enterprise_url(host: &str, user: &str, repo: &str, branch: &Option<String>, page: &Page) -> String {
     match page {
-        &Page::Open => format!("https://{}/{}/{}/tree/{}", host, user, repo, branch),
+        &Page::Open => if let &Some(ref b) = branch {
+            format!("https://{}/{}/{}/tree/{}", host, user, repo, b)
+        } else {
+            format!("https://{}/{}/{}", host, user, repo)
+        },
         &Page::Diff {ref lhs, ref rhs} => format!("https://{}/{}/{}/compare/{}...{}", host, user, repo, lhs, rhs),
         &Page::Commit {ref hash} => format!("https://{}/{}/{}/commit/{}", host, user, repo, hash),
         &Page::FileOrDir {ref relative_path, ref hash} => format!("https://{}/{}/{}/blob/{}/{}", host, user, repo, hash, relative_path),
     }
 }
 
-fn parse_gitlab_url(user: &str, repo: &str, branch: &String, page: &Page) -> String {
+fn parse_gitlab_url(user: &str, repo: &str, branch: &Option<String>, page: &Page) -> String {
     match page {
-        &Page::Open => format!("https://gitlab.com/{}/{}/tree/{}", user, repo, branch),
+        &Page::Open => if let &Some(ref b) = branch {
+            format!("https://gitlab.com/{}/{}/tree/{}", user, repo, b)
+        } else {
+            format!("https://gitlab.com/{}/{}", user, repo)
+        },
         &Page::Diff {ref lhs, ref rhs} => format!("https://gitlab.com/{}/{}/compare/{}...{}", user, repo, lhs, rhs),
         &Page::Commit {ref hash} => format!("https://gitlab.com/{}/{}/commit/{}", user, repo, hash),
         &Page::FileOrDir {ref relative_path, ref hash} => format!("https://gitlab.com/{}/{}/blob/{}/{}", user, repo, hash, relative_path),
@@ -59,7 +75,7 @@ fn user_and_repo_from_path<'a>(path: &'a str) -> Result<(&'a str, &'a str), Erro
 // GitHub:
 //  https://github.com/user/repo.git
 //  git@github.com:user/repo.git (-> ssh://git@github.com:22/user/repo.git)
-pub fn parse_url(repo: &String, branch: &String, page: &Page) -> UrlResult {
+pub fn parse_url(repo: &String, branch: &Option<String>, page: &Page) -> UrlResult {
     let url = Url::parse(repo).map_err(|e| format!("{}", e))?;
     let path = url.path();
     let (user, repo_name) = user_and_repo_from_path(path)?;

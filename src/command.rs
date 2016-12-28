@@ -7,7 +7,7 @@ use service;
 #[derive(Debug)]
 pub struct Options {
     pub repo: String,
-    pub branch: String,
+    pub branch: Option<String>,
     pub git_dir: PathBuf,
     pub args: Vec<String>,
 }

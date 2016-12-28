@@ -86,18 +86,16 @@ pub fn parse_options(argv: Vec<String>) -> Result<ParsedArgv, ErrorMsg> {
 
     let git_dir = git::git_dir(matches.opt_str("d"))?;
 
-    let (repo, branch) = match (matches.opt_str("r"), matches.opt_str("b")) {
-        (Some(r), Some(b)) => (normalize_repo_format(r, &git_dir)?, b),
-        (Some(r), None) => (normalize_repo_format(r, &git_dir)?, git::new(&git_dir)?.tracking_remote()?.1),
-        (None, Some(b)) => (git::new(&git_dir)?.tracking_remote()?.0, b),
-        (None, None) => git::new(&git_dir)?.tracking_remote()?,
+    let repo = match matches.opt_str("r") {
+        Some(r) => normalize_repo_format(r, &git_dir)?,
+        None => git::new(&git_dir)?.tracking_remote()?.0,
     };
 
     let show_url = matches.opt_present("u");
 
     Ok(ParsedArgv::Parsed(command::Options {
         repo: repo,
-        branch: branch,
+        branch: matches.opt_str("b"),
         git_dir: git_dir,
         args: matches.free,
     }, show_url))
