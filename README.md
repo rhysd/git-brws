@@ -1,6 +1,7 @@
 git-brws
 ========
-[![crates-badge][]][github project]
+[![Crate Badge][]][GitHub Project]
+[![Build Status][]][CI Results]
 
 `git-brws` is a command line tool to open a repository, file, commit or diff in your web browser from command line.
 
@@ -154,5 +155,7 @@ cargo install cargo-watch
 cargo watch
 ```
 
-[github project]: https://github.com/rhysd/git-brws
-[crates-badge]: https://img.shields.io/crates/v/git-brws.svg
+[GitHub Project]: https://github.com/rhysd/git-brws
+[Crate Badge]: https://img.shields.io/crates/v/git-brws.svg
+[CI Results]: https://travis-ci.org/rhysd/git-brws
+[Build Status]: https://travis-ci.org/rhysd/git-brws.svg?branch=master
