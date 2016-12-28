@@ -2,7 +2,7 @@ extern crate open;
 
 use std::path::PathBuf;
 use page::parse_page;
-use service;
+use service::parse_service;
 
 #[derive(Debug)]
 pub struct Config {
@@ -16,7 +16,8 @@ type ErrorMsg = String;
 
 pub fn url(cfg: Config) -> Result<String, ErrorMsg> {
     let page = parse_page(&cfg)?;
-    service::parse_url(&cfg.repo, &cfg.branch, &page)
+    let service = parse_service(&cfg.repo)?;
+    service.page_url(&page, &cfg.branch)
 }
 
 fn open(url: String) -> Option<ErrorMsg> {
