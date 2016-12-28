@@ -13,8 +13,8 @@ Features:
 - Supports below services
   - [GitHub](https://github.com)
   - [Bitbucket](https://bitbucket.org)
-  - [GitHub Enterprise](https://enterprise.github.com/home) (Will be supported soon)
-  - [GitLab](https://about.gitlab.com/) (Will be supported soon)
+  - [GitHub Enterprise](https://enterprise.github.com/home)
+  - [GitLab](https://about.gitlab.com/)
 - Prefers commit-specific page URL
 
 ## Installation

@@ -33,6 +33,15 @@ fn parse_github_enterprise_url(host: &str, user: &str, repo: &str, branch: &Stri
     }
 }
 
+fn parse_gitlab_url(user: &str, repo: &str, branch: &String, page: &Page) -> String {
+    match page {
+        &Page::Open => format!("https://gitlab.com/{}/{}/tree/{}", user, repo, branch),
+        &Page::Diff {ref lhs, ref rhs} => format!("https://gitlab.com/{}/{}/compare/{}...{}", user, repo, lhs, rhs),
+        &Page::Commit {ref hash} => format!("https://gitlab.com/{}/{}/commit/{}", user, repo, hash),
+        &Page::FileOrDir {ref relative_path, ref hash} => format!("https://gitlab.com/{}/{}/blob/{}/{}", user, repo, hash, relative_path),
+    }
+}
+
 // Note: Parse '/user/repo.git' or '/user/repo' or 'user/repo' into 'user' and 'repo'
 fn user_and_repo_from_path<'a>(path: &'a str) -> Result<(&'a str, &'a str), ErrorMsg> {
     let mut split = path.split('/').skip_while(|s| s.is_empty());
@@ -58,6 +67,7 @@ pub fn parse_url(repo: &String, branch: &String, page: &Page) -> UrlResult {
     match host {
         "github.com" => Ok(parse_github_url(user, repo_name, branch, page)),
         "bitbucket.org" => parse_bitbucket_url(user, repo_name, branch, page),
+        "gitlab.com" => Ok(parse_gitlab_url(user, repo_name, branch, page)),
         host => if host.starts_with("github.") {
             Ok(parse_github_enterprise_url(host, user, repo_name, branch, page))
         } else {

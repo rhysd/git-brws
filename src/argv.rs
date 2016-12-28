@@ -39,6 +39,7 @@ fn usage(program: &String) -> String {
         r#"Usage: {} [Options] {{Args}}
 
   Open a repository, file, commit or diff in your web browser from command line.
+  GitHub, Bitbucket, GitLab, GitHub Enterprise are supported as hosting service.
   Please see https://github.com/rhysd/git-brws for more detail.
 
 Example:
