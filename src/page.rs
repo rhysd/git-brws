@@ -23,29 +23,29 @@ type ErrorMsg = String;
 type ParseResult = Result<Page, ErrorMsg>;
 
 struct BrowsePageParser<'a> {
-    opts: &'a command::Options,
+    cfg: &'a command::Config,
     git: git::Git<'a>,
 }
 
 impl<'a> BrowsePageParser<'a> {
     fn try_parse_commit(&self) -> ParseResult {
-        if self.opts.args.len() != 1 {
+        if self.cfg.args.len() != 1 {
             return Err("  Invalid number of arguments for commit (1 is expected)".to_string());
         }
-        let hash = self.git.hash(&self.opts.args[0])?;
+        let hash = self.git.hash(&self.cfg.args[0])?;
         Ok(Page::Commit {
             hash: hash,
         })
     }
 
     fn try_parse_diff(&self) -> ParseResult {
-        if self.opts.args.len() != 1 {
+        if self.cfg.args.len() != 1 {
             return Err("  Invalid number of arguments for diff (1 is expected)".to_string());
         }
 
-        let mut split = self.opts.args[0].splitn(2, "..");
+        let mut split = self.cfg.args[0].splitn(2, "..");
         let lhs = split.next().unwrap();
-        let rhs = split.next().ok_or(format!("  Diff format must be specified as LHS..RHS but found {}", self.opts.args[0]))?;
+        let rhs = split.next().ok_or(format!("  Diff format must be specified as LHS..RHS but found {}", self.cfg.args[0]))?;
 
         Ok(Page::Diff {
             lhs: self.git.hash(&lhs)?,
@@ -54,12 +54,12 @@ impl<'a> BrowsePageParser<'a> {
     }
 
     fn try_parse_file_or_dir(&self) -> ParseResult {
-        let len = self.opts.args.len();
+        let len = self.cfg.args.len();
         if len != 1 && len != 2 {
             return Err("  Invalid number of arguments for file or directory (1..2 is expected)".to_string());
         }
 
-        let path = &self.opts.args[0];
+        let path = &self.cfg.args[0];
 
         let entry = fs::canonicalize(path).map_err(|e| format!("  Unable to locate file '{}': {}", path, e))?;
         let relative_path = entry
@@ -70,7 +70,7 @@ impl<'a> BrowsePageParser<'a> {
             .to_string();
 
         let hash = if len == 2 {
-            self.git.hash(&self.opts.args[1].as_str())
+            self.git.hash(&self.cfg.args[1].as_str())
         } else {
             self.git.hash(&"HEAD")
         };
@@ -81,15 +81,15 @@ impl<'a> BrowsePageParser<'a> {
     }
 }
 
-pub fn parse_page(opts: &command::Options) -> Result<Page, ErrorMsg> {
+pub fn parse_page(cfg: &command::Config) -> Result<Page, ErrorMsg> {
     let mut errors = vec!["Error on parsing command line arguments".to_string()];
 
     let parser = BrowsePageParser {
-        opts: opts,
-        git: git::new(&opts.git_dir)?,
+        cfg: cfg,
+        git: git::new(&cfg.git_dir)?,
     };
 
-    if opts.args.is_empty() {
+    if cfg.args.is_empty() {
         return Ok(Page::Open)
     }
 

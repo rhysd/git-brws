@@ -5,7 +5,7 @@ use page::parse_page;
 use service;
 
 #[derive(Debug)]
-pub struct Options {
+pub struct Config {
     pub repo: String,
     pub branch: Option<String>,
     pub git_dir: PathBuf,
@@ -14,9 +14,9 @@ pub struct Options {
 
 type ErrorMsg = String;
 
-pub fn url(opts: Options) -> Result<String, ErrorMsg> {
-    let page = parse_page(&opts)?;
-    service::parse_url(&opts.repo, &opts.branch, &page)
+pub fn url(cfg: Config) -> Result<String, ErrorMsg> {
+    let page = parse_page(&cfg)?;
+    service::parse_url(&cfg.repo, &cfg.branch, &page)
 }
 
 fn open(url: String) -> Option<ErrorMsg> {
@@ -36,8 +36,8 @@ fn open(url: String) -> Option<ErrorMsg> {
     }
 }
 
-pub fn browse(opts: Options) -> Option<ErrorMsg> {
-    match url(opts) {
+pub fn browse(cfg: Config) -> Option<ErrorMsg> {
+    match url(cfg) {
         Ok(url) => open(url),
         Err(msg) => Some(msg),
     }

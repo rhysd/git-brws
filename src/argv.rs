@@ -9,7 +9,7 @@ use git;
 pub enum ParsedArgv {
     Help,
     Version,
-    Parsed(command::Options, bool),
+    Parsed(command::Config, bool),
 }
 
 type ErrorMsg = String;
@@ -93,7 +93,7 @@ pub fn parse_options(argv: Vec<String>) -> Result<ParsedArgv, ErrorMsg> {
 
     let show_url = matches.opt_present("u");
 
-    Ok(ParsedArgv::Parsed(command::Options {
+    Ok(ParsedArgv::Parsed(command::Config {
         repo: repo,
         branch: matches.opt_str("b"),
         git_dir: git_dir,
