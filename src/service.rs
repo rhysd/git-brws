@@ -24,6 +24,15 @@ fn parse_bitbucket_url(user: &str, repo: &str, branch: &String, page: &Page) -> 
     }
 }
 
+fn parse_github_enterprise_url(host: &str, user: &str, repo: &str, branch: &String, page: &Page) -> String {
+    match page {
+        &Page::Open => format!("https://{}/{}/{}/tree/{}", host, user, repo, branch),
+        &Page::Diff {ref lhs, ref rhs} => format!("https://{}/{}/{}/compare/{}...{}", host, user, repo, lhs, rhs),
+        &Page::Commit {ref hash} => format!("https://{}/{}/{}/commit/{}", host, user, repo, hash),
+        &Page::FileOrDir {ref relative_path, ref hash} => format!("https://{}/{}/{}/blob/{}/{}", host, user, repo, hash, relative_path),
+    }
+}
+
 // Note: Parse '/user/repo.git' or '/user/repo' or 'user/repo' into 'user' and 'repo'
 fn user_and_repo_from_path<'a>(path: &'a str) -> Result<(&'a str, &'a str), ErrorMsg> {
     let mut split = path.split('/').skip_while(|s| s.is_empty());
@@ -44,11 +53,15 @@ fn user_and_repo_from_path<'a>(path: &'a str) -> Result<(&'a str, &'a str), Erro
 pub fn parse_url(repo: &String, branch: &String, page: &Page) -> UrlResult {
     let url = Url::parse(repo).map_err(|e| format!("{}", e))?;
     let path = url.path();
-    let (user, repo) = user_and_repo_from_path(path)?;
+    let (user, repo_name) = user_and_repo_from_path(path)?;
     let host = url.host_str().ok_or(format!("Failed to parse host from {}", repo))?;
     match host {
-        "github.com" => Ok(parse_github_url(user, repo, branch, page)),
-        "bitbucket.org" => parse_bitbucket_url(user, repo, branch, page),
-        _ => Err(format!("Unknown hosting service for URL {}", repo)),
+        "github.com" => Ok(parse_github_url(user, repo_name, branch, page)),
+        "bitbucket.org" => parse_bitbucket_url(user, repo_name, branch, page),
+        host => if host.starts_with("github.") {
+            Ok(parse_github_enterprise_url(host, user, repo_name, branch, page))
+        } else {
+            Err(format!("Unknown hosting service for URL {}", repo))
+        },
     }
 }
