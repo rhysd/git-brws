@@ -56,7 +56,7 @@ Example:
 
   - Open diff between commits:
 
-    $ git brws HEAD..HEAD~3"#, program)
+    $ git brws HEAD~3..HEAD"#, program)
 }
 
 pub fn parse_options(argv: Vec<String>) -> Result<ParsedArgv, ErrorMsg> {

@@ -6,10 +6,10 @@ git-brws
 Features:
 
 - Opens a page of
-  - Repository (e.g. https://github.com/rhysd/git-brws)
-  - File (e.g. https://github.com/rhysd/git-brws/blob/master/Cargo.toml)
-  - Commit (e.g. https://github.com/rhysd/git-brws/commit/60024ab1280f9f10423b22bc708f3f6ef97db6b5)
-  - Diff (e.g. https://github.com/rhysd/git-brws/compare/60024ab1280f9f10423b22bc708f3f6ef97db6b5...e3c18d0d50252112d37bde97061370204b3cdab7)
+  - Repository ([e.g.](https://github.com/rhysd/git-brws))
+  - File ([e.g.](https://github.com/rhysd/git-brws/blob/master/Cargo.toml))
+  - Commit ([e.g.](https://github.com/rhysd/git-brws/commit/60024ab1280f9f10423b22bc708f3f6ef97db6b5))
+  - Diff ([e.g.](https://github.com/rhysd/git-brws/compare/e3c18d0d50252112d37bde97061370204b3cdab7...60024ab1280f9f10423b22bc708f3f6ef97db6b5))
 - Supports below services
   - [GitHub](https://github.com)
   - [Bitbucket](https://bitbucket.org)
@@ -105,10 +105,10 @@ $ git brws HEAD
 - Show diff between `HEAD` and `HEAD~3`
 
 ```
-$ git brws HEAD..HEAD~3
+$ git brws HEAD~3..HEAD
 ```
 
-- Show diff between `60024ab` and `113079b`
+- Show diff between `113079b` and `60024ab`
 
 ```
 $ git brws 60024ab..113079b
