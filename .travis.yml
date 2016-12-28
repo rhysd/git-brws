@@ -1,9 +1,7 @@
 language: rust
 rust: stable
-os:
-    - osx # Avoid too old git (1.8.5.6) on Linux worker
+dist: trusty
 before_script:
-    - brew install git
     - git --version
     - git checkout $TRAVIS_BRANCH # Attach git again for tests
     - git rev-parse HEAD
