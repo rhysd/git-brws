@@ -83,44 +83,28 @@ pub fn new(dir: &PathBuf) -> util::Result<Git> {
     Ok(Git { command: command, git_dir: path })
 }
 
-fn set_current_dir(p: &PathBuf) -> util::Result<()> {
-    env::set_current_dir(p).map_err(|e| format!("Error on setting current direcotry to {:?}: {}", p, e))
-}
+pub fn git_dir(dir: Option<String>) -> util::Result<PathBuf> {
+    let mut cmd = Command::new(get_git_command());
+    cmd.arg("rev-parse").arg("--git-dir");
+    if let Some(d) = dir {
+        let d = fs::canonicalize(&d).map_err(|e| format!("Cannot locate canonical path for '{}': {}", d, e))?;
+        cmd.current_dir(d);
+    }
 
-fn git_revparse_git_dir(current: &PathBuf) -> util::Result<PathBuf> {
-    // XXX:
-    // We may be able to use exec or spawn to change current working directory
-    // in child command.
-    // It can avoid changing current working directory globally.
-    let out = Command::new(get_git_command())
-                .arg("rev-parse")
-                .arg("--git-dir")
-                .output()
-                .map_err(|e| format!("{}", e))?;
+    let out = cmd.output().map_err(|e| format!("{}", e))?;
     if !out.status.success() {
-        return Err(format!("Git command exited with non-zero status: {}", str::from_utf8(&out.stderr).expect("Failed to convert git command output from UTF8")));
+        let stderr = str::from_utf8(&out.stderr).map_err(|e| format!("Failed to convert git command output: {}", e))?;
+        return Err(format!("Git command exited with non-zero status: {}", stderr));
     }
 
     let s = str::from_utf8(&out.stdout).map_err(|e| format!("Invalid UTF-8 sequence in output of git command: {}", e))?.trim();
 
     let p = Path::new(s);
     if p.is_relative() {
+        let current = env::current_dir().map_err(|e| format!("Unable to get current working directory: {}", e))?;
         Ok(current.join(&p))
     } else {
         Ok(p.to_owned())
     }
 }
 
-pub fn git_dir(dir: Option<String>) -> util::Result<PathBuf> {
-    let current_dir = env::current_dir().map_err(|e| format!("{}", e))?;
-    match dir {
-        Some(d) => {
-            let d = fs::canonicalize(&d).map_err(|e| format!("Cannot locate canonical path for '{}': {}", d, e))?;
-            set_current_dir(&d)?;
-            let p = git_revparse_git_dir(&d).map_err(|e| format!("{}", e));
-            set_current_dir(&current_dir)?;
-            p
-        },
-        None => git_revparse_git_dir(&current_dir),
-    }
-}
