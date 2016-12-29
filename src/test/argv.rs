@@ -89,7 +89,6 @@ fn unknown_options() {
 }
 
 #[test]
-#[ignore] /* because this test breaks other tests even if `cargo test -- --ignore`*/
 fn detect_git_dir() {
     let mut p = env::current_dir().unwrap();
     p.push(Path::new("src/test/assets/test1/dir1"));
