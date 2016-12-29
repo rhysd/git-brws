@@ -88,6 +88,10 @@ fn set_current_dir(p: &PathBuf) -> util::Result<()> {
 }
 
 fn git_revparse_git_dir(current: &PathBuf) -> util::Result<PathBuf> {
+    // XXX:
+    // We may be able to use exec or spawn to change current working directory
+    // in child command.
+    // It can avoid changing current working directory globally.
     let out = Command::new(get_git_command())
                 .arg("rev-parse")
                 .arg("--git-dir")
