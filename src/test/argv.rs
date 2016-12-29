@@ -90,11 +90,14 @@ fn unknown_options() {
 
 #[test]
 fn detect_git_dir() {
-    let mut p = env::current_dir().unwrap();
-    p.push(Path::new("src/test/assets/test1/dir1"));
+    let current = env::current_dir().unwrap();
+    let mut p = current.clone();
+    p.push(Path::new("src/test/"));
     match parse_options(args(vec!["-d", p.to_str().unwrap()])).unwrap() {
         ParsedArgv::Parsed(o, false) => {
-            assert!(o.git_dir.ends_with("src/test/assets/test1/.git"));
+            let mut expected = current.clone();
+            expected.push(".git");
+            assert_eq!(o.git_dir, expected);
         },
         _ => assert!(false),
     }
