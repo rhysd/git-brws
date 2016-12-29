@@ -69,6 +69,15 @@ fn not_exsiting_file() {
 }
 
 #[test]
+fn file_at_specific_commit() {
+    let c = config("https://github.com/user/repo.git", None, vec![&"README.md"]);
+    let p = parse_page(&c).unwrap();
+    let c = config("https://github.com/user/repo.git", None, vec![&"README.md", "HEAD^"]);
+    let p2 = parse_page(&c).unwrap();
+    assert!(p != p2, format!("{:?} v.s. {:?}", p, p2));
+}
+
+#[test]
 fn parse_commit_ref() {
     for &cm in &[
         "HEAD",
@@ -95,4 +104,46 @@ fn parse_short_commit_hash() {
             p => assert!(false, "Unexpected result: {:?}", p),
         }
     }
+}
+
+#[test]
+fn parse_diff_ref_name() {
+    let c = config("https://github.com/user/repo.git", None, vec!["HEAD^..HEAD"]);
+    match parse_page(&c).unwrap() {
+        Page::Diff{lhs, rhs} => {
+            assert!(!lhs.is_empty());
+            assert!(!rhs.is_empty());
+        },
+        p => assert!(false, "Unexpected result: {:?}", p),
+    }
+}
+
+#[test]
+fn parse_diff() {
+    let c = config("https://github.com/user/repo.git", None, vec!["499edbb..bc869a1"]);
+    match parse_page(&c).unwrap() {
+        Page::Diff{lhs, rhs} => {
+            assert_eq!(lhs, "499edbbbad4d8054e4a47e12944e5fb4a2ef7ec5");
+            assert_eq!(rhs, "bc869a14617a131fefe8fa1a3dcdeba0745880d5");
+        },
+        p => assert!(false, "Unexpected result: {:?}", p),
+    }
+}
+
+#[test]
+fn wrong_num_of_args() {
+    let c = config("https://github.com/user/repo.git", None, vec!["foo", "bar", "piyo"]);
+    assert!(parse_page(&c).is_err());
+}
+
+#[test]
+fn unknown_diff() {
+    let c = config("https://github.com/user/repo.git", None, vec!["HEAD~114514..HEAD~114513"]);
+    assert!(parse_page(&c).is_err());
+}
+
+#[test]
+fn file_for_unknown_commit() {
+    let c = config("https://github.com/user/repo.git", None, vec!["README.md", "HEAD~114514"]);
+    assert!(parse_page(&c).is_err());
 }
