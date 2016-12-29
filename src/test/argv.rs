@@ -1,3 +1,5 @@
+use std::env;
+use std::path::Path;
 use argv::*;
 
 fn args(strs: Vec<&str>) -> Vec<String> {
@@ -9,7 +11,7 @@ fn args(strs: Vec<&str>) -> Vec<String> {
 }
 
 #[test]
-fn no_options() {
+fn no_option() {
     match parse_options(args(vec![])).unwrap() {
         ParsedArgv::Parsed(o, false) => {
             assert!(
@@ -76,6 +78,24 @@ fn version_option() {
     match parse_options(args(vec!["-v"])).unwrap() {
         ParsedArgv::Version(s) => {
             assert!(!s.is_empty());
+        },
+        _ => assert!(false),
+    }
+}
+
+#[test]
+fn unknown_options() {
+    assert!(parse_options(args(vec!["--unknown"])).is_err());
+}
+
+#[test]
+#[ignore] /* because this test breaks other tests even if `cargo test -- --ignore`*/
+fn detect_git_dir() {
+    let mut p = env::current_dir().unwrap();
+    p.push(Path::new("src/test/assets/test1/dir1"));
+    match parse_options(args(vec!["-d", p.to_str().unwrap()])).unwrap() {
+        ParsedArgv::Parsed(o, false) => {
+            assert!(o.git_dir.ends_with("src/test/assets/test1/.git"));
         },
         _ => assert!(false),
     }

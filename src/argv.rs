@@ -33,8 +33,8 @@ fn normalize_repo_format(mut s: String, git_dir: &PathBuf) -> util::Result<Strin
 }
 
 fn usage(program: &String) -> String {
-    format!(
-        r#"Usage: {} [Options] {{Args}}
+    format!("\
+Usage: {} [Options] {{Args}}
 
   Open a repository, file, commit or diff in your web browser from command line.
   GitHub, Bitbucket, GitLab, GitHub Enterprise are supported as hosting service.
@@ -59,7 +59,7 @@ Examples:
 
   - Open line 123 of file:
 
-    $ git brws some/file.txt#L123"#, program)
+    $ git brws some/file.txt#L123", program)
 }
 
 pub fn parse_options(argv: Vec<String>) -> util::Result<ParsedArgv> {
