@@ -1,15 +1,17 @@
 language: rust
-rust: stable
 dist: trusty
 
 matrix:
   include:
     - os: linux
+      rust: stable
       env: TARGET=x86_64-unknown-linux-gnu
     - os: linux
+      rust: stable
       env: TARGET=i686-unknown-linux-gnu
 
 before_script:
+  - if [[ "${TARGET}" != "x86_64-unknown-linux-gnu" ]]; then rustup target add $TARGET; fi
   - git --version
   - echo $TRAVIS_BRANCH
   - git checkout $TRAVIS_BRANCH
