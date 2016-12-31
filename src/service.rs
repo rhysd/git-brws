@@ -57,7 +57,7 @@ fn user_and_repo_from_path<'a>(path: &'a str) -> util::Result<(&'a str, &'a str)
 //  1. https://hosting_service.com/user/repo.git
 //  2. git@hosting_service.com:user/repo.git (-> ssh://git@hosting_service.com:22/user/repo.git)
 pub fn parse_and_build_page_url(repo: &String, page: &Page, branch: &Option<String>) -> util::Result<String> {
-    let url = Url::parse(repo).map_err(|e| format!("{}", e))?;
+    let url = Url::parse(repo).map_err(|e| format!("Failed to parse URL '{}': {}", repo, e))?;
     let path = url.path();
     let (user, repo_name) = user_and_repo_from_path(path)?;
     let host = url.host_str().ok_or(format!("Failed to parse host from {}", repo))?;
