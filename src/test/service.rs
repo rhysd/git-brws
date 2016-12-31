@@ -102,3 +102,14 @@ fn parse_and_build_file_page_with_line_number() {
         assert_eq!(parse_and_build_page_url(&repo.to_string(), &p, &None).unwrap(), expected);
     }
 }
+
+#[test]
+fn invalid_repo_url() {
+    for repo in &[
+        "https://github.com.git",
+        "https://github.com/user.git",
+        "https://unknown.hosting_service.com/user/repo.git",
+    ] {
+        assert!(parse_and_build_page_url(&repo.to_string(), &Page::Open, &None).is_err(), "{} must be invalid", repo);
+    }
+}
