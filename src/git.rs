@@ -34,15 +34,7 @@ impl<'a> Git<'a> {
         // XXX:
         // `git remote get-url {name}` is not available because it's added recently (at 2.6.1).
         // Note that git installed in Ubuntu 14.04 is 1.9.1.
-        let mut url = self.command(&["config", "--get", &format!("remote.{}.url", name.as_ref())])?;
-        if url.starts_with("git@") {
-            // Note: Convert SSH protocol URL
-            //  git@service.com:user/repo.git -> ssh://git@service.com:22/user/repo.git
-            if let Some(i) = url.find(':') {
-                util::insert(&mut url, i + 1, "22/");
-            }
-            util::insert(&mut url, 0, "ssh://");
-        }
+        let url = self.command(&["config", "--get", &format!("remote.{}.url", name.as_ref())])?;
         Ok(url)
     }
 

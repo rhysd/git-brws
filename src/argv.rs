@@ -6,6 +6,19 @@ use command;
 use git;
 use util;
 
+fn convert_ssh_url(mut url: String) -> String {
+    if url.starts_with("git@") {
+        // Note: Convert SSH protocol URL
+        //  git@service.com:user/repo.git -> ssh://git@service.com:22/user/repo.git
+        if let Some(i) = url.find(':') {
+            util::insert(&mut url, i + 1, "22/");
+        }
+        util::insert(&mut url, 0, "ssh://");
+    }
+    url
+}
+
+#[derive(Debug)]
 pub enum ParsedArgv {
     Help(String),
     Version(&'static str),
@@ -90,6 +103,7 @@ pub fn parse_options(argv: Vec<String>) -> util::Result<ParsedArgv> {
         Some(r) => normalize_repo_format(r, &git_dir)?,
         None => git::new(&git_dir)?.tracking_remote()?.0,
     };
+    let repo = convert_ssh_url(repo);
 
     let show_url = matches.opt_present("u");
 

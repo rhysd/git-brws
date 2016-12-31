@@ -18,6 +18,7 @@ fn no_option() {
                 vec![
                     "https://github.com/rhysd/git-brws.git",
                     "ssh://git@github.com:22/rhysd/git-brws.git",
+                    "git@github.com:rhysd/git-brws.git",
                 ]
                 .iter()
                 .any(|u| o.repo == u.to_string())
@@ -47,6 +48,16 @@ fn with_options() {
             assert_eq!(o.args.len(), 2);
         },
         _ => assert!(false),
+    };
+}
+
+#[test]
+fn ssh_conversion_with_option() {
+    match parse_options(args(vec!["-r", "git@github.com:user/repo.git"])).unwrap() {
+        ParsedArgv::Parsed(o, ..) => {
+            assert_eq!(o.repo, "ssh://git@github.com:22/user/repo.git");
+        },
+        p => assert!(false, "Parse must be succeeded but actually results in {:?}", p),
     };
 }
 

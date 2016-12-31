@@ -1,12 +1,14 @@
 use service::parse_and_build_page_url;
 use page::Page;
 
+// Note:
+// git@ -> ssh://git@ conversion is done in git.rs.
 #[test]
 fn convert_ssh_url() {
     let p = Page::Open;
     for &(repo, expected) in &[
-        ("git@github.com:user/repo.git", "https://github.com/user/repo"),
-        ("git@bitbucket.org:user/repo.git", "https://bitbucket.org/user/repo"),
+        ("ssh://git@github.com:22/user/repo.git", "https://github.com/user/repo"),
+        ("ssh://git@bitbucket.org:22/user/repo.git", "https://bitbucket.org/user/repo"),
     ] {
         assert_eq!(parse_and_build_page_url(&repo.to_string(), &p, &None).unwrap(), expected);
     }
