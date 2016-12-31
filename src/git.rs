@@ -3,6 +3,7 @@ use std::fs;
 use std::str;
 use std::ffi::OsStr;
 use std::path::{Path, PathBuf};
+use std::fmt::Debug;
 use std::process::Command;
 use util;
 
@@ -12,7 +13,7 @@ pub struct Git<'a> {
 }
 
 impl<'a> Git<'a> {
-    pub fn command<S: AsRef<OsStr>>(&self, args: &[S]) -> util::Result<String> {
+    pub fn command<S: AsRef<OsStr> + Debug>(&self, args: &[S]) -> util::Result<String> {
         let out = Command::new(&self.command)
                     .arg("--git-dir")
                     .arg(self.git_dir)
@@ -20,7 +21,8 @@ impl<'a> Git<'a> {
                     .output()
                     .map_err(|e| format!("Error on executing git command: {}", e))?;
         if !out.status.success() {
-            return Err(format!("Git command exited with non-zero status: {}", str::from_utf8(&out.stderr).expect("Failed to convert git command output from UTF8")));
+            let stderr = str::from_utf8(&out.stderr).expect("Failed to convert git command output from UTF8");
+            return Err(format!("Git command exited with non-zero status (git-dir: '{}', args: '{:?}'): {}", self.git_dir, args, stderr));
         }
         let s = str::from_utf8(&out.stdout).map_err(|e| format!("Invalid UTF-8 sequence in output of git command: {}", e))?;
         Ok(s.trim().to_string())

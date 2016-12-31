@@ -27,7 +27,7 @@ fn no_option() {
             assert!(o.git_dir.ends_with(".git"));
             assert!(o.args.is_empty());
         },
-        _ => assert!(false),
+        r => assert!(false, "Failed to parse args with no option: {:?}", r),
     };
 
     match parse_options(args(vec!["foo", "bar"])).unwrap() {
