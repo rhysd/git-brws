@@ -101,7 +101,7 @@ pub fn parse_options(argv: Vec<String>) -> util::Result<ParsedArgv> {
 
     let repo = match matches.opt_str("r") {
         Some(r) => normalize_repo_format(r, &git_dir)?,
-        None => git::new(&git_dir)?.tracking_remote()?.0,
+        None => git::new(&git_dir)?.tracking_remote()?,
     };
     let repo = convert_ssh_url(repo);
 
