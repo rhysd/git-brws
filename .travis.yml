@@ -3,6 +3,9 @@ dist: trusty
 
 matrix:
   include:
+    - os: osx
+      rust: stable
+      env: TARGET=x86_64-apple-darwin
     - os: linux
       rust: stable
       env: TARGET=x86_64-unknown-linux-gnu
@@ -16,7 +19,7 @@ before_script:
   - curl https://sh.rustup.rs -sSf | sh -s -- -y --default-toolchain=$TRAVIS_RUST_VERSION
   - rustc -V
   - cargo -V
-  - if [[ "${TARGET}" != "x86_64-unknown-linux-gnu" ]]; then rustup target add $TARGET; fi
+  - if [[ "${TARGET}" == "i686-unknown-linux-gnu" ]]; then rustup target add $TARGET; fi
   - git --version
   - echo $TRAVIS_BRANCH
   - git checkout $TRAVIS_BRANCH
