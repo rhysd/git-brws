@@ -5,8 +5,8 @@ use page::Page;
 fn convert_ssh_url() {
     let p = Page::Open;
     for &(repo, expected) in &[
-        ("ssh://git@github.com:22/user/repo.git", "https://github.com/user/repo"),
-        ("ssh://git@bitbucket.org:22/user/repo.git", "https://bitbucket.org/user/repo"),
+        ("git@github.com:user/repo.git", "https://github.com/user/repo"),
+        ("git@bitbucket.org:user/repo.git", "https://bitbucket.org/user/repo"),
     ] {
         assert_eq!(parse_and_build_page_url(&repo.to_string(), &p, &None).unwrap(), expected);
     }
