@@ -1,14 +1,43 @@
 language: rust
 rust: stable
 dist: trusty
+
+matrix:
+  include:
+  - os: linux
+    env: TARGET=x86_64-unknown-linux-gnu
+
 before_script:
-    - git --version
-    - git checkout $TRAVIS_BRANCH # Attach git again for tests
-    - git rev-parse HEAD
+  - git --version
+  - git checkout $TRAVIS_BRANCH
+  - git rev-parse HEAD
+  - rustc -V
+  - cargo -V
+
 script:
-    - cargo build
-    - cargo test --verbose
+  - cargo build
+  - cargo test --verbose
+
 notifications:
-    email:
-        on_success: never
-        on_failure: change
+  email:
+    on_success: never
+    on_failure: change
+
+before_deploy:
+  - cargo build --target $TARGET --release
+  - mkdir "git-brws-${TRAVIS_TAG}-${TARGET}"
+  - cp target/$TARGET/release/git-brws LICENSE.txt README.md "git-brws-${TRAVIS_TAG}-${TARGET}"
+  - tar czf "git-brws-${TRAVIS_TAG}-${TARGET}.gz" "git-brws-${TRAVIS_TAG}-${TARGET}"
+
+deploy:
+  provider: releases
+  api_key:
+    secure: p+hqviA2MdXIWHZ+DDTr/QzgCPKxWGCFxo1KyI7mIpgmuJ5YcgCj5+V5bQDLG55Z5Iz45MigVMgxRdM3IUErFRdYuOl/wi3PMr4ukWNALJWl6iCQgGZt7Qcl2UCPlsYOeGiNLzC/pyLtTrxtBR8KtRBAijAZChGw2D9zEZ2rTn8IXLsMl+I9Ri0eHUXpY/JCqmfQ00Kgtjnh75QeWkg48Oxt8ZUWjuRbfZv66w1qpg6mWvCya5FVt6MuHLicO1icvYbmH3Z0IeaZavq8mE4NfikAUrkAK24CZ3N8IHySNYzyQbAgTFvByscyLh0rkrKsibagvENiCLCGwY9nYc2xrpin5/GbeGfSE5ybAUvfoO9yqgGzS2kLUp/RwfPmwJeJaUunx3OsjAw6UrXo6AS+2iRBj9qqa3CacmtBHITF3XH0YNvfLcKaOVTO14mv4BqFEmTkegsggP/qv/qVaxU7DlFBb+U//Kll4bARqg70D6OVRxftyB8vSk9dDqol4Sh5aI40cBX27FgykZdjehqboTOLapBDIEVfgd/pvLN/yVB9uzEjvP13cik1B30GEWS5xyMog8+XRHlEvwMWmdYlM+vOhIUpyXGR9cjZKgKp5IllXmIAtFeN5t6GQ2AlO7d+aJaODGDXk72df9ueuwwQVF/7q8/J9dxyQQpbZXS4g6w=
+  file: git-brws-${TRAVIS_TAG}-${TARGET}.gz
+  skip_cleanup: true
+  on:
+    repo: rhysd/git-brws
+    # On specific condition -> condition: $TRAVIS_RUST_VERSION = nightly
+    #
+    # Only deploy tagged commit
+    tags: true
