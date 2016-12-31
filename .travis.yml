@@ -11,11 +11,9 @@ matrix:
 
 before_script:
   - git --version
-  - git branch $TRAVIS_BRANCH
+  - echo $TRAVIS_BRANCH
   - git checkout $TRAVIS_BRANCH
   - git rev-parse HEAD
-  - rustc -V
-  - cargo -V
 
 script:
   - cargo build
