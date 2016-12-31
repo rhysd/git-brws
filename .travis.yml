@@ -4,11 +4,14 @@ dist: trusty
 
 matrix:
   include:
-  - os: linux
-    env: TARGET=x86_64-unknown-linux-gnu
+    - os: linux
+      env: TARGET=x86_64-unknown-linux-gnu
+    - os: linux
+      env: TARGET=i686-unknown-linux-gnu
 
 before_script:
   - git --version
+  - git branch $TRAVIS_BRANCH
   - git checkout $TRAVIS_BRANCH
   - git rev-parse HEAD
   - rustc -V
