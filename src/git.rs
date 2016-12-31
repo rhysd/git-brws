@@ -38,18 +38,21 @@ impl<'a> Git<'a> {
         Ok(url)
     }
 
-    pub fn tracking_remote(&self) -> util::Result<(String, String)> {
-        let out = self.command(&["rev-parse", "--abbrev-ref", "--symbolic", "@{u}"])?;
-        let mut split = out.splitn(2, "/");
-        let url = match split.next() {
-            None => return Err(format!("Invalid tracking remote name: {}", out)),
-            Some(ref u) => self.remote_url(&u)?,
+    pub fn tracking_remote(&self) -> util::Result<String> {
+        let out = match self.command(&["rev-parse", "--abbrev-ref", "--symbolic", "@{u}"]) {
+            Ok(stdout) => stdout,
+            Err(stderr) => return if stderr.find("does not point to a branch").is_some() {
+                Ok(self.remote_url(&"origin")?)
+            } else {
+                Err(format!("Failed to retrieve default remote name: {}", stderr))
+            },
         };
-        let branch = match split.next() {
-            None => return Err(format!("Invalid tracking remote name: {}", out)),
-            Some(ref u) => u.to_string(),
-        };
-        Ok((url, branch))
+
+        // out is formatted as '{remote-url}/{branch-name}'
+        match out.splitn(2, "/").next() {
+            Some(ref u) => self.remote_url(&u),
+            None => Err(format!("Invalid tracking remote name: {}", out)),
+        }
     }
 
     pub fn root_dir(&self) -> util::Result<PathBuf> {
