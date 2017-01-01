@@ -1,3 +1,4 @@
+use std::env;
 use service::parse_and_build_page_url;
 use page::Page;
 
@@ -114,4 +115,14 @@ fn invalid_repo_url() {
     ] {
         assert!(parse_and_build_page_url(&repo.to_string(), &Page::Open, &None).is_err(), "{} must be invalid", repo);
     }
+}
+
+#[test]
+fn customized_host() {
+    env::set_var("GIT_BRWS_GITHUB_URL_HOST", "my-original-ghe.org");
+    match parse_and_build_page_url(&"https://my-original-ghe.org/user/repo.git".to_string(), &Page::Open, &None) {
+        Ok(u) => assert_eq!(u, "https://my-original-ghe.org/user/repo"),
+        Err(e) => assert!(false, "Unable to detect environment variable for custom GH:E repos: {}", e),
+    }
+    env::set_var("GIT_BRWS_GITHUB_URL_HOST", "");
 }

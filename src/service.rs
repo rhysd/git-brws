@@ -1,6 +1,7 @@
 extern crate url;
 
 use std::path::Path;
+use std::env;
 use self::url::Url;
 use page::Page;
 
@@ -67,7 +68,12 @@ pub fn parse_and_build_page_url(repo: &String, page: &Page, branch: &Option<Stri
         _ => if host.starts_with("github.") {
             Ok(build_github_like_url(host, user, repo_name, branch, page))
         } else {
-            Err(format!("Unknown hosting service for URL {}", repo))
+            if let Ok(v) = env::var("GIT_BRWS_GITHUB_URL_HOST") {
+                if v == host {
+                    return Ok(build_github_like_url(host, user, repo_name, branch, page))
+                }
+            }
+            Err(format!("Unknown hosting service for URL {}. If you want to use custom URL for GitHub Enterprise, please set $GIT_BRWS_GITHUB_URL_HOST", repo))
         },
     }
 }

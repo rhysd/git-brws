@@ -133,6 +133,15 @@ And below can open editing file in your browser.
 :!git brws %
 ```
 
+## Customization
+
+You can customize behavior of this command with environment varibles.
+
+- `$GIT_BRWS_GIT_COMMAND`: Git command to use. If not specified, `"git"` will be used.
+- `$GIT_BRWS_GITHUB_URL_HOST`: When you use your own GitHub:Enterprise repository, you can specify its host to this variable.
+  By default, `git brws` detects `^github\.` as GH:E host. If your GH:E repository host does not match it, please specify
+  this variable. If your repository is `https://example-repo.org/user/repo`, `example-repo.org` should be set.
+
 ## Related Projects
 
 - [hub browse](https://hub.github.com/)
