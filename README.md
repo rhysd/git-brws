@@ -21,6 +21,8 @@ Features:
 
 ## Installation
 
+`git brws` currently supports Linux (x86\_64, i686, aarch64) and macOS.
+
 - With [cargo](https://crates.io/)
 
 ```
@@ -29,7 +31,7 @@ $ cargo install git-brws
 
 - As single binary
 
-For Linux (64bit/32bit) or macOS (64bit), you can download a binary executable from [release page][].
+You can download a binary executable from [release page][].
 Unarchive downloaded file and put the binary in your `bin` directory. 
 
 ## Usage
