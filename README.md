@@ -120,10 +120,17 @@ $ git brws 60024ab..113079b
 ### Cooperate with other tools
 
 With `-u` option, `git brws` outputs URL to stdout.
+
 For example, in Vim, you can write your repository URL to your text instantly.
 
 ```
 :r!git brws -u
+```
+
+And below can open editing file in your browser.
+
+```
+:!git brws %
 ```
 
 ## Related Projects
