@@ -12,6 +12,9 @@ matrix:
     - os: linux
       rust: stable
       env: TARGET=i686-unknown-linux-gnu
+    - os: linux
+      rust: stable
+      env: TARGET=aarch64-unknown-linux-gnu
 
 before_script:
   - sh ~/rust/lib/rustlib/uninstall.sh
@@ -20,6 +23,15 @@ before_script:
   - rustc -V
   - cargo -V
   - if [[ "${TARGET}" == "i686-unknown-linux-gnu" ]]; then rustup target add $TARGET; fi
+  - |
+    if [[ "${TARGET}" == "aarch64-unknown-linux-gnu" ]]; then
+        rustup target add $TARGET
+        aarch64-linux-gnu-gcc -v
+        mkdir -p .cargo
+        echo "[target.${TARGET}]" > .cargo/config
+        echo "linker = \"aarch64-linux-gnu-gcc\"" >> .cargo/config
+        cat .cargo/config
+    fi
   - git --version
   - echo $TRAVIS_BRANCH
   - git checkout $TRAVIS_BRANCH
@@ -56,4 +68,8 @@ deploy:
 addons:
   apt:
     packages:
-      - gcc-multilib
+      - gcc-4.8-multilib
+      - gcc-4.8-aarch64-linux-gnu
+      - gcc-aarch64-linux-gnu
+      - libc6-arm64-cross
+      - libc6-dev-arm64-cross
