@@ -1,9 +1,9 @@
-git-brws
+git brws
 ========
 [![Crate Badge][]][GitHub Project]
 [![Build Status][]][CI Results]
 
-`git-brws` is a command line tool to open a repository, file, commit or diff in your web browser from command line.
+`git brws` is a command line tool to open a repository, file, commit or diff in your web browser from command line.
 
 Features:
 
@@ -29,12 +29,13 @@ $ cargo install git-brws
 
 - As single binary
 
-Not yet (I'll upload soon)
+For Linux (64bit/32bit) or macOS (64bit), you can download a binary executable from [release page][].
+Unarchive downloaded file and put the binary in your `bin` directory. 
 
 ## Usage
 
 ```
-Usage: target/debug/git-brws [Options] {Args}
+Usage: git brws [Options] {Args}
 
 Options:
     -r, --repo REPO     Shorthand format (user/repo, service/user/repo) or
@@ -116,18 +117,13 @@ $ git brws HEAD~3..HEAD
 $ git brws 60024ab..113079b
 ```
 
-### Open issues/PRs (NOT YET)
+### Cooperate with other tools
 
-- Open issue `#12`
-
-```
-$ git brws issues/12
-```
-
-- Open PR `#12`
+With `-u` option, `git brws` outputs URL to stdout.
+For example, in Vim, you can write your repository URL to your text instantly.
 
 ```
-$ git brws pr/12
+:r!git brws -u
 ```
 
 ## Related Projects
@@ -159,3 +155,4 @@ cargo watch
 [Crate Badge]: https://img.shields.io/crates/v/git-brws.svg
 [CI Results]: https://travis-ci.org/rhysd/git-brws
 [Build Status]: https://travis-ci.org/rhysd/git-brws.svg?branch=master
+[release page]: https://github.com/rhysd/git-brws/releases

@@ -105,7 +105,7 @@ pub fn parse_page(cfg: &command::Config) -> util::Result<Page> {
     };
 
     if cfg.args.is_empty() {
-        return Ok(Page::Open)
+        return Ok(Page::Open);
     }
 
     match parser.try_parse_file_or_dir() {
