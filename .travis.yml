@@ -50,7 +50,7 @@ before_deploy:
   - cargo build --target $TARGET --release
   - mkdir "git-brws-${TRAVIS_TAG}-${TARGET}"
   - cp target/$TARGET/release/git-brws LICENSE.txt README.md "git-brws-${TRAVIS_TAG}-${TARGET}"
-  - tar czf "git-brws-${TRAVIS_TAG}-${TARGET}.gz" "git-brws-${TRAVIS_TAG}-${TARGET}"
+  - zip "git-brws-${TRAVIS_TAG}-${TARGET}.zip" -r "git-brws-${TRAVIS_TAG}-${TARGET}"
 
 deploy:
   provider: releases
