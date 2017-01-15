@@ -125,5 +125,33 @@ fn customized_host() {
         Ok(u) => assert_eq!(u, "https://my-original-ghe.org/user/repo"),
         Err(e) => assert!(false, "Unable to detect environment variable for custom GH:E repos: {}", e),
     }
-    env::set_var("GIT_BRWS_GITHUB_URL_HOST", "");
+    env::remove_var("GIT_BRWS_GITHUB_URL_HOST");
+}
+
+#[test]
+fn customized_host_ssh_port() {
+    env::set_var("GIT_BRWS_GITHUB_SSH_PORT", "10022");
+    env::set_var("GIT_BRWS_GITLAB_SSH_PORT", "10022");
+    env::set_var("GIT_BRWS_GITHUB_URL_HOST", "my-original-ghe.org");
+
+    let p = Page::Open;
+    for &(repo, expected) in &[
+        ("https://github.com/user/repo.git", "https://github.com/user/repo"),
+        ("https://github.somewhere.com/user/repo.git", "https://github.somewhere.com:10022/user/repo"),
+        ("https://gitlab.com/user/repo.git", "https://gitlab.com/user/repo"),
+        ("https://gitlab.somewhere.com/user/repo.git", "https://gitlab.somewhere.com:10022/user/repo"),
+        ("https://my-original-ghe.org/user/repo.git", "https://my-original-ghe.org:10022/user/repo"),
+    ] {
+        assert_eq!(parse_and_build_page_url(&repo.to_string(), &p, &None), Ok(expected.to_string()));
+    }
+
+    env::remove_var("GIT_BRWS_GITHUB_SSH_PORT");
+    env::remove_var("GIT_BRWS_GITLAB_SSH_PORT");
+
+    assert_eq!(
+        parse_and_build_page_url(&"https://my-original-ghe.org/user/repo.git".to_string(), &Page::Open, &None),
+        Ok("https://my-original-ghe.org/user/repo".to_string())
+    );
+
+    env::remove_var("GIT_BRWS_GITHUB_URL_HOST");
 }

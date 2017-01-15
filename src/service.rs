@@ -21,6 +21,15 @@ fn build_github_like_url(host: &str, user: &str, repo: &str, branch: &Option<Str
     }
 }
 
+fn build_custom_github_like_url(host: &str, user: &str, repo: &str, branch: &Option<String>, page: &Page, ssh_port_env: &str) -> String {
+    if let Ok(v) = env::var(ssh_port_env) {
+        if !v.is_empty() {
+            return build_github_like_url(&format!("{}:{}", host, v).as_str(), user, repo, branch, page)
+        }
+    }
+    build_github_like_url(host, user, repo, branch, page)
+}
+
 fn build_bitbucket_url(user: &str, repo: &str, branch: &Option<String>, page: &Page) -> util::Result<String> {
     match page {
         &Page::Open => if let &Some(ref b) = branch {
@@ -65,12 +74,14 @@ pub fn parse_and_build_page_url(repo: &String, page: &Page, branch: &Option<Stri
     match host {
         "github.com" | "gitlab.com" => Ok(build_github_like_url(host, user, repo_name, branch, page)),
         "bitbucket.org" => build_bitbucket_url(user, repo_name, branch, page),
-        _ => if host.starts_with("github.") || host.starts_with("gitlab.") {
-            Ok(build_github_like_url(host, user, repo_name, branch, page))
+        _ => if host.starts_with("github.") {
+            Ok(build_custom_github_like_url(host, user, repo_name, branch, page, "GIT_BRWS_GITHUB_SSH_PORT"))
+        } else if host.starts_with("gitlab.") {
+            Ok(build_custom_github_like_url(host, user, repo_name, branch, page, "GIT_BRWS_GITLAB_SSH_PORT"))
         } else {
             if let Ok(v) = env::var("GIT_BRWS_GITHUB_URL_HOST") {
                 if v == host {
-                    return Ok(build_github_like_url(host, user, repo_name, branch, page))
+                    return Ok(build_custom_github_like_url(host, user, repo_name, branch, page, "GIT_BRWS_GITHUB_SSH_PORT"))
                 }
             }
             Err(format!("Unknown hosting service for URL {}. If you want to use custom URL for GitHub Enterprise, please set $GIT_BRWS_GITHUB_URL_HOST", repo))
