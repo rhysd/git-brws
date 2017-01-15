@@ -36,6 +36,7 @@ fn parse_and_build_open_branch_page() {
         ("https://bitbucket.org/user/repo.git", "https://bitbucket.org/user/repo/branch/dev"),
         ("https://github.somewhere.com/user/repo.git", "https://github.somewhere.com/user/repo/tree/dev"),
         ("https://gitlab.com/user/repo.git", "https://gitlab.com/user/repo/tree/dev"),
+        ("https://gitlab.somewhere.com/user/repo.git", "https://gitlab.somewhere.com/user/repo/tree/dev"),
     ] {
         assert_eq!(parse_and_build_page_url(&repo.to_string(), &p, &Some("dev".to_string())).unwrap(), expected);
     }

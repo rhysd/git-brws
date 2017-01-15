@@ -65,7 +65,7 @@ pub fn parse_and_build_page_url(repo: &String, page: &Page, branch: &Option<Stri
     match host {
         "github.com" | "gitlab.com" => Ok(build_github_like_url(host, user, repo_name, branch, page)),
         "bitbucket.org" => build_bitbucket_url(user, repo_name, branch, page),
-        _ => if host.starts_with("github.") {
+        _ => if host.starts_with("github.") || host.starts_with("gitlab.") {
             Ok(build_github_like_url(host, user, repo_name, branch, page))
         } else {
             if let Ok(v) = env::var("GIT_BRWS_GITHUB_URL_HOST") {
