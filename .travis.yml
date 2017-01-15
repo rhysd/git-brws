@@ -39,7 +39,7 @@ before_script:
 
 script:
   - cargo build --target $TARGET
-  - cargo test --verbose
+  - RUST_TEST_TASKS=1 cargo test --verbose
 
 notifications:
   email:
