@@ -14,6 +14,7 @@ fn args(strs: Vec<&str>) -> Vec<String> {
 fn no_option() {
     match parse_options(args(vec![])).unwrap() {
         ParsedArgv::Parsed(o, false) => {
+            println!("FOO! {:?}", o);
             assert!(
                 vec![
                     "https://github.com/rhysd/git-brws.git",
