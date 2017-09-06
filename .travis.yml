@@ -17,9 +17,6 @@ matrix:
       env: TARGET=aarch64-unknown-linux-gnu
 
 before_script:
-  - sh ~/rust/lib/rustlib/uninstall.sh
-  - export PATH="$PATH:$HOME/.cargo/bin"
-  - curl https://sh.rustup.rs -sSf | sh -s -- -y --default-toolchain=$TRAVIS_RUST_VERSION
   - rustc -V
   - cargo -V
   - if [[ "${TARGET}" == "i686-unknown-linux-gnu" ]]; then rustup target add $TARGET; fi
