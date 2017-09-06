@@ -52,7 +52,7 @@ fn build_bitbucket_url(user: &str, repo: &str, branch: &Option<String>, page: &P
 }
 
 // Note: Parse '/user/repo.git' or '/user/repo' or 'user/repo' into 'user' and 'repo'
-fn user_and_repo_from_path<'a>(path: &'a str) -> util::Result<(&'a str, &'a str)> {
+fn slug_from_path<'a>(path: &'a str) -> util::Result<(&'a str, &'a str)> {
     let mut split = path.split('/').skip_while(|s| s.is_empty());
     let user = split.next().ok_or(format!("Can't detect user name from path {}", path))?;
     let mut repo = split.next().ok_or(format!("Can't detect repository name from path {}", path))?;
@@ -69,7 +69,7 @@ fn user_and_repo_from_path<'a>(path: &'a str) -> util::Result<(&'a str, &'a str)
 pub fn parse_and_build_page_url(repo: &String, page: &Page, branch: &Option<String>) -> util::Result<String> {
     let url = Url::parse(repo).map_err(|e| format!("Failed to parse URL '{}': {}", repo, e))?;
     let path = url.path();
-    let (user, repo_name) = user_and_repo_from_path(path)?;
+    let (user, repo_name) = slug_from_path(path)?;
     let host = url.host_str().ok_or(format!("Failed to parse host from {}", repo))?;
     match host {
         "github.com" | "gitlab.com" => Ok(build_github_like_url(host, user, repo_name, branch, page)),
