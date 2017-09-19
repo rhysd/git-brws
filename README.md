@@ -137,7 +137,7 @@ And below can open editing file in your browser.
 
 ## Customization
 
-You can customize behavior of this command with environment varibles.
+You can customize behavior of this command with environment variables.
 
 - `$GIT_BRWS_GIT_COMMAND`: Git command to use. If not specified, `"git"` will be used.
 - `$GIT_BRWS_GHE_URL_HOST`: When you use your own GitHub:Enterprise repository, you can specify its host to this variable.
