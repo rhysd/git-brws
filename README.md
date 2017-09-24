@@ -140,10 +140,10 @@ And below can open editing file in your browser.
 You can customize behavior of this command with environment variables.
 
 - `$GIT_BRWS_GIT_COMMAND`: Git command to use. If not specified, `"git"` will be used.
-- `$GIT_BRWS_GHE_URL_HOST`: When you use your own GitHub:Enterprise repository, you can specify its host to this variable.
-  By default, `git brws` detects `^github\.` as GH:E host. If your GH:E repository host does not match it, please specify
+- `$GIT_BRWS_GHE_URL_HOST`: When you use your own GitHub Enterprise repository, you can specify its host to this variable.
+  By default, `git brws` detects `^github\.` as GHE host. If your GHE repository host does not match it, please specify
   this variable. If your repository is `https://example-repo.org/user/repo`, `example-repo.org` should be set.
-- `GIT_BRWS_GHE_SSH_PORT`: When you set a number to it, the number will be used for the ssh port for GITHUB:Enterprise URLs.
+- `GIT_BRWS_GHE_SSH_PORT`: When you set a number to it, the number will be used for the ssh port for GitHub Enterprise URLs.
 - `GIT_BRWS_GITLAB_SSH_PORT`: When you set a number to it, the number will be used for the ssh port for self-hosted GitLab URLs.
   This is useful when your environment hosts GitLab to non-trivial ssh port URL.
 
