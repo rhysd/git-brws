@@ -152,6 +152,7 @@ You can customize behavior of this command with environment variables.
 - [hub browse](https://hub.github.com/)
 - [git open](https://github.com/paulirish/git-open)
 - [open-browser-github.vim](https://github.com/tyru/open-browser-github.vim)
+- [git browse](https://github.com/albertyw/git-browse)
 
 ## License
 
