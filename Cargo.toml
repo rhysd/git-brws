@@ -6,7 +6,7 @@ description = "Command line tool to open a repository, file, commit or diff in y
 repository = "https://github.com/rhysd/git-brws"
 readme = "README.md"
 include = ["src/*.rs", "Cargo.toml", "LICENSE.txt"]
-license = "MIT"
+license-file = "LICENSE.txt"
 
 [dependencies]
 getopts = "0.2"
