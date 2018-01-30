@@ -5,7 +5,7 @@ authors = ["rhysd <lin90162@yahoo.co.jp>"]
 description = "Command line tool to open a repository, file, commit or diff in your web browser from command line"
 repository = "https://github.com/rhysd/git-brws"
 readme = "README.md"
-include = ["src/*.rs", "Cargo.toml", "LICENSE.txt"]
+include = ["src/**/*.rs", "Cargo.toml", "LICENSE.txt"]
 license-file = "LICENSE.txt"
 
 [dependencies]
