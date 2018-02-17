@@ -77,7 +77,7 @@ pub fn get_git_command() -> String {
 pub fn new(dir: &PathBuf) -> util::Result<Git> {
     let command = get_git_command();
     let path = dir.to_str().ok_or(format!("Failed to retrieve directory path as UTF8 string: {:?}", dir))?;
-    Ok(Git { command: command, git_dir: path })
+    Ok(Git { command, git_dir: path })
 }
 
 pub fn git_dir(dir: Option<String>) -> util::Result<PathBuf> {

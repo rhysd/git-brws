@@ -108,9 +108,9 @@ pub fn parse_options(argv: Vec<String>) -> util::Result<ParsedArgv> {
     let show_url = matches.opt_present("u");
 
     Ok(ParsedArgv::Parsed(command::Config {
-        repo: repo,
+        repo,
         branch: matches.opt_str("b"),
-        git_dir: git_dir,
+        git_dir,
         args: matches.free,
     }, show_url))
 }

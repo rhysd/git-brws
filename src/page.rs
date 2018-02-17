@@ -33,7 +33,7 @@ impl<'a> BrowsePageParser<'a> {
         }
         let hash = self.git.hash(&self.cfg.args[0])?;
         Ok(Page::Commit {
-            hash: hash,
+            hash,
         })
     }
 
@@ -84,14 +84,14 @@ impl<'a> BrowsePageParser<'a> {
             .to_string();
 
         let hash = if len == 2 {
-            self.git.hash(&self.cfg.args[1].as_str())
+            self.git.hash(&self.cfg.args[1].as_str())?
         } else {
-            self.git.hash(&"HEAD")
+            self.git.hash(&"HEAD")?
         };
         Ok(Page::FileOrDir {
             relative_path: relative_path,
-            hash: hash?,
-            line: line,
+            hash,
+            line,
         })
     }
 }
@@ -100,7 +100,7 @@ pub fn parse_page(cfg: &command::Config) -> util::Result<Page> {
     let mut errors = vec!["Error on parsing command line arguments".to_string()];
 
     let parser = BrowsePageParser {
-        cfg: cfg,
+        cfg,
         git: git::new(&cfg.git_dir)?,
     };
 
