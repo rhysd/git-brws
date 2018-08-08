@@ -1,4 +1,4 @@
-#[macro_use] mod util;
+mod util;
 mod argv;
 mod git;
 mod command;
@@ -9,7 +9,6 @@ mod service;
 mod test;
 
 use std::env;
-use std::io::Write;
 use std::process::exit;
 use argv::{parse_options, ParsedArgv};
 
@@ -18,14 +17,14 @@ fn main() {
     let parsed = match parse_options(argv) {
         Ok(p) => p,
         Err(reason) => {
-            errorln!("{}", reason);
+            eprintln!("{}", reason);
             exit(3);
         },
     };
 
     let msg = match parsed {
         ParsedArgv::Help(usage) => {
-            errorln!("{}", usage);
+            eprintln!("{}", usage);
             None
         },
         ParsedArgv::Version(version) => {
@@ -45,7 +44,7 @@ fn main() {
     };
 
     if let Some(m) = msg {
-        errorln!("{}", m);
+        eprintln!("{}", m);
         exit(3);
     } else {
         exit(0);
