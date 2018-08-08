@@ -1,7 +1,7 @@
-use std::env;
-use std::path::Path;
 use command::Config;
 use page::{parse_page, Page};
+use std::env;
+use std::path::Path;
 
 fn config(repo: &str, branch: Option<&str>, args: Vec<&str>) -> Config {
     let mut dir = env::current_dir().unwrap();
@@ -14,7 +14,7 @@ fn config(repo: &str, branch: Option<&str>, args: Vec<&str>) -> Config {
         repo: repo.to_string(),
         branch: branch.map(|s| s.to_string()),
         git_dir: dir,
-        args: a
+        args: a,
     }
 }
 
@@ -22,7 +22,7 @@ fn config(repo: &str, branch: Option<&str>, args: Vec<&str>) -> Config {
 fn parse_empty_args() {
     let c = config("https://github.com/user/repo.git", None, vec![]);
     match parse_page(&c).unwrap() {
-        Page::Open => { /* OK */ },
+        Page::Open => { /* OK */ }
         _ => assert!(false),
     }
 }
@@ -36,10 +36,14 @@ fn parse_file_or_dir() {
     ] {
         let c = config("https://github.com/user/repo.git", None, vec![&entry]);
         match parse_page(&c).unwrap() {
-            Page::FileOrDir{relative_path, hash, line: None} => {
+            Page::FileOrDir {
+                relative_path,
+                hash,
+                line: None,
+            } => {
                 assert_eq!(relative_path, relative);
                 assert!(!hash.is_empty());
-            },
+            }
             p => assert!(false, "Unexpected result: {:?}", p),
         }
     }
@@ -54,9 +58,13 @@ fn parse_file_line() {
     ] {
         let c = config("https://github.com/user/repo.git", None, vec![&file]);
         match parse_page(&c).unwrap() {
-            Page::FileOrDir{relative_path: _, hash: _, line} => {
+            Page::FileOrDir {
+                relative_path: _,
+                hash: _,
+                line,
+            } => {
                 assert_eq!(line, expected);
-            },
+            }
             p => assert!(false, "Unexpected result: {:?}", p),
         }
     }
@@ -64,7 +72,11 @@ fn parse_file_line() {
 
 #[test]
 fn not_exsiting_file() {
-    let c = config("https://github.com/user/repo.git", None, vec!["not/existing/file.txt"]);
+    let c = config(
+        "https://github.com/user/repo.git",
+        None,
+        vec!["not/existing/file.txt"],
+    );
     assert!(parse_page(&c).is_err());
 }
 
@@ -72,21 +84,21 @@ fn not_exsiting_file() {
 fn file_at_specific_commit() {
     let c = config("https://github.com/user/repo.git", None, vec![&"README.md"]);
     let p = parse_page(&c).unwrap();
-    let c = config("https://github.com/user/repo.git", None, vec![&"README.md", "HEAD^"]);
+    let c = config(
+        "https://github.com/user/repo.git",
+        None,
+        vec![&"README.md", "HEAD^"],
+    );
     let p2 = parse_page(&c).unwrap();
     assert!(p != p2, format!("{:?} v.s. {:?}", p, p2));
 }
 
 #[test]
 fn parse_commit_ref() {
-    for &cm in &[
-        "HEAD",
-        "HEAD~1",
-        "HEAD^",
-    ] {
+    for &cm in &["HEAD", "HEAD~1", "HEAD^"] {
         let c = config("https://github.com/user/repo.git", None, vec![cm]);
         match parse_page(&c).unwrap() {
-            Page::Commit{hash} => assert!(!hash.is_empty()),
+            Page::Commit { hash } => assert!(!hash.is_empty()),
             p => assert!(false, "Unexpected result: {:?}", p),
         }
     }
@@ -96,11 +108,14 @@ fn parse_commit_ref() {
 fn parse_short_commit_hash() {
     for &(cm, expected) in &[
         ("499edbb", "499edbbbad4d8054e4a47e12944e5fb4a2ef7ec5"),
-        ("bc869a14617a131fefe8fa1a3dcdeba0745880d5", "bc869a14617a131fefe8fa1a3dcdeba0745880d5"),
+        (
+            "bc869a14617a131fefe8fa1a3dcdeba0745880d5",
+            "bc869a14617a131fefe8fa1a3dcdeba0745880d5",
+        ),
     ] {
         let c = config("https://github.com/user/repo.git", None, vec![cm]);
         match parse_page(&c).unwrap() {
-            Page::Commit{hash} => assert_eq!(hash, expected),
+            Page::Commit { hash } => assert_eq!(hash, expected),
             p => assert!(false, "Unexpected result: {:?}", p),
         }
     }
@@ -108,42 +123,62 @@ fn parse_short_commit_hash() {
 
 #[test]
 fn parse_diff_ref_name() {
-    let c = config("https://github.com/user/repo.git", None, vec!["HEAD^..HEAD"]);
+    let c = config(
+        "https://github.com/user/repo.git",
+        None,
+        vec!["HEAD^..HEAD"],
+    );
     match parse_page(&c).unwrap() {
-        Page::Diff{lhs, rhs} => {
+        Page::Diff { lhs, rhs } => {
             assert!(!lhs.is_empty());
             assert!(!rhs.is_empty());
-        },
+        }
         p => assert!(false, "Unexpected result: {:?}", p),
     }
 }
 
 #[test]
 fn parse_diff() {
-    let c = config("https://github.com/user/repo.git", None, vec!["499edbb..bc869a1"]);
+    let c = config(
+        "https://github.com/user/repo.git",
+        None,
+        vec!["499edbb..bc869a1"],
+    );
     match parse_page(&c).unwrap() {
-        Page::Diff{lhs, rhs} => {
+        Page::Diff { lhs, rhs } => {
             assert_eq!(lhs, "499edbbbad4d8054e4a47e12944e5fb4a2ef7ec5");
             assert_eq!(rhs, "bc869a14617a131fefe8fa1a3dcdeba0745880d5");
-        },
+        }
         p => assert!(false, "Unexpected result: {:?}", p),
     }
 }
 
 #[test]
 fn wrong_num_of_args() {
-    let c = config("https://github.com/user/repo.git", None, vec!["foo", "bar", "piyo"]);
+    let c = config(
+        "https://github.com/user/repo.git",
+        None,
+        vec!["foo", "bar", "piyo"],
+    );
     assert!(parse_page(&c).is_err());
 }
 
 #[test]
 fn unknown_diff() {
-    let c = config("https://github.com/user/repo.git", None, vec!["HEAD~114514..HEAD~114513"]);
+    let c = config(
+        "https://github.com/user/repo.git",
+        None,
+        vec!["HEAD~114514..HEAD~114513"],
+    );
     assert!(parse_page(&c).is_err());
 }
 
 #[test]
 fn file_for_unknown_commit() {
-    let c = config("https://github.com/user/repo.git", None, vec!["README.md", "HEAD~114514"]);
+    let c = config(
+        "https://github.com/user/repo.git",
+        None,
+        vec!["README.md", "HEAD~114514"],
+    );
     assert!(parse_page(&c).is_err());
 }

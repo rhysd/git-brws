@@ -1,8 +1,8 @@
 extern crate open;
 
-use std::path::PathBuf;
 use page::parse_page;
 use service;
+use std::path::PathBuf;
 use util;
 
 #[derive(Debug)]
@@ -25,13 +25,19 @@ fn open(url: String) -> Option<util::ErrorMsg> {
                 None
             } else {
                 if let Some(code) = status.code() {
-                    Some(format!("Error on opening URL {}: Command exited with non-zero status {}", url, code))
+                    Some(format!(
+                        "Error on opening URL {}: Command exited with non-zero status {}",
+                        url, code
+                    ))
                 } else {
-                    Some(format!("Error on opening URL {}: Command terminated by signal", url))
+                    Some(format!(
+                        "Error on opening URL {}: Command terminated by signal",
+                        url
+                    ))
                 }
             }
-        },
-        Err(e) => Some(format!("Error on opening URL {}: {}", url, e))
+        }
+        Err(e) => Some(format!("Error on opening URL {}: {}", url, e)),
     }
 }
 
@@ -41,4 +47,3 @@ pub fn browse(cfg: Config) -> Option<util::ErrorMsg> {
         Err(msg) => Some(msg),
     }
 }
-

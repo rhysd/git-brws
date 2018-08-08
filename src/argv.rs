@@ -1,9 +1,9 @@
 extern crate getopts;
 
-use std::path::PathBuf;
 use self::getopts::Options;
 use command;
 use git;
+use std::path::PathBuf;
 use util;
 
 fn convert_ssh_url(mut url: String) -> String {
@@ -46,7 +46,8 @@ fn normalize_repo_format(mut s: String, git_dir: &PathBuf) -> util::Result<Strin
 }
 
 fn usage(program: &String) -> String {
-    format!("\
+    format!(
+        "\
 Usage: {} [Options] {{Args}}
 
   Open a repository, file, commit or diff in your web browser from command line.
@@ -72,7 +73,9 @@ Examples:
 
   - Open line 123 of file:
 
-    $ git brws some/file.txt#L123", program)
+    $ git brws some/file.txt#L123",
+        program
+    )
 }
 
 pub fn parse_options(argv: Vec<String>) -> util::Result<ParsedArgv> {
@@ -82,7 +85,11 @@ pub fn parse_options(argv: Vec<String>) -> util::Result<ParsedArgv> {
     opts.optopt("r", "repo", "Shorthand format (user/repo, service/user/repo) or remote name (e.g. origin) or Git URL you want to see", "REPO");
     opts.optopt("b", "branch", "Branch name of the repository", "BRANCH");
     opts.optopt("d", "dir", "Directory path to your repository", "PATH");
-    opts.optflag("u", "url", "Output URL to STDOUT instead of opening in browser");
+    opts.optflag(
+        "u",
+        "url",
+        "Output URL to STDOUT instead of opening in browser",
+    );
     opts.optflag("h", "help", "Print this help");
     opts.optflag("v", "version", "Show version");
 
@@ -94,7 +101,9 @@ pub fn parse_options(argv: Vec<String>) -> util::Result<ParsedArgv> {
     }
 
     if matches.opt_present("v") {
-        return Ok(ParsedArgv::Version(option_env!("CARGO_PKG_VERSION").unwrap_or("unknown")));
+        return Ok(ParsedArgv::Version(
+            option_env!("CARGO_PKG_VERSION").unwrap_or("unknown"),
+        ));
     }
 
     let git_dir = git::git_dir(matches.opt_str("d"))?;
@@ -107,11 +116,13 @@ pub fn parse_options(argv: Vec<String>) -> util::Result<ParsedArgv> {
 
     let show_url = matches.opt_present("u");
 
-    Ok(ParsedArgv::Parsed(command::Config {
-        repo,
-        branch: matches.opt_str("b"),
-        git_dir,
-        args: matches.free,
-    }, show_url))
+    Ok(ParsedArgv::Parsed(
+        command::Config {
+            repo,
+            branch: matches.opt_str("b"),
+            git_dir,
+            args: matches.free,
+        },
+        show_url,
+    ))
 }
-

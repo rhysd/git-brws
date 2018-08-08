@@ -1,6 +1,6 @@
-use std::env;
-use service::parse_and_build_page_url;
 use page::Page;
+use service::parse_and_build_page_url;
+use std::env;
 
 // Note:
 // git@ -> ssh://git@ conversion is done in git.rs.
@@ -8,10 +8,19 @@ use page::Page;
 fn convert_ssh_url() {
     let p = Page::Open;
     for &(repo, expected) in &[
-        ("ssh://git@github.com:22/user/repo.git", "https://github.com/user/repo"),
-        ("ssh://git@bitbucket.org:22/user/repo.git", "https://bitbucket.org/user/repo"),
+        (
+            "ssh://git@github.com:22/user/repo.git",
+            "https://github.com/user/repo",
+        ),
+        (
+            "ssh://git@bitbucket.org:22/user/repo.git",
+            "https://bitbucket.org/user/repo",
+        ),
     ] {
-        assert_eq!(parse_and_build_page_url(&repo.to_string(), &p, &None).unwrap(), expected);
+        assert_eq!(
+            parse_and_build_page_url(&repo.to_string(), &p, &None).unwrap(),
+            expected
+        );
     }
 }
 
@@ -19,12 +28,27 @@ fn convert_ssh_url() {
 fn parse_and_build_open_page() {
     let p = Page::Open;
     for &(repo, expected) in &[
-        ("https://github.com/user/repo.git", "https://github.com/user/repo"),
-        ("https://bitbucket.org/user/repo.git", "https://bitbucket.org/user/repo"),
-        ("https://github.somewhere.com/user/repo.git", "https://github.somewhere.com/user/repo"),
-        ("https://gitlab.com/user/repo.git", "https://gitlab.com/user/repo"),
+        (
+            "https://github.com/user/repo.git",
+            "https://github.com/user/repo",
+        ),
+        (
+            "https://bitbucket.org/user/repo.git",
+            "https://bitbucket.org/user/repo",
+        ),
+        (
+            "https://github.somewhere.com/user/repo.git",
+            "https://github.somewhere.com/user/repo",
+        ),
+        (
+            "https://gitlab.com/user/repo.git",
+            "https://gitlab.com/user/repo",
+        ),
     ] {
-        assert_eq!(parse_and_build_page_url(&repo.to_string(), &p, &None).unwrap(), expected);
+        assert_eq!(
+            parse_and_build_page_url(&repo.to_string(), &p, &None).unwrap(),
+            expected
+        );
     }
 }
 
@@ -32,13 +56,31 @@ fn parse_and_build_open_page() {
 fn parse_and_build_open_branch_page() {
     let p = Page::Open;
     for &(repo, expected) in &[
-        ("https://github.com/user/repo.git", "https://github.com/user/repo/tree/dev"),
-        ("https://bitbucket.org/user/repo.git", "https://bitbucket.org/user/repo/branch/dev"),
-        ("https://github.somewhere.com/user/repo.git", "https://github.somewhere.com/user/repo/tree/dev"),
-        ("https://gitlab.com/user/repo.git", "https://gitlab.com/user/repo/tree/dev"),
-        ("https://gitlab.somewhere.com/user/repo.git", "https://gitlab.somewhere.com/user/repo/tree/dev"),
+        (
+            "https://github.com/user/repo.git",
+            "https://github.com/user/repo/tree/dev",
+        ),
+        (
+            "https://bitbucket.org/user/repo.git",
+            "https://bitbucket.org/user/repo/branch/dev",
+        ),
+        (
+            "https://github.somewhere.com/user/repo.git",
+            "https://github.somewhere.com/user/repo/tree/dev",
+        ),
+        (
+            "https://gitlab.com/user/repo.git",
+            "https://gitlab.com/user/repo/tree/dev",
+        ),
+        (
+            "https://gitlab.somewhere.com/user/repo.git",
+            "https://gitlab.somewhere.com/user/repo/tree/dev",
+        ),
     ] {
-        assert_eq!(parse_and_build_page_url(&repo.to_string(), &p, &Some("dev".to_string())).unwrap(), expected);
+        assert_eq!(
+            parse_and_build_page_url(&repo.to_string(), &p, &Some("dev".to_string())).unwrap(),
+            expected
+        );
     }
 }
 
@@ -70,7 +112,11 @@ fn parse_and_build_diff_page() {
     ] {
         assert_eq!(parse_and_build_page_url(&repo.to_string(), &p, &None).unwrap(), expected);
     }
-    assert!(parse_and_build_page_url(&"https://bitbucket.org/user/repo".to_string(), &p, &None).is_err(), "bitbucket does not support diff page");
+    assert!(
+        parse_and_build_page_url(&"https://bitbucket.org/user/repo".to_string(), &p, &None)
+            .is_err(),
+        "bitbucket does not support diff page"
+    );
 }
 
 #[test]
@@ -114,7 +160,11 @@ fn invalid_repo_url() {
         "https://github.com/user.git",
         "https://unknown.hosting_service.com/user/repo.git",
     ] {
-        assert!(parse_and_build_page_url(&repo.to_string(), &Page::Open, &None).is_err(), "{} must be invalid", repo);
+        assert!(
+            parse_and_build_page_url(&repo.to_string(), &Page::Open, &None).is_err(),
+            "{} must be invalid",
+            repo
+        );
     }
 }
 
@@ -126,20 +176,42 @@ fn customized_host_ssh_port() {
 
     let p = Page::Open;
     for &(repo, expected) in &[
-        ("https://github.com/user/repo.git", "https://github.com/user/repo"),
-        ("https://github.somewhere.com/user/repo.git", "https://github.somewhere.com:10022/user/repo"),
-        ("https://gitlab.com/user/repo.git", "https://gitlab.com/user/repo"),
-        ("https://gitlab.somewhere.com/user/repo.git", "https://gitlab.somewhere.com:10022/user/repo"),
-        ("https://my-original-ghe.org/user/repo.git", "https://my-original-ghe.org:10022/user/repo"),
+        (
+            "https://github.com/user/repo.git",
+            "https://github.com/user/repo",
+        ),
+        (
+            "https://github.somewhere.com/user/repo.git",
+            "https://github.somewhere.com:10022/user/repo",
+        ),
+        (
+            "https://gitlab.com/user/repo.git",
+            "https://gitlab.com/user/repo",
+        ),
+        (
+            "https://gitlab.somewhere.com/user/repo.git",
+            "https://gitlab.somewhere.com:10022/user/repo",
+        ),
+        (
+            "https://my-original-ghe.org/user/repo.git",
+            "https://my-original-ghe.org:10022/user/repo",
+        ),
     ] {
-        assert_eq!(parse_and_build_page_url(&repo.to_string(), &p, &None), Ok(expected.to_string()));
+        assert_eq!(
+            parse_and_build_page_url(&repo.to_string(), &p, &None),
+            Ok(expected.to_string())
+        );
     }
 
     env::remove_var("GIT_BRWS_GHE_SSH_PORT");
     env::remove_var("GIT_BRWS_GITLAB_SSH_PORT");
 
     assert_eq!(
-        parse_and_build_page_url(&"https://my-original-ghe.org/user/repo.git".to_string(), &Page::Open, &None),
+        parse_and_build_page_url(
+            &"https://my-original-ghe.org/user/repo.git".to_string(),
+            &Page::Open,
+            &None
+        ),
         Ok("https://my-original-ghe.org/user/repo".to_string())
     );
 

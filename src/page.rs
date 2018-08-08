@@ -32,9 +32,7 @@ impl<'a> BrowsePageParser<'a> {
             return Err("  Invalid number of arguments for commit (1 is expected)".to_string());
         }
         let hash = self.git.hash(&self.cfg.args[0])?;
-        Ok(Page::Commit {
-            hash,
-        })
+        Ok(Page::Commit { hash })
     }
 
     fn try_parse_diff(&self) -> util::Result<Page> {
@@ -44,7 +42,10 @@ impl<'a> BrowsePageParser<'a> {
 
         let mut split = self.cfg.args[0].splitn(2, "..");
         let lhs = split.next().unwrap();
-        let rhs = split.next().ok_or(format!("  Diff format must be specified as LHS..RHS but found {}", self.cfg.args[0]))?;
+        let rhs = split.next().ok_or(format!(
+            "  Diff format must be specified as LHS..RHS but found {}",
+            self.cfg.args[0]
+        ))?;
 
         Ok(Page::Diff {
             lhs: self.git.hash(&lhs)?,
@@ -63,19 +64,23 @@ impl<'a> BrowsePageParser<'a> {
             // Skip 'L' of file#L123
             idx += 1;
         }
-        let line = (&arg[idx+1..]).parse().ok();
+        let line = (&arg[idx + 1..]).parse().ok();
         (&arg[..line_start], line)
     }
 
     fn try_parse_file_or_dir(&self) -> util::Result<Page> {
         let len = self.cfg.args.len();
         if len != 1 && len != 2 {
-            return Err("  Invalid number of arguments for file or directory (1..2 is expected)".to_string());
+            return Err(
+                "  Invalid number of arguments for file or directory (1..2 is expected)"
+                    .to_string(),
+            );
         }
 
         let (path, line) = self.parse_path_and_line();
 
-        let entry = fs::canonicalize(path).map_err(|e| format!("  Unable to locate file '{}': {}", path, e))?;
+        let entry = fs::canonicalize(path)
+            .map_err(|e| format!("  Unable to locate file '{}': {}", path, e))?;
         let relative_path = entry
             .strip_prefix(&self.git.root_dir()?)
             .map_err(|e| format!("  Unable to locate the file in repository: {}", e))?

@@ -1,10 +1,10 @@
 use std::env;
-use std::fs;
-use std::str;
 use std::ffi::OsStr;
-use std::path::{Path, PathBuf};
 use std::fmt::Debug;
+use std::fs;
+use std::path::{Path, PathBuf};
 use std::process::Command;
+use std::str;
 use util;
 
 pub struct Git<'a> {
@@ -15,16 +15,21 @@ pub struct Git<'a> {
 impl<'a> Git<'a> {
     pub fn command<S: AsRef<OsStr> + Debug>(&self, args: &[S]) -> util::Result<String> {
         let out = Command::new(&self.command)
-                    .arg("--git-dir")
-                    .arg(self.git_dir)
-                    .args(args)
-                    .output()
-                    .map_err(|e| format!("Error on executing git command: {}", e))?;
+            .arg("--git-dir")
+            .arg(self.git_dir)
+            .args(args)
+            .output()
+            .map_err(|e| format!("Error on executing git command: {}", e))?;
         if !out.status.success() {
-            let stderr = str::from_utf8(&out.stderr).expect("Failed to convert git command output from UTF8");
-            return Err(format!("Git command exited with non-zero status (git-dir: '{}', args: '{:?}'): {}", self.git_dir, args, stderr));
+            let stderr = str::from_utf8(&out.stderr)
+                .expect("Failed to convert git command output from UTF8");
+            return Err(format!(
+                "Git command exited with non-zero status (git-dir: '{}', args: '{:?}'): {}",
+                self.git_dir, args, stderr
+            ));
         }
-        let s = str::from_utf8(&out.stdout).map_err(|e| format!("Invalid UTF-8 sequence in output of git command: {}", e))?;
+        let s = str::from_utf8(&out.stdout)
+            .map_err(|e| format!("Invalid UTF-8 sequence in output of git command: {}", e))?;
         Ok(s.trim().to_string())
     }
 
@@ -43,11 +48,16 @@ impl<'a> Git<'a> {
     pub fn tracking_remote(&self) -> util::Result<String> {
         let out = match self.command(&["rev-parse", "--abbrev-ref", "--symbolic", "@{u}"]) {
             Ok(stdout) => stdout,
-            Err(stderr) => return if stderr.find("does not point to a branch").is_some() {
-                Ok(self.remote_url(&"origin")?)
-            } else {
-                Err(format!("Failed to retrieve default remote name: {}", stderr))
-            },
+            Err(stderr) => {
+                return if stderr.find("does not point to a branch").is_some() {
+                    Ok(self.remote_url(&"origin")?)
+                } else {
+                    Err(format!(
+                        "Failed to retrieve default remote name: {}",
+                        stderr
+                    ))
+                }
+            }
         };
 
         // out is formatted as '{remote-url}/{branch-name}'
@@ -63,9 +73,10 @@ impl<'a> Git<'a> {
         // `git --git-dir ../.git rev-parse --show-toplevel` always returns
         // current working directory.
         // So here root directory is calculated from git-dir.
-        let p = Path::new(self.git_dir)
-                    .parent()
-                    .ok_or(format!("Cannot locate root directory from git-dir '{}'", self.git_dir))?;
+        let p = Path::new(self.git_dir).parent().ok_or(format!(
+            "Cannot locate root directory from git-dir '{}'",
+            self.git_dir
+        ))?;
         Ok(p.to_owned())
     }
 }
@@ -76,32 +87,45 @@ pub fn get_git_command() -> String {
 
 pub fn new(dir: &PathBuf) -> util::Result<Git> {
     let command = get_git_command();
-    let path = dir.to_str().ok_or(format!("Failed to retrieve directory path as UTF8 string: {:?}", dir))?;
-    Ok(Git { command, git_dir: path })
+    let path = dir.to_str().ok_or(format!(
+        "Failed to retrieve directory path as UTF8 string: {:?}",
+        dir
+    ))?;
+    Ok(Git {
+        command,
+        git_dir: path,
+    })
 }
 
 pub fn git_dir(dir: Option<String>) -> util::Result<PathBuf> {
     let mut cmd = Command::new(get_git_command());
     cmd.arg("rev-parse").arg("--git-dir");
     if let Some(d) = dir {
-        let d = fs::canonicalize(&d).map_err(|e| format!("Cannot locate canonical path for '{}': {}", d, e))?;
+        let d = fs::canonicalize(&d)
+            .map_err(|e| format!("Cannot locate canonical path for '{}': {}", d, e))?;
         cmd.current_dir(d);
     }
 
     let out = cmd.output().map_err(|e| format!("{}", e))?;
     if !out.status.success() {
-        let stderr = str::from_utf8(&out.stderr).map_err(|e| format!("Failed to convert git command output: {}", e))?;
-        return Err(format!("Git command exited with non-zero status: {}", stderr));
+        let stderr = str::from_utf8(&out.stderr)
+            .map_err(|e| format!("Failed to convert git command output: {}", e))?;
+        return Err(format!(
+            "Git command exited with non-zero status: {}",
+            stderr
+        ));
     }
 
-    let s = str::from_utf8(&out.stdout).map_err(|e| format!("Invalid UTF-8 sequence in output of git command: {}", e))?.trim();
+    let s = str::from_utf8(&out.stdout)
+        .map_err(|e| format!("Invalid UTF-8 sequence in output of git command: {}", e))?
+        .trim();
 
     let p = Path::new(s);
     if p.is_relative() {
-        let current = env::current_dir().map_err(|e| format!("Unable to get current working directory: {}", e))?;
+        let current = env::current_dir()
+            .map_err(|e| format!("Unable to get current working directory: {}", e))?;
         Ok(current.join(&p))
     } else {
         Ok(p.to_owned())
     }
 }
-

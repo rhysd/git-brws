@@ -1,6 +1,6 @@
+use command::*;
 use std::env;
 use std::path::Path;
-use command::*;
 
 // Somke test only
 #[test]
@@ -14,7 +14,11 @@ fn smoke() {
         args: vec![],
     };
     match url(c) {
-        Ok(u) => assert_eq!(u, "https://github.com/rhysd/git-brws", "Unexpected URL: {}", u),
+        Ok(u) => assert_eq!(
+            u, "https://github.com/rhysd/git-brws",
+            "Unexpected URL: {}",
+            u
+        ),
         Err(e) => assert!(false, "command::url() was not processed properly: {}", e),
     }
 }
