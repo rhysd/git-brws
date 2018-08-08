@@ -11,9 +11,9 @@ fn convert_ssh_url(mut url: String) -> String {
         // Note: Convert SSH protocol URL
         //  git@service.com:user/repo.git -> ssh://git@service.com:22/user/repo.git
         if let Some(i) = url.find(':') {
-            util::insert(&mut url, i + 1, "22/");
+            &mut url.insert_str(i + 1, "22/");
         }
-        util::insert(&mut url, 0, "ssh://");
+        &mut url.insert_str(0, "ssh://");
     }
     url
 }
