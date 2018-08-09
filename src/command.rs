@@ -3,7 +3,7 @@ extern crate open;
 use page::parse_page;
 use service;
 use std::path::PathBuf;
-use util;
+use errors::*;
 
 #[derive(Debug)]
 pub struct Config {
@@ -13,12 +13,12 @@ pub struct Config {
     pub args: Vec<String>,
 }
 
-pub fn url(cfg: Config) -> util::Result<String> {
+pub fn url(cfg: Config) -> Result<String> {
     let page = parse_page(&cfg)?;
     service::parse_and_build_page_url(&cfg.repo, &page, &cfg.branch)
 }
 
-fn open(url: String) -> Option<util::ErrorMsg> {
+fn open(url: String) -> Option<ErrorMsg> {
     match open::that(&url) {
         Ok(status) => {
             if status.success() {
@@ -41,7 +41,7 @@ fn open(url: String) -> Option<util::ErrorMsg> {
     }
 }
 
-pub fn browse(cfg: Config) -> Option<util::ErrorMsg> {
+pub fn browse(cfg: Config) -> Option<ErrorMsg> {
     match url(cfg) {
         Ok(url) => open(url),
         Err(msg) => Some(msg),

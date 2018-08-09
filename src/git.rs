@@ -5,7 +5,7 @@ use std::fs;
 use std::path::{Path, PathBuf};
 use std::process::Command;
 use std::str;
-use util;
+use errors::Result;
 
 pub struct Git<'a> {
     command: String,
@@ -13,7 +13,7 @@ pub struct Git<'a> {
 }
 
 impl<'a> Git<'a> {
-    pub fn command<S: AsRef<OsStr> + Debug>(&self, args: &[S]) -> util::Result<String> {
+    pub fn command<S: AsRef<OsStr> + Debug>(&self, args: &[S]) -> Result<String> {
         let out = Command::new(&self.command)
             .arg("--git-dir")
             .arg(self.git_dir)
@@ -33,11 +33,11 @@ impl<'a> Git<'a> {
         Ok(s.trim().to_string())
     }
 
-    pub fn hash<S: AsRef<str>>(&self, commit: &S) -> util::Result<String> {
+    pub fn hash<S: AsRef<str>>(&self, commit: &S) -> Result<String> {
         self.command(&["rev-parse", commit.as_ref()])
     }
 
-    pub fn remote_url<S: AsRef<str>>(&self, name: &S) -> util::Result<String> {
+    pub fn remote_url<S: AsRef<str>>(&self, name: &S) -> Result<String> {
         // XXX:
         // `git remote get-url {name}` is not available because it's added recently (at 2.6.1).
         // Note that git installed in Ubuntu 14.04 is 1.9.1.
@@ -45,7 +45,7 @@ impl<'a> Git<'a> {
         Ok(url)
     }
 
-    pub fn tracking_remote(&self) -> util::Result<String> {
+    pub fn tracking_remote(&self) -> Result<String> {
         let out = match self.command(&["rev-parse", "--abbrev-ref", "--symbolic", "@{u}"]) {
             Ok(stdout) => stdout,
             Err(stderr) => {
@@ -67,7 +67,7 @@ impl<'a> Git<'a> {
         }
     }
 
-    pub fn root_dir(&self) -> util::Result<PathBuf> {
+    pub fn root_dir(&self) -> Result<PathBuf> {
         // XXX:
         // `git rev-parse` can't be used with --git-dir arguments.
         // `git --git-dir ../.git rev-parse --show-toplevel` always returns
@@ -85,7 +85,7 @@ pub fn get_git_command() -> String {
     env::var("GIT_BRWS_GIT_COMMAND").unwrap_or("git".to_string())
 }
 
-pub fn new(dir: &PathBuf) -> util::Result<Git> {
+pub fn new(dir: &PathBuf) -> Result<Git> {
     let command = get_git_command();
     let path = dir.to_str().ok_or(format!(
         "Failed to retrieve directory path as UTF8 string: {:?}",
@@ -97,7 +97,7 @@ pub fn new(dir: &PathBuf) -> util::Result<Git> {
     })
 }
 
-pub fn git_dir(dir: Option<String>) -> util::Result<PathBuf> {
+pub fn git_dir(dir: Option<String>) -> Result<PathBuf> {
     let mut cmd = Command::new(get_git_command());
     cmd.arg("rev-parse").arg("--git-dir");
     if let Some(d) = dir {

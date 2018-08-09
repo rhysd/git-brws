@@ -4,7 +4,7 @@ use self::getopts::Options;
 use command;
 use git;
 use std::path::PathBuf;
-use util;
+use errors::Result;
 
 fn convert_ssh_url(mut url: String) -> String {
     if url.starts_with("git@") {
@@ -25,7 +25,7 @@ pub enum ParsedArgv {
     Parsed(command::Config, bool),
 }
 
-fn normalize_repo_format(mut s: String, git_dir: &PathBuf) -> util::Result<String> {
+fn normalize_repo_format(mut s: String, git_dir: &PathBuf) -> Result<String> {
     if let Ok(url) = git::new(git_dir)?.remote_url(&s) {
         return Ok(url);
     }
@@ -78,7 +78,7 @@ Examples:
     )
 }
 
-pub fn parse_options(argv: Vec<String>) -> util::Result<ParsedArgv> {
+pub fn parse_options(argv: Vec<String>) -> Result<ParsedArgv> {
     let program = argv[0].clone();
     let mut opts = Options::new();
 

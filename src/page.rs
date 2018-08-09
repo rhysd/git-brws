@@ -2,7 +2,7 @@ use std::fs;
 
 use command;
 use git;
-use util;
+use errors::Result;
 
 #[derive(Debug, PartialEq)]
 pub enum Page {
@@ -27,7 +27,7 @@ struct BrowsePageParser<'a> {
 }
 
 impl<'a> BrowsePageParser<'a> {
-    fn try_parse_commit(&self) -> util::Result<Page> {
+    fn try_parse_commit(&self) -> Result<Page> {
         if self.cfg.args.len() != 1 {
             return Err("  Invalid number of arguments for commit (1 is expected)".to_string());
         }
@@ -35,7 +35,7 @@ impl<'a> BrowsePageParser<'a> {
         Ok(Page::Commit { hash })
     }
 
-    fn try_parse_diff(&self) -> util::Result<Page> {
+    fn try_parse_diff(&self) -> Result<Page> {
         if self.cfg.args.len() != 1 {
             return Err("  Invalid number of arguments for diff (1 is expected)".to_string());
         }
@@ -68,7 +68,7 @@ impl<'a> BrowsePageParser<'a> {
         (&arg[..line_start], line)
     }
 
-    fn try_parse_file_or_dir(&self) -> util::Result<Page> {
+    fn try_parse_file_or_dir(&self) -> Result<Page> {
         let len = self.cfg.args.len();
         if len != 1 && len != 2 {
             return Err(
@@ -101,7 +101,7 @@ impl<'a> BrowsePageParser<'a> {
     }
 }
 
-pub fn parse_page(cfg: &command::Config) -> util::Result<Page> {
+pub fn parse_page(cfg: &command::Config) -> Result<Page> {
     let mut errors = vec!["Error on parsing command line arguments".to_string()];
 
     let parser = BrowsePageParser {

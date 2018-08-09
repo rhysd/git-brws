@@ -5,7 +5,7 @@ use page::Page;
 use std::env;
 use std::path::Path;
 
-use util;
+use errors::Result;
 
 fn build_github_like_url(
     host: &str,
@@ -71,7 +71,7 @@ fn build_bitbucket_url(
     repo: &str,
     branch: &Option<String>,
     page: &Page,
-) -> util::Result<String> {
+) -> Result<String> {
     match page {
         &Page::Open => if let &Some(ref b) = branch {
             Ok(format!("https://bitbucket.org/{}/{}/branch/{}", user, repo, b))
@@ -93,7 +93,7 @@ fn build_bitbucket_url(
 }
 
 // Note: Parse '/user/repo.git' or '/user/repo' or 'user/repo' into 'user' and 'repo'
-fn slug_from_path<'a>(path: &'a str) -> util::Result<(&'a str, &'a str)> {
+fn slug_from_path<'a>(path: &'a str) -> Result<(&'a str, &'a str)> {
     let mut split = path.split('/').skip_while(|s| s.is_empty());
     let user = split
         .next()
@@ -115,7 +115,7 @@ pub fn parse_and_build_page_url(
     repo: &String,
     page: &Page,
     branch: &Option<String>,
-) -> util::Result<String> {
+) -> Result<String> {
     let url = Url::parse(repo).map_err(|e| format!("Failed to parse URL '{}': {}", repo, e))?;
     let path = url.path();
     let (user, repo_name) = slug_from_path(path)?;

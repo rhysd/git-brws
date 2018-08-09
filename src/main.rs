@@ -3,7 +3,7 @@ mod command;
 mod git;
 mod page;
 mod service;
-mod util;
+mod errors;
 
 #[cfg(test)]
 mod test;
