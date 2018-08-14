@@ -1,9 +1,9 @@
 mod argv;
 mod command;
+mod errors;
 mod git;
 mod page;
 mod service;
-mod errors;
 
 #[cfg(test)]
 mod test;

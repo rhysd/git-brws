@@ -1,8 +1,8 @@
 use std::fs;
 
 use command;
-use git;
 use errors::Result;
+use git;
 
 #[derive(Debug, PartialEq)]
 pub enum Page {

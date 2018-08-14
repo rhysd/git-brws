@@ -1,3 +1,4 @@
+use errors::Result;
 use std::env;
 use std::ffi::OsStr;
 use std::fmt::Debug;
@@ -5,7 +6,6 @@ use std::fs;
 use std::path::{Path, PathBuf};
 use std::process::Command;
 use std::str;
-use errors::Result;
 
 pub struct Git<'a> {
     command: String,

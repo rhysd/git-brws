@@ -2,9 +2,9 @@ extern crate getopts;
 
 use self::getopts::Options;
 use command;
+use errors::Result;
 use git;
 use std::path::PathBuf;
-use errors::Result;
 
 fn convert_ssh_url(mut url: String) -> String {
     if url.starts_with("git@") {

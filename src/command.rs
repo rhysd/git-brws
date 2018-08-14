@@ -1,9 +1,9 @@
 extern crate open;
 
+use errors::*;
 use page::parse_page;
 use service;
 use std::path::PathBuf;
-use errors::*;
 
 #[derive(Debug)]
 pub struct Config {
