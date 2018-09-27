@@ -42,10 +42,12 @@ impl<'a> BrowsePageParser<'a> {
 
         let mut split = self.cfg.args[0].splitn(2, "..");
         let lhs = split.next().unwrap();
-        let rhs = split.next().ok_or(format!(
-            "  Diff format must be specified as LHS..RHS but found {}",
-            self.cfg.args[0]
-        ))?;
+        let rhs = split.next().ok_or_else(|| {
+            format!(
+                "  Diff format must be specified as LHS..RHS but found {}",
+                self.cfg.args[0]
+            )
+        })?;
 
         Ok(Page::Diff {
             lhs: self.git.hash(&lhs)?,

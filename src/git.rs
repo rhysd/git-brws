@@ -73,10 +73,12 @@ impl<'a> Git<'a> {
         // `git --git-dir ../.git rev-parse --show-toplevel` always returns
         // current working directory.
         // So here root directory is calculated from git-dir.
-        let p = Path::new(self.git_dir).parent().ok_or(format!(
-            "Cannot locate root directory from git-dir '{}'",
-            self.git_dir
-        ))?;
+        let p = Path::new(self.git_dir).parent().ok_or_else(|| {
+            format!(
+                "Cannot locate root directory from git-dir '{}'",
+                self.git_dir
+            )
+        })?;
         Ok(p.to_owned())
     }
 }
@@ -87,10 +89,12 @@ pub fn get_git_command() -> String {
 
 pub fn new(dir: &PathBuf) -> Result<Git> {
     let command = get_git_command();
-    let path = dir.to_str().ok_or(format!(
-        "Failed to retrieve directory path as UTF8 string: {:?}",
-        dir
-    ))?;
+    let path = dir.to_str().ok_or_else(|| {
+        format!(
+            "Failed to retrieve directory path as UTF8 string: {:?}",
+            dir
+        )
+    })?;
     Ok(Git {
         command,
         git_dir: path,

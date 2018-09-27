@@ -84,9 +84,9 @@ fn build_bitbucket_url(
         &Page::FileOrDir {ref relative_path, ref hash, line: Some(line)} => {
             let file = Path::new(relative_path)
                 .file_name()
-                .ok_or(format!("Cannot get file name from path: {}", relative_path))?
+                .ok_or_else(|| format!("Cannot get file name from path: {}", relative_path))?
                 .to_str()
-                .ok_or(format!("Cannot convert path to UTF8 string: {}", relative_path))?;
+                .ok_or_else(|| format!("Cannot convert path to UTF8 string: {}", relative_path))?;
             Ok(format!("https://bitbucket.org/{}/{}/src/{}/{}#{}-{}", user, repo, hash, relative_path, file, line))
         },
     }
@@ -97,10 +97,10 @@ fn slug_from_path<'a>(path: &'a str) -> Result<(&'a str, &'a str)> {
     let mut split = path.split('/').skip_while(|s| s.is_empty());
     let user = split
         .next()
-        .ok_or(format!("Can't detect user name from path {}", path))?;
+        .ok_or_else(|| format!("Can't detect user name from path {}", path))?;
     let mut repo = split
         .next()
-        .ok_or(format!("Can't detect repository name from path {}", path))?;
+        .ok_or_else(|| format!("Can't detect repository name from path {}", path))?;
     if repo.ends_with(".git") {
         // Slice '.git' from 'repo.git'
         repo = &repo[0..repo.len() - 4];
@@ -121,7 +121,7 @@ pub fn parse_and_build_page_url(
     let (user, repo_name) = slug_from_path(path)?;
     let host = url
         .host_str()
-        .ok_or(format!("Failed to parse host from {}", repo))?;
+        .ok_or_else(|| format!("Failed to parse host from {}", repo))?;
     match host {
         "github.com" | "gitlab.com" => {
             Ok(build_github_like_url(host, user, repo_name, branch, page))
