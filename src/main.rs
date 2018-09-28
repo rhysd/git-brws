@@ -14,7 +14,7 @@ use std::process::exit;
 
 fn main() {
     let argv = env::args().collect::<Vec<_>>();
-    let parsed = match parse_options(argv) {
+    let parsed = match parse_options(argv.as_slice()) {
         Ok(p) => p,
         Err(reason) => {
             eprintln!("{}", reason);

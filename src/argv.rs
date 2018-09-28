@@ -11,9 +11,9 @@ fn convert_ssh_url(mut url: String) -> String {
         // Note: Convert SSH protocol URL
         //  git@service.com:user/repo.git -> ssh://git@service.com:22/user/repo.git
         if let Some(i) = url.find(':') {
-            &mut url.insert_str(i + 1, "22/");
+            url.insert_str(i + 1, "22/");
         }
-        &mut url.insert_str(0, "ssh://");
+        url.insert_str(0, "ssh://");
     }
     url
 }
@@ -45,7 +45,7 @@ fn normalize_repo_format(mut s: String, git_dir: &PathBuf) -> Result<String> {
     }
 }
 
-fn usage(program: &String) -> String {
+fn usage(program: &str) -> String {
     format!(
         "\
 Usage: {} [Options] {{Args}}
@@ -78,8 +78,8 @@ Examples:
     )
 }
 
-pub fn parse_options(argv: Vec<String>) -> Result<ParsedArgv> {
-    let program = argv[0].clone();
+pub fn parse_options<T: AsRef<str>>(argv: &[T]) -> Result<ParsedArgv> {
+    let program = argv[0].as_ref().to_owned();
     let mut opts = Options::new();
 
     opts.optopt("r", "repo", "Shorthand format (user/repo, service/user/repo) or remote name (e.g. origin) or Git URL you want to see", "REPO");
@@ -93,7 +93,9 @@ pub fn parse_options(argv: Vec<String>) -> Result<ParsedArgv> {
     opts.optflag("h", "help", "Print this help");
     opts.optflag("v", "version", "Show version");
 
-    let matches = opts.parse(&argv[1..]).map_err(|f| format!("{}", f))?;
+    let matches = opts
+        .parse(argv[1..].iter().map(|a| a.as_ref()))
+        .map_err(|f| format!("{}", f))?;
 
     if matches.opt_present("h") {
         let brief = usage(&program);
