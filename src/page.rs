@@ -96,7 +96,7 @@ impl<'a> BrowsePageParser<'a> {
             self.git.hash(&"HEAD")?
         };
         Ok(Page::FileOrDir {
-            relative_path: relative_path,
+            relative_path,
             hash,
             line,
         })

@@ -15,17 +15,17 @@ fn build_github_like_url(
     page: &Page,
 ) -> String {
     match page {
-        &Page::Open => if let &Some(ref b) = branch {
+        Page::Open => if let Some(ref b) = branch {
             format!("https://{}/{}/{}/tree/{}", host, user, repo, b)
         } else {
             format!("https://{}/{}/{}", host, user, repo)
         },
-        &Page::Diff { ref lhs, ref rhs } => format!(
+        Page::Diff { ref lhs, ref rhs } => format!(
             "https://{}/{}/{}/compare/{}...{}",
             host, user, repo, lhs, rhs
         ),
-        &Page::Commit { ref hash } => format!("https://{}/{}/{}/commit/{}", host, user, repo, hash),
-        &Page::FileOrDir {
+        Page::Commit { ref hash } => format!("https://{}/{}/{}/commit/{}", host, user, repo, hash),
+        Page::FileOrDir {
             ref relative_path,
             ref hash,
             line: None,
@@ -33,7 +33,7 @@ fn build_github_like_url(
             "https://{}/{}/{}/blob/{}/{}",
             host, user, repo, hash, relative_path
         ),
-        &Page::FileOrDir {
+        Page::FileOrDir {
             ref relative_path,
             ref hash,
             line: Some(line),
@@ -73,15 +73,15 @@ fn build_bitbucket_url(
     page: &Page,
 ) -> Result<String> {
     match page {
-        &Page::Open => if let &Some(ref b) = branch {
+        Page::Open => if let Some(ref b) = branch {
             Ok(format!("https://bitbucket.org/{}/{}/branch/{}", user, repo, b))
         } else {
             Ok(format!("https://bitbucket.org/{}/{}", user, repo))
         },
-        &Page::Diff {..} => Err("BitBucket does not support diff between commits (see https://bitbucket.org/site/master/issues/4779/ability-to-diff-between-any-two-commits)".to_string()),
-        &Page::Commit {ref hash} => Ok(format!("https://bitbucket.org/{}/{}/commits/{}", user, repo, hash)),
-        &Page::FileOrDir {ref relative_path, ref hash, line: None} => Ok(format!("https://bitbucket.org/{}/{}/src/{}/{}", user, repo, hash, relative_path)),
-        &Page::FileOrDir {ref relative_path, ref hash, line: Some(line)} => {
+        Page::Diff {..} => Err("BitBucket does not support diff between commits (see https://bitbucket.org/site/master/issues/4779/ability-to-diff-between-any-two-commits)".to_string()),
+        Page::Commit {ref hash} => Ok(format!("https://bitbucket.org/{}/{}/commits/{}", user, repo, hash)),
+        Page::FileOrDir {ref relative_path, ref hash, line: None} => Ok(format!("https://bitbucket.org/{}/{}/src/{}/{}", user, repo, hash, relative_path)),
+        Page::FileOrDir {ref relative_path, ref hash, line: Some(line)} => {
             let file = Path::new(relative_path)
                 .file_name()
                 .ok_or_else(|| format!("Cannot get file name from path: {}", relative_path))?

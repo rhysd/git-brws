@@ -61,7 +61,7 @@ impl<'a> Git<'a> {
         };
 
         // out is formatted as '{remote-url}/{branch-name}'
-        match out.splitn(2, "/").next() {
+        match out.splitn(2, '/').next() {
             Some(ref u) => self.remote_url(&u),
             None => Err(format!("Invalid tracking remote name: {}", out)),
         }
@@ -84,7 +84,7 @@ impl<'a> Git<'a> {
 }
 
 pub fn get_git_command() -> String {
-    env::var("GIT_BRWS_GIT_COMMAND").unwrap_or("git".to_string())
+    env::var("GIT_BRWS_GIT_COMMAND").unwrap_or_else(|_| "git".to_string())
 }
 
 pub fn new(dir: &PathBuf) -> Result<Git> {
