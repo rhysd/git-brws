@@ -13,13 +13,13 @@ pub struct Config {
     pub args: Vec<String>,
 }
 
-pub fn url(cfg: Config) -> Result<String> {
+pub fn url(cfg: &Config) -> Result<String> {
     let page = parse_page(&cfg)?;
     service::parse_and_build_page_url(&cfg.repo, &page, &cfg.branch)
 }
 
-fn open(url: String) -> Option<ErrorMsg> {
-    match open::that(&url) {
+fn open(url: &str) -> Option<ErrorMsg> {
+    match open::that(url) {
         Ok(status) => {
             if status.success() {
                 None
@@ -39,9 +39,9 @@ fn open(url: String) -> Option<ErrorMsg> {
     }
 }
 
-pub fn browse(cfg: Config) -> Option<ErrorMsg> {
+pub fn browse(cfg: &Config) -> Option<ErrorMsg> {
     match url(cfg) {
-        Ok(url) => open(url),
+        Ok(url) => open(url.as_str()),
         Err(msg) => Some(msg),
     }
 }

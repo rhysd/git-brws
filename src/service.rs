@@ -112,7 +112,7 @@ fn slug_from_path<'a>(path: &'a str) -> Result<(&'a str, &'a str)> {
 //  1. https://hosting_service.com/user/repo.git
 //  2. git@hosting_service.com:user/repo.git (-> ssh://git@hosting_service.com:22/user/repo.git)
 pub fn parse_and_build_page_url(
-    repo: &String,
+    repo: &str,
     page: &Page,
     branch: &Option<String>,
 ) -> Result<String> {

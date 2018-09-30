@@ -110,11 +110,10 @@ fn parse_and_build_diff_page() {
         ("https://github.somewhere.com/user/repo.git", "https://github.somewhere.com/user/repo/compare/561848bad7164d7568658456088b107ec9efd9f3...90601f1037142605a32426f9ece0c07d479b9cc5"),
         ("https://gitlab.com/user/repo.git", "https://gitlab.com/user/repo/compare/561848bad7164d7568658456088b107ec9efd9f3...90601f1037142605a32426f9ece0c07d479b9cc5"),
     ] {
-        assert_eq!(parse_and_build_page_url(&repo.to_string(), &p, &None).unwrap(), expected);
+        assert_eq!(parse_and_build_page_url(&repo, &p, &None).unwrap(), expected);
     }
     assert!(
-        parse_and_build_page_url(&"https://bitbucket.org/user/repo".to_string(), &p, &None)
-            .is_err(),
+        parse_and_build_page_url(&"https://bitbucket.org/user/repo", &p, &None).is_err(),
         "bitbucket does not support diff page"
     );
 }
@@ -132,7 +131,7 @@ fn parse_and_build_file_page() {
         ("https://github.somewhere.com/user/repo.git", "https://github.somewhere.com/user/repo/blob/561848bad7164d7568658456088b107ec9efd9f3/src/main.rs"),
         ("https://gitlab.com/user/repo.git", "https://gitlab.com/user/repo/blob/561848bad7164d7568658456088b107ec9efd9f3/src/main.rs"),
     ] {
-        assert_eq!(parse_and_build_page_url(&repo.to_string(), &p, &None).unwrap(), expected);
+        assert_eq!(parse_and_build_page_url(&repo, &p, &None).unwrap(), expected);
     }
 }
 
@@ -149,7 +148,7 @@ fn parse_and_build_file_page_with_line_number() {
         ("https://github.somewhere.com/user/repo.git", "https://github.somewhere.com/user/repo/blob/561848bad7164d7568658456088b107ec9efd9f3/src/main.rs#L12"),
         ("https://gitlab.com/user/repo.git", "https://gitlab.com/user/repo/blob/561848bad7164d7568658456088b107ec9efd9f3/src/main.rs#L12"),
     ] {
-        assert_eq!(parse_and_build_page_url(&repo.to_string(), &p, &None).unwrap(), expected);
+        assert_eq!(parse_and_build_page_url(&repo, &p, &None).unwrap(), expected);
     }
 }
 
@@ -161,7 +160,7 @@ fn invalid_repo_url() {
         "https://unknown.hosting_service.com/user/repo.git",
     ] {
         assert!(
-            parse_and_build_page_url(&repo.to_string(), &Page::Open, &None).is_err(),
+            parse_and_build_page_url(&repo, &Page::Open, &None).is_err(),
             "{} must be invalid",
             repo
         );
@@ -198,7 +197,7 @@ fn customized_host_ssh_port() {
         ),
     ] {
         assert_eq!(
-            parse_and_build_page_url(&repo.to_string(), &p, &None),
+            parse_and_build_page_url(&repo, &p, &None),
             Ok(expected.to_string())
         );
     }
@@ -208,7 +207,7 @@ fn customized_host_ssh_port() {
 
     assert_eq!(
         parse_and_build_page_url(
-            &"https://my-original-ghe.org/user/repo.git".to_string(),
+            &"https://my-original-ghe.org/user/repo.git",
             &Page::Open,
             &None
         ),

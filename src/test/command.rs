@@ -13,7 +13,7 @@ fn smoke() {
         git_dir: d,
         args: vec![],
     };
-    match url(c) {
+    match url(&c) {
         Ok(u) => assert_eq!(
             u, "https://github.com/rhysd/git-brws",
             "Unexpected URL: {}",

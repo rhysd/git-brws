@@ -31,8 +31,8 @@ fn main() {
             println!("{}", version);
             None
         }
-        ParsedArgv::Parsed(opts, false) => command::browse(opts),
-        ParsedArgv::Parsed(opts, true) => match command::url(opts) {
+        ParsedArgv::Parsed(opts, false) => command::browse(&opts),
+        ParsedArgv::Parsed(opts, true) => match command::url(&opts) {
             Ok(url) => {
                 println!("{}", url);
                 None
