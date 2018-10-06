@@ -1,4 +1,9 @@
 [[package]]
+name = "cargo-husky"
+version = "0.3.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+
+[[package]]
 name = "getopts"
 version = "0.2.18"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -10,6 +15,7 @@ dependencies = [
 name = "git-brws"
 version = "0.6.1"
 dependencies = [
+ "cargo-husky 0.3.0 (registry+https://github.com/rust-lang/crates.io-index)",
  "getopts 0.2.18 (registry+https://github.com/rust-lang/crates.io-index)",
  "open 1.2.2 (registry+https://github.com/rust-lang/crates.io-index)",
  "url 1.7.1 (registry+https://github.com/rust-lang/crates.io-index)",
@@ -91,6 +97,7 @@ version = "0.4.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 
 [metadata]
+"checksum cargo-husky 0.3.0 (registry+https://github.com/rust-lang/crates.io-index)" = "cd26a8e70bc0a52ecf35de2f0d0f19f94a6e3601d5290e697126db3772f723da"
 "checksum getopts 0.2.18 (registry+https://github.com/rust-lang/crates.io-index)" = "0a7292d30132fb5424b354f5dc02512a86e4c516fe544bb7a25e7f266951b797"
 "checksum idna 0.1.5 (registry+https://github.com/rust-lang/crates.io-index)" = "38f09e0f0b1fb55fdee1f17470ad800da77af5186a1a76c026b679358b7e844e"
 "checksum matches 0.1.7 (registry+https://github.com/rust-lang/crates.io-index)" = "835511bab37c34c47da5cb44844bea2cfde0236db0b506f90ea4224482c9774a"

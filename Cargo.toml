@@ -12,3 +12,6 @@ license-file = "LICENSE.txt"
 getopts = "0.2"
 url = "1.6"
 open = "1.2"
+
+[dev-dependencies]
+cargo-husky = "0.x"
