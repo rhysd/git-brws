@@ -14,4 +14,4 @@ url = "1.6"
 open = "1.2"
 
 [dev-dependencies]
-cargo-husky = "0.x"
+cargo-husky = "1"
