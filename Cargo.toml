@@ -16,4 +16,4 @@ open = "1.2"
 [dev-dependencies.cargo-husky]
 version = "^1.2"
 default-features = false
-features = ["prepush-hook", "run-cargo-test", "run-cargo-clippy"]
+features = ["prepush-hook", "run-cargo-test", "run-cargo-clippy", "run-cargo-fmt"]
