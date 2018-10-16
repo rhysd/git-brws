@@ -90,12 +90,24 @@ fn parse_and_build_commit_page() {
         hash: "90601f1037142605a32426f9ece0c07d479b9cc5".to_string(),
     };
     for &(repo, expected) in &[
-        ("https://github.com/user/repo.git", "https://github.com/user/repo/commit/90601f1037142605a32426f9ece0c07d479b9cc5"),
-        ("https://bitbucket.org/user/repo.git", "https://bitbucket.org/user/repo/commits/90601f1037142605a32426f9ece0c07d479b9cc5"),
-        ("https://github.somewhere.com/user/repo.git", "https://github.somewhere.com/user/repo/commit/90601f1037142605a32426f9ece0c07d479b9cc5"),
-        ("https://gitlab.com/user/repo.git", "https://gitlab.com/user/repo/commit/90601f1037142605a32426f9ece0c07d479b9cc5"),
+        (
+            "https://github.com/user/repo.git",
+            "https://github.com/user/repo/commit/90601f1037142605a32426f9ece0c07d479b9cc5",
+        ),
+        (
+            "https://bitbucket.org/user/repo.git",
+            "https://bitbucket.org/user/repo/commits/90601f1037142605a32426f9ece0c07d479b9cc5",
+        ),
+        (
+            "https://github.somewhere.com/user/repo.git",
+            "https://github.somewhere.com/user/repo/commit/90601f1037142605a32426f9ece0c07d479b9cc5",
+        ),
+        (
+            "https://gitlab.com/user/repo.git",
+            "https://gitlab.com/user/repo/commit/90601f1037142605a32426f9ece0c07d479b9cc5",
+        ),
     ] {
-        assert_eq!(parse_and_build_page_url(&repo.to_string(), &p, &None).unwrap(), expected);
+        assert_eq!(parse_and_build_page_url(repo, &p, &None).unwrap(), expected);
     }
 }
 
@@ -106,9 +118,18 @@ fn parse_and_build_diff_page() {
         rhs: "90601f1037142605a32426f9ece0c07d479b9cc5".to_string(),
     };
     for &(repo, expected) in &[
-        ("https://github.com/user/repo.git", "https://github.com/user/repo/compare/561848bad7164d7568658456088b107ec9efd9f3...90601f1037142605a32426f9ece0c07d479b9cc5"),
-        ("https://github.somewhere.com/user/repo.git", "https://github.somewhere.com/user/repo/compare/561848bad7164d7568658456088b107ec9efd9f3...90601f1037142605a32426f9ece0c07d479b9cc5"),
-        ("https://gitlab.com/user/repo.git", "https://gitlab.com/user/repo/compare/561848bad7164d7568658456088b107ec9efd9f3...90601f1037142605a32426f9ece0c07d479b9cc5"),
+        (
+            "https://github.com/user/repo.git",
+            "https://github.com/user/repo/compare/561848bad7164d7568658456088b107ec9efd9f3...90601f1037142605a32426f9ece0c07d479b9cc5",
+        ),
+        (
+            "https://github.somewhere.com/user/repo.git",
+            "https://github.somewhere.com/user/repo/compare/561848bad7164d7568658456088b107ec9efd9f3...90601f1037142605a32426f9ece0c07d479b9cc5",
+        ),
+        (
+            "https://gitlab.com/user/repo.git",
+            "https://gitlab.com/user/repo/compare/561848bad7164d7568658456088b107ec9efd9f3...90601f1037142605a32426f9ece0c07d479b9cc5",
+        ),
     ] {
         assert_eq!(parse_and_build_page_url(&repo, &p, &None).unwrap(), expected);
     }
@@ -126,10 +147,22 @@ fn parse_and_build_file_page() {
         line: None,
     };
     for &(repo, expected) in &[
-        ("https://github.com/user/repo.git", "https://github.com/user/repo/blob/561848bad7164d7568658456088b107ec9efd9f3/src/main.rs"),
-        ("https://bitbucket.org/user/repo.git", "https://bitbucket.org/user/repo/src/561848bad7164d7568658456088b107ec9efd9f3/src/main.rs"),
-        ("https://github.somewhere.com/user/repo.git", "https://github.somewhere.com/user/repo/blob/561848bad7164d7568658456088b107ec9efd9f3/src/main.rs"),
-        ("https://gitlab.com/user/repo.git", "https://gitlab.com/user/repo/blob/561848bad7164d7568658456088b107ec9efd9f3/src/main.rs"),
+        (
+            "https://github.com/user/repo.git",
+            "https://github.com/user/repo/blob/561848bad7164d7568658456088b107ec9efd9f3/src/main.rs",
+        ),
+        (
+            "https://bitbucket.org/user/repo.git",
+            "https://bitbucket.org/user/repo/src/561848bad7164d7568658456088b107ec9efd9f3/src/main.rs",
+        ),
+        (
+            "https://github.somewhere.com/user/repo.git",
+            "https://github.somewhere.com/user/repo/blob/561848bad7164d7568658456088b107ec9efd9f3/src/main.rs",
+        ),
+        (
+            "https://gitlab.com/user/repo.git",
+            "https://gitlab.com/user/repo/blob/561848bad7164d7568658456088b107ec9efd9f3/src/main.rs",
+        ),
     ] {
         assert_eq!(parse_and_build_page_url(&repo, &p, &None).unwrap(), expected);
     }
@@ -143,10 +176,22 @@ fn parse_and_build_file_page_with_line_number() {
         line: Some(12),
     };
     for &(repo, expected) in &[
-        ("https://github.com/user/repo.git", "https://github.com/user/repo/blob/561848bad7164d7568658456088b107ec9efd9f3/src/main.rs#L12"),
-        ("https://bitbucket.org/user/repo.git", "https://bitbucket.org/user/repo/src/561848bad7164d7568658456088b107ec9efd9f3/src/main.rs#main.rs-12"),
-        ("https://github.somewhere.com/user/repo.git", "https://github.somewhere.com/user/repo/blob/561848bad7164d7568658456088b107ec9efd9f3/src/main.rs#L12"),
-        ("https://gitlab.com/user/repo.git", "https://gitlab.com/user/repo/blob/561848bad7164d7568658456088b107ec9efd9f3/src/main.rs#L12"),
+        (
+            "https://github.com/user/repo.git",
+            "https://github.com/user/repo/blob/561848bad7164d7568658456088b107ec9efd9f3/src/main.rs#L12",
+        ),
+        (
+            "https://bitbucket.org/user/repo.git",
+            "https://bitbucket.org/user/repo/src/561848bad7164d7568658456088b107ec9efd9f3/src/main.rs#main.rs-12",
+        ),
+        (
+            "https://github.somewhere.com/user/repo.git",
+            "https://github.somewhere.com/user/repo/blob/561848bad7164d7568658456088b107ec9efd9f3/src/main.rs#L12",
+        ),
+        (
+            "https://gitlab.com/user/repo.git",
+            "https://gitlab.com/user/repo/blob/561848bad7164d7568658456088b107ec9efd9f3/src/main.rs#L12",
+        ),
     ] {
         assert_eq!(parse_and_build_page_url(&repo, &p, &None).unwrap(), expected);
     }
