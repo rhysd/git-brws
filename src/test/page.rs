@@ -1,5 +1,5 @@
-use command::Config;
-use page::{parse_page, Page};
+use crate::command::Config;
+use crate::page::{parse_page, Page};
 use std::env;
 use std::path::Path;
 

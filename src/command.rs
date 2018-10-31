@@ -1,8 +1,8 @@
 extern crate open;
 
-use errors::*;
-use page::parse_page;
-use service;
+use crate::errors::*;
+use crate::page::parse_page;
+use crate::service;
 use std::path::PathBuf;
 
 #[derive(Debug)]

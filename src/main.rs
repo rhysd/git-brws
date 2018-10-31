@@ -8,7 +8,7 @@ mod service;
 #[cfg(test)]
 mod test;
 
-use argv::{parse_options, ParsedArgv};
+use crate::argv::{parse_options, ParsedArgv};
 use std::env;
 use std::process::exit;
 

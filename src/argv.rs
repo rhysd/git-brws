@@ -1,9 +1,9 @@
 extern crate getopts;
 
 use self::getopts::Options;
-use command;
-use errors::Result;
-use git;
+use crate::command;
+use crate::errors::Result;
+use crate::git;
 use std::path::PathBuf;
 
 fn convert_ssh_url(mut url: String) -> String {

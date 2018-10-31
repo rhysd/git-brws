@@ -1,11 +1,11 @@
 extern crate url;
 
 use self::url::Url;
-use page::Page;
+use crate::page::Page;
 use std::env;
 use std::path::Path;
 
-use errors::Result;
+use crate::errors::Result;
 
 fn build_github_like_url(
     host: &str,

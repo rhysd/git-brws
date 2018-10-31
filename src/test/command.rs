@@ -1,4 +1,4 @@
-use command::*;
+use crate::command::*;
 use std::env;
 use std::path::Path;
 

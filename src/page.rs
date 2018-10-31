@@ -1,8 +1,8 @@
 use std::fs;
 
-use command;
-use errors::Result;
-use git;
+use crate::command;
+use crate::errors::Result;
+use crate::git;
 
 #[derive(Debug, PartialEq)]
 pub enum Page {

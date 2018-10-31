@@ -1,5 +1,5 @@
-use page::Page;
-use service::parse_and_build_page_url;
+use crate::page::Page;
+use crate::service::parse_and_build_page_url;
 use std::env;
 
 // Note:
