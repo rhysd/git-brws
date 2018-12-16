@@ -2,9 +2,9 @@ extern crate url;
 
 use self::url::Url;
 use crate::page::Page;
-use std::env;
 use std::path::Path;
 
+use crate::envvar;
 use crate::errors::Result;
 
 fn build_github_like_url(
@@ -52,20 +52,18 @@ fn build_custom_github_like_url(
     repo: &str,
     branch: &Option<String>,
     page: &Page,
-    ssh_port_env: &str,
+    ssh_port_env: &Option<String>,
 ) -> String {
-    if let Ok(v) = env::var(ssh_port_env) {
-        if !v.is_empty() {
-            return build_github_like_url(
-                &format!("{}:{}", host, v).as_str(),
-                user,
-                repo,
-                branch,
-                page,
-            );
-        }
+    match ssh_port_env {
+        Some(ref v) if !v.is_empty() => build_github_like_url(
+            &format!("{}:{}", host, v).as_str(),
+            user,
+            repo,
+            branch,
+            page,
+        ),
+        _ => build_github_like_url(host, user, repo, branch, page),
     }
-    build_github_like_url(host, user, repo, branch, page)
 }
 
 fn build_bitbucket_url(
@@ -117,6 +115,7 @@ pub fn parse_and_build_page_url(
     repo: &str,
     page: &Page,
     branch: &Option<String>,
+    env: &envvar::Envvar,
 ) -> Result<String> {
     let url = Url::parse(repo).map_err(|e| format!("Failed to parse URL '{}': {}", repo, e))?;
     let path = url.path();
@@ -130,39 +129,21 @@ pub fn parse_and_build_page_url(
         }
         "bitbucket.org" => build_bitbucket_url(user, repo_name, branch, page),
         _ => {
-            if host.starts_with("github.") {
-                Ok(build_custom_github_like_url(
-                    host,
-                    user,
-                    repo_name,
-                    branch,
-                    page,
-                    "GIT_BRWS_GHE_SSH_PORT",
-                ))
+            let port_env = if host.starts_with("github.") {
+                &env.ghe_ssh_port
             } else if host.starts_with("gitlab.") {
-                Ok(build_custom_github_like_url(
-                    host,
-                    user,
-                    repo_name,
-                    branch,
-                    page,
-                    "GIT_BRWS_GITLAB_SSH_PORT",
-                ))
+                &env.gitlab_ssh_port
             } else {
-                if let Ok(v) = env::var("GIT_BRWS_GHE_URL_HOST") {
-                    if v == host {
-                        return Ok(build_custom_github_like_url(
-                            host,
-                            user,
-                            repo_name,
-                            branch,
-                            page,
-                            "GIT_BRWS_GHE_SSH_PORT",
-                        ));
+                match env.ghe_url_host {
+                    Some(ref v) if v == host => &env.ghe_ssh_port,
+                    _ => {
+                        return Err(format!("Unknown hosting service for URL {}. If you want to use custom URL for GitHub Enterprise, please set $GIT_BRWS_GHE_URL_HOST", repo));
                     }
                 }
-                Err(format!("Unknown hosting service for URL {}. If you want to use custom URL for GitHub Enterprise, please set $GIT_BRWS_GHE_URL_HOST", repo))
-            }
+            };
+            Ok(build_custom_github_like_url(
+                host, user, repo_name, branch, page, port_env,
+            ))
         }
     }
 }

@@ -108,7 +108,7 @@ pub fn parse_page(cfg: &command::Config) -> Result<Page> {
 
     let parser = BrowsePageParser {
         cfg,
-        git: git::new(&cfg.git_dir)?,
+        git: git::new(&cfg.git_dir, cfg.env.git_command.as_str())?,
     };
 
     if cfg.args.is_empty() {

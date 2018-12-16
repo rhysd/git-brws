@@ -1,5 +1,6 @@
 extern crate open;
 
+use crate::envvar;
 use crate::errors::*;
 use crate::page::parse_page;
 use crate::service;
@@ -12,11 +13,12 @@ pub struct Config {
     pub git_dir: PathBuf,
     pub args: Vec<String>,
     pub stdout: bool,
+    pub env: envvar::Envvar,
 }
 
 pub fn url(cfg: &Config) -> Result<String> {
     let page = parse_page(&cfg)?;
-    service::parse_and_build_page_url(&cfg.repo, &page, &cfg.branch)
+    service::parse_and_build_page_url(&cfg.repo, &page, &cfg.branch, &cfg.env)
 }
 
 fn open(url: &str) -> Option<ErrorMsg> {

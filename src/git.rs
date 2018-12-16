@@ -8,7 +8,7 @@ use std::process::Command;
 use std::str;
 
 pub struct Git<'a> {
-    command: String,
+    command: &'a str,
     git_dir: &'a str,
 }
 
@@ -83,26 +83,15 @@ impl<'a> Git<'a> {
     }
 }
 
-pub fn get_git_command() -> String {
-    env::var("GIT_BRWS_GIT_COMMAND").unwrap_or_else(|_| "git".to_string())
+pub fn new<'a>(dir: &'a PathBuf, command: &'a str) -> Result<Git<'a>> {
+    let git_dir = dir
+        .to_str()
+        .ok_or_else(|| format!("Failed to retrieve git_dir path as UTF8 string: {:?}", dir))?;
+    Ok(Git { command, git_dir })
 }
 
-pub fn new(dir: &PathBuf) -> Result<Git> {
-    let command = get_git_command();
-    let path = dir.to_str().ok_or_else(|| {
-        format!(
-            "Failed to retrieve directory path as UTF8 string: {:?}",
-            dir
-        )
-    })?;
-    Ok(Git {
-        command,
-        git_dir: path,
-    })
-}
-
-pub fn git_dir(dir: Option<String>) -> Result<PathBuf> {
-    let mut cmd = Command::new(get_git_command());
+pub fn git_dir(dir: Option<String>, git_cmd: &str) -> Result<PathBuf> {
+    let mut cmd = Command::new(if git_cmd != "" { git_cmd } else { "git" });
     cmd.arg("rev-parse").arg("--git-dir");
     if let Some(d) = dir {
         let d = fs::canonicalize(&d)

@@ -2,9 +2,9 @@ extern crate getopts;
 
 use self::getopts::Options;
 use crate::command;
+use crate::envvar;
 use crate::errors::Result;
 use crate::git;
-use std::path::PathBuf;
 
 fn convert_ssh_url(mut url: String) -> String {
     if url.starts_with("git@") {
@@ -25,8 +25,8 @@ pub enum ParsedArgv {
     Parsed(command::Config),
 }
 
-fn normalize_repo_format(mut s: String, git_dir: &PathBuf) -> Result<String> {
-    if let Ok(url) = git::new(git_dir)?.remote_url(&s) {
+fn normalize_repo_format(mut s: String, git: git::Git) -> Result<String> {
+    if let Ok(url) = git.remote_url(&s) {
         return Ok(url);
     }
 
@@ -84,7 +84,7 @@ pub fn parse_options<T: AsRef<str>>(argv: &[T]) -> Result<ParsedArgv> {
 
     opts.optopt("r", "repo", "Shorthand format (user/repo, service/user/repo) or remote name (e.g. origin) or Git URL you want to see", "REPO");
     opts.optopt("b", "branch", "Branch name of the repository", "BRANCH");
-    opts.optopt("d", "dir", "Directory path to your repository", "PATH");
+    opts.optopt("d", "dir", "Directory path to the repository", "PATH");
     opts.optflag(
         "u",
         "url",
@@ -108,12 +108,17 @@ pub fn parse_options<T: AsRef<str>>(argv: &[T]) -> Result<ParsedArgv> {
         ));
     }
 
-    let git_dir = git::git_dir(matches.opt_str("d"))?;
-
-    let repo = match matches.opt_str("r") {
-        Some(r) => normalize_repo_format(r, &git_dir)?,
-        None => git::new(&git_dir)?.tracking_remote()?,
+    let env = envvar::new();
+    let git_dir = git::git_dir(matches.opt_str("d"), env.git_command.as_str())?;
+    let repo = {
+        // Create scope for borrowing git_dir ref
+        let git = git::new(&git_dir, env.git_command.as_str())?;
+        match matches.opt_str("r") {
+            Some(r) => normalize_repo_format(r, git)?,
+            None => git.tracking_remote()?,
+        }
     };
+
     let repo = convert_ssh_url(repo);
 
     let stdout = matches.opt_present("u");
@@ -124,5 +129,6 @@ pub fn parse_options<T: AsRef<str>>(argv: &[T]) -> Result<ParsedArgv> {
         git_dir,
         args: matches.free,
         stdout,
+        env,
     }))
 }

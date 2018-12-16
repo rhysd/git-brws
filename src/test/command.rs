@@ -1,4 +1,5 @@
 use crate::command::*;
+use crate::test::helper::empty_env;
 use std::env;
 use std::path::Path;
 
@@ -13,6 +14,7 @@ fn smoke() {
         git_dir: d,
         args: vec![],
         stdout: false,
+        env: empty_env(),
     };
     match url(&c) {
         Ok(u) => assert_eq!(

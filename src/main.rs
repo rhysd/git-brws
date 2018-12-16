@@ -1,5 +1,6 @@
 mod argv;
 mod command;
+mod envvar;
 mod errors;
 mod git;
 mod page;

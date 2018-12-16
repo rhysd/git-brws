@@ -1,5 +1,6 @@
 use crate::command::Config;
 use crate::page::{parse_page, Page};
+use crate::test::helper::empty_env;
 use std::env;
 use std::path::Path;
 
@@ -16,6 +17,7 @@ fn config(repo: &str, branch: Option<&str>, args: Vec<&str>) -> Config {
         git_dir: dir,
         args: a,
         stdout: false,
+        env: empty_env(),
     }
 }
 
