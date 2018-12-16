@@ -15,11 +15,13 @@ fn build_github_like_url(
     page: &Page,
 ) -> String {
     match page {
-        Page::Open => if let Some(ref b) = branch {
-            format!("https://{}/{}/{}/tree/{}", host, user, repo, b)
-        } else {
-            format!("https://{}/{}/{}", host, user, repo)
-        },
+        Page::Open => {
+            if let Some(ref b) = branch {
+                format!("https://{}/{}/{}/tree/{}", host, user, repo, b)
+            } else {
+                format!("https://{}/{}/{}", host, user, repo)
+            }
+        }
         Page::Diff { ref lhs, ref rhs } => format!(
             "https://{}/{}/{}/compare/{}...{}",
             host, user, repo, lhs, rhs
@@ -127,38 +129,40 @@ pub fn parse_and_build_page_url(
             Ok(build_github_like_url(host, user, repo_name, branch, page))
         }
         "bitbucket.org" => build_bitbucket_url(user, repo_name, branch, page),
-        _ => if host.starts_with("github.") {
-            Ok(build_custom_github_like_url(
-                host,
-                user,
-                repo_name,
-                branch,
-                page,
-                "GIT_BRWS_GHE_SSH_PORT",
-            ))
-        } else if host.starts_with("gitlab.") {
-            Ok(build_custom_github_like_url(
-                host,
-                user,
-                repo_name,
-                branch,
-                page,
-                "GIT_BRWS_GITLAB_SSH_PORT",
-            ))
-        } else {
-            if let Ok(v) = env::var("GIT_BRWS_GHE_URL_HOST") {
-                if v == host {
-                    return Ok(build_custom_github_like_url(
-                        host,
-                        user,
-                        repo_name,
-                        branch,
-                        page,
-                        "GIT_BRWS_GHE_SSH_PORT",
-                    ));
+        _ => {
+            if host.starts_with("github.") {
+                Ok(build_custom_github_like_url(
+                    host,
+                    user,
+                    repo_name,
+                    branch,
+                    page,
+                    "GIT_BRWS_GHE_SSH_PORT",
+                ))
+            } else if host.starts_with("gitlab.") {
+                Ok(build_custom_github_like_url(
+                    host,
+                    user,
+                    repo_name,
+                    branch,
+                    page,
+                    "GIT_BRWS_GITLAB_SSH_PORT",
+                ))
+            } else {
+                if let Ok(v) = env::var("GIT_BRWS_GHE_URL_HOST") {
+                    if v == host {
+                        return Ok(build_custom_github_like_url(
+                            host,
+                            user,
+                            repo_name,
+                            branch,
+                            page,
+                            "GIT_BRWS_GHE_SSH_PORT",
+                        ));
+                    }
                 }
+                Err(format!("Unknown hosting service for URL {}. If you want to use custom URL for GitHub Enterprise, please set $GIT_BRWS_GHE_URL_HOST", repo))
             }
-            Err(format!("Unknown hosting service for URL {}. If you want to use custom URL for GitHub Enterprise, please set $GIT_BRWS_GHE_URL_HOST", repo))
-        },
+        }
     }
 }

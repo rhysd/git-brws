@@ -7,14 +7,13 @@ fn no_option() {
     match parse_options(&["git-brws"]).unwrap() {
         ParsedArgv::Parsed(o) => {
             println!("FOO! {:?}", o);
-            assert!(
-                vec![
-                    "https://github.com/rhysd/git-brws.git",
-                    "ssh://git@github.com:22/rhysd/git-brws.git",
-                    "git@github.com:rhysd/git-brws.git",
-                ].iter()
-                .any(|u| o.repo == u.to_string())
-            );
+            assert!(vec![
+                "https://github.com/rhysd/git-brws.git",
+                "ssh://git@github.com:22/rhysd/git-brws.git",
+                "git@github.com:rhysd/git-brws.git",
+            ]
+            .iter()
+            .any(|u| o.repo == u.to_string()));
             assert_eq!(o.branch, None);
             assert!(o.git_dir.ends_with(".git"));
             assert!(o.args.is_empty());
@@ -35,7 +34,8 @@ fn no_option() {
 fn with_options() {
     match parse_options(&[
         "git-brws", "foo", "-u", "-r", "foo/bar", "--dir", ".", "bar", "-b", "dev",
-    ]).unwrap()
+    ])
+    .unwrap()
     {
         ParsedArgv::Parsed(o) => {
             assert_eq!(o.repo, "https://github.com/foo/bar.git");
