@@ -1,6 +1,6 @@
 use crate::command::Config;
 use crate::page::{parse_page, Page};
-use crate::test::helper::empty_env;
+use crate::test::helper::{empty_env, on_travis_ci};
 use std::env;
 use std::path::Path;
 
@@ -109,6 +109,12 @@ fn parse_commit_ref() {
 
 #[test]
 fn parse_short_commit_hash() {
+    if on_travis_ci() {
+        // On Travis CI, it does not clone repository and instead it only checkouts the snapshot of revision.
+        // So there is not commit 499edbb in the repository and this test fails.
+        return;
+    }
+
     for &(cm, expected) in &[
         ("499edbb", "499edbbbad4d8054e4a47e12944e5fb4a2ef7ec5"),
         (
@@ -125,6 +131,7 @@ fn parse_short_commit_hash() {
 }
 
 #[test]
+#[cfg_attr(feature = "travis_ci", ignore)]
 fn parse_diff_ref_name() {
     let c = config(
         "https://github.com/user/repo.git",
@@ -142,6 +149,11 @@ fn parse_diff_ref_name() {
 
 #[test]
 fn parse_diff() {
+    if on_travis_ci() {
+        // On Travis CI, it does not clone repository and instead it only checkouts the snapshot of revision.
+        // So there is not commit 499edbb in the repository and this test fails.
+        return;
+    }
     let c = config(
         "https://github.com/user/repo.git",
         None,
