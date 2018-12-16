@@ -31,14 +31,7 @@ fn main() {
             println!("{}", version);
             None
         }
-        ParsedArgv::Parsed(opts, false) => command::browse(&opts),
-        ParsedArgv::Parsed(opts, true) => match command::url(&opts) {
-            Ok(url) => {
-                println!("{}", url);
-                None
-            }
-            Err(msg) => Some(msg),
-        },
+        ParsedArgv::Parsed(opts) => command::browse(&opts),
     };
 
     if let Some(m) = msg {

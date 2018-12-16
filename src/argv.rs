@@ -22,7 +22,7 @@ fn convert_ssh_url(mut url: String) -> String {
 pub enum ParsedArgv {
     Help(String),
     Version(&'static str),
-    Parsed(command::Config, bool),
+    Parsed(command::Config),
 }
 
 fn normalize_repo_format(mut s: String, git_dir: &PathBuf) -> Result<String> {
@@ -116,15 +116,13 @@ pub fn parse_options<T: AsRef<str>>(argv: &[T]) -> Result<ParsedArgv> {
     };
     let repo = convert_ssh_url(repo);
 
-    let show_url = matches.opt_present("u");
+    let stdout = matches.opt_present("u");
 
-    Ok(ParsedArgv::Parsed(
-        command::Config {
-            repo,
-            branch: matches.opt_str("b"),
-            git_dir,
-            args: matches.free,
-        },
-        show_url,
-    ))
+    Ok(ParsedArgv::Parsed(command::Config {
+        repo,
+        branch: matches.opt_str("b"),
+        git_dir,
+        args: matches.free,
+        stdout,
+    }))
 }

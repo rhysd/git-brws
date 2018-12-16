@@ -15,6 +15,7 @@ fn config(repo: &str, branch: Option<&str>, args: Vec<&str>) -> Config {
         branch: branch.map(|s| s.to_string()),
         git_dir: dir,
         args: a,
+        stdout: false,
     }
 }
 

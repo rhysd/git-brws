@@ -5,7 +5,7 @@ use std::path::Path;
 #[test]
 fn no_option() {
     match parse_options(&["git-brws"]).unwrap() {
-        ParsedArgv::Parsed(o, false) => {
+        ParsedArgv::Parsed(o) => {
             println!("FOO! {:?}", o);
             assert!(
                 vec![
@@ -18,12 +18,13 @@ fn no_option() {
             assert_eq!(o.branch, None);
             assert!(o.git_dir.ends_with(".git"));
             assert!(o.args.is_empty());
+            assert!(!o.stdout);
         }
         r => assert!(false, "Failed to parse args with no option: {:?}", r),
     };
 
     match parse_options(&["git-brws", "foo", "bar"]).unwrap() {
-        ParsedArgv::Parsed(o, false) => {
+        ParsedArgv::Parsed(o) => {
             assert_eq!(o.args.len(), 2);
         }
         _ => assert!(false),
@@ -36,11 +37,12 @@ fn with_options() {
         "git-brws", "foo", "-u", "-r", "foo/bar", "--dir", ".", "bar", "-b", "dev",
     ]).unwrap()
     {
-        ParsedArgv::Parsed(o, true) => {
+        ParsedArgv::Parsed(o) => {
             assert_eq!(o.repo, "https://github.com/foo/bar.git");
             assert_eq!(o.branch, Some("dev".to_string()));
             assert!(o.git_dir.ends_with(".git"));
             assert_eq!(o.args.len(), 2);
+            assert!(o.stdout);
         }
         _ => assert!(false),
     };
@@ -49,7 +51,7 @@ fn with_options() {
 #[test]
 fn ssh_conversion_with_option() {
     match parse_options(&["git-brws", "-r", "git@github.com:user/repo.git"]).unwrap() {
-        ParsedArgv::Parsed(o, ..) => {
+        ParsedArgv::Parsed(o) => {
             assert_eq!(o.repo, "ssh://git@github.com:22/user/repo.git");
         }
         p => assert!(
@@ -64,11 +66,11 @@ fn ssh_conversion_with_option() {
 fn repo_formatting() {
     let p = |r| parse_options(&["git-brws", "-r", r]).unwrap();
     match p("bitbucket.org/foo/bar") {
-        ParsedArgv::Parsed(o, false) => assert_eq!(o.repo, "https://bitbucket.org/foo/bar.git"),
+        ParsedArgv::Parsed(o) => assert_eq!(o.repo, "https://bitbucket.org/foo/bar.git"),
         _ => assert!(false),
     }
     match p("https://gitlab.com/foo/bar") {
-        ParsedArgv::Parsed(o, false) => assert_eq!(o.repo, "https://gitlab.com/foo/bar.git"),
+        ParsedArgv::Parsed(o) => assert_eq!(o.repo, "https://gitlab.com/foo/bar.git"),
         _ => assert!(false),
     }
 }
@@ -104,7 +106,7 @@ fn detect_git_dir() {
     let mut p = current.clone();
     p.push(Path::new("src/test/"));
     match parse_options(&["git-brws", "-d", p.to_str().unwrap()]).unwrap() {
-        ParsedArgv::Parsed(o, false) => {
+        ParsedArgv::Parsed(o) => {
             let mut expected = current.clone();
             expected.push(".git");
             assert_eq!(o.git_dir, expected);

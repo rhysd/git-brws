@@ -12,6 +12,7 @@ fn smoke() {
         branch: None,
         git_dir: d,
         args: vec![],
+        stdout: false,
     };
     match url(&c) {
         Ok(u) => assert_eq!(

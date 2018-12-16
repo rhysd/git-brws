@@ -11,6 +11,7 @@ pub struct Config {
     pub branch: Option<String>,
     pub git_dir: PathBuf,
     pub args: Vec<String>,
+    pub stdout: bool,
 }
 
 pub fn url(cfg: &Config) -> Result<String> {
@@ -41,6 +42,10 @@ fn open(url: &str) -> Option<ErrorMsg> {
 
 pub fn browse(cfg: &Config) -> Option<ErrorMsg> {
     match url(cfg) {
+        Ok(ref url) if cfg.stdout => {
+            println!("{}", url);
+            None
+        }
         Ok(url) => open(url.as_str()),
         Err(msg) => Some(msg),
     }
