@@ -10,10 +10,10 @@ license-file = "LICENSE.txt"
 
 [dependencies]
 getopts = "0.2"
-url = "1.6"
+url = "1.7"
 open = "1.2"
 
 [dev-dependencies.cargo-husky]
-version = "^1.2"
+version = "1.2"
 default-features = false
 features = ["prepush-hook", "run-cargo-test", "run-cargo-clippy", "run-cargo-fmt"]
