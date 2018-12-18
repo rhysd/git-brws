@@ -8,6 +8,9 @@ readme = "README.md"
 include = ["src/**/*.rs", "Cargo.toml", "LICENSE.txt"]
 license-file = "LICENSE.txt"
 
+[package.metadata.release]
+no-dev-version = true
+
 [dependencies]
 getopts = "0.2"
 url = "1.7"
