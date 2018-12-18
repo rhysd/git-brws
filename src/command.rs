@@ -2,7 +2,9 @@ extern crate open;
 
 use crate::envvar;
 use crate::errors::*;
+use crate::git;
 use crate::page::parse_page;
+use crate::pull_request;
 use crate::service;
 use std::path::PathBuf;
 
@@ -13,12 +15,23 @@ pub struct Config {
     pub git_dir: PathBuf,
     pub args: Vec<String>,
     pub stdout: bool,
+    pub pull_request: bool,
     pub env: envvar::Envvar,
 }
 
 pub fn url(cfg: &Config) -> Result<String> {
-    let page = parse_page(&cfg)?;
-    service::parse_and_build_page_url(&cfg.repo, &page, &cfg.branch, &cfg.env)
+    if cfg.pull_request {
+        match cfg.branch {
+            Some(ref b) => pull_request::find_url(cfg.repo.as_str(), b.as_str(), &cfg.env),
+            None => {
+                let git = git::new(&cfg.git_dir, cfg.env.git_command.as_str())?;
+                pull_request::find_url(cfg.repo.as_str(), git.current_branch()?.as_str(), &cfg.env)
+            }
+        }
+    } else {
+        let page = parse_page(&cfg)?;
+        service::parse_and_build_page_url(&cfg.repo, &page, &cfg.branch, &cfg.env)
+    }
 }
 
 fn open(url: &str) -> Option<ErrorMsg> {

@@ -86,6 +86,13 @@ impl<'a> Git<'a> {
         })?;
         Ok(p.to_owned())
     }
+
+    pub fn current_branch(&self) -> Result<String> {
+        match self.command(&["rev-parse", "--abbrev-ref", "--symbolic", "HEAD"]) {
+            Ok(stdout) => Ok(stdout),
+            Err(stderr) => Err(format!("Cannot get current branch: {}", stderr)),
+        }
+    }
 }
 
 pub fn new<'a>(dir: &'a PathBuf, command: &'a str) -> Result<Git<'a>> {

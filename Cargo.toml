@@ -15,6 +15,9 @@ no-dev-version = true
 getopts = "0.2"
 url = "1.7"
 open = "1.2"
+reqwest = "0.9.5"
+serde_derive = "1.0.82"
+serde = "1.0.82"
 
 [dev-dependencies.cargo-husky]
 version = "1.2"

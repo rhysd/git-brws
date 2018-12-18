@@ -6,5 +6,8 @@ pub fn empty_env() -> envvar::Envvar {
         ghe_ssh_port: None,
         ghe_url_host: None,
         gitlab_ssh_port: None,
+        github_token: None,
+        ghe_token: None,
+        https_proxy: None,
     }
 }

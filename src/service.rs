@@ -93,7 +93,7 @@ fn build_bitbucket_url(
 }
 
 // Note: Parse '/user/repo.git' or '/user/repo' or 'user/repo' into 'user' and 'repo'
-fn slug_from_path<'a>(path: &'a str) -> Result<(&'a str, &'a str)> {
+pub fn slug_from_path<'a>(path: &'a str) -> Result<(&'a str, &'a str)> {
     let mut split = path.split('/').skip_while(|s| s.is_empty());
     let user = split
         .next()

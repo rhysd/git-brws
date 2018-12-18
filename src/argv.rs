@@ -18,6 +18,7 @@ fn convert_ssh_url(mut url: String) -> String {
     url
 }
 
+#[cfg_attr(feature = "cargo-clippy", allow(clippy::large_enum_variant))]
 #[derive(Debug)]
 pub enum ParsedArgv {
     Help(String),
@@ -84,6 +85,11 @@ pub fn parse_options<T: AsRef<str>>(argv: &[T]) -> Result<ParsedArgv> {
         "url",
         "Output URL to STDOUT instead of opening in browser",
     );
+    opts.optflag(
+        "p",
+        "pr",
+        "Open pull request page instead of repository page",
+    );
     opts.optflag("h", "help", "Print this help");
     opts.optflag("v", "version", "Show version");
 
@@ -116,6 +122,7 @@ pub fn parse_options<T: AsRef<str>>(argv: &[T]) -> Result<ParsedArgv> {
     let repo = convert_ssh_url(repo);
 
     let stdout = matches.opt_present("u");
+    let pull_request = matches.opt_present("p");
 
     Ok(ParsedArgv::Parsed(command::Config {
         repo,
@@ -123,6 +130,7 @@ pub fn parse_options<T: AsRef<str>>(argv: &[T]) -> Result<ParsedArgv> {
         git_dir,
         args: matches.free,
         stdout,
+        pull_request,
         env,
     }))
 }
