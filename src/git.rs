@@ -45,8 +45,13 @@ impl<'a> Git<'a> {
         Ok(url)
     }
 
-    pub fn tracking_remote(&self) -> Result<String> {
-        let out = match self.command(&["rev-parse", "--abbrev-ref", "--symbolic", "@{u}"]) {
+    pub fn tracking_remote<S: AsRef<str>>(&self, branch: &Option<S>) -> Result<String> {
+        let rev = match branch {
+            Some(b) => format!("{}@{{u}}", b.as_ref()),
+            None => "@{u}".to_string(),
+        };
+
+        let out = match self.command(&["rev-parse", "--abbrev-ref", "--symbolic", rev.as_str()]) {
             Ok(stdout) => stdout,
             Err(stderr) => {
                 return if stderr.find("does not point to a branch").is_some() {
@@ -102,18 +107,18 @@ pub fn git_dir(dir: Option<String>, git_cmd: &str) -> Result<PathBuf> {
     let out = cmd.output().map_err(|e| format!("{}", e))?;
     if !out.status.success() {
         let stderr = str::from_utf8(&out.stderr)
-            .map_err(|e| format!("Failed to convert git command output: {}", e))?;
+            .map_err(|e| format!("Failed to convert git command output as UTF-8: {}", e))?;
         return Err(format!(
             "Git command exited with non-zero status: {}",
             stderr
         ));
     }
 
-    let s = str::from_utf8(&out.stdout)
+    let stdout = str::from_utf8(&out.stdout)
         .map_err(|e| format!("Invalid UTF-8 sequence in output of git command: {}", e))?
         .trim();
 
-    let p = Path::new(s);
+    let p = Path::new(stdout);
     if p.is_relative() {
         let current = env::current_dir()
             .map_err(|e| format!("Unable to get current working directory: {}", e))?;

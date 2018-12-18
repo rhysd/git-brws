@@ -83,7 +83,7 @@ pub fn parse_options<T: AsRef<str>>(argv: &[T]) -> Result<ParsedArgv> {
     let mut opts = Options::new();
 
     opts.optopt("r", "repo", "Shorthand format (user/repo, service/user/repo) or remote name (e.g. origin) or Git URL you want to see", "REPO");
-    opts.optopt("b", "branch", "Branch name of the repository", "BRANCH");
+    opts.optopt("b", "branch", "Branch name to browse", "BRANCH");
     opts.optopt("d", "dir", "Directory path to the repository", "PATH");
     opts.optflag(
         "u",
@@ -110,12 +110,13 @@ pub fn parse_options<T: AsRef<str>>(argv: &[T]) -> Result<ParsedArgv> {
 
     let env = envvar::new();
     let git_dir = git::git_dir(matches.opt_str("d"), env.git_command.as_str())?;
+    let branch = matches.opt_str("b");
     let repo = {
         // Create scope for borrowing git_dir ref
         let git = git::new(&git_dir, env.git_command.as_str())?;
         match matches.opt_str("r") {
             Some(r) => normalize_repo_format(r, &git)?,
-            None => git.tracking_remote()?,
+            None => git.tracking_remote(&branch)?,
         }
     };
 
@@ -125,7 +126,7 @@ pub fn parse_options<T: AsRef<str>>(argv: &[T]) -> Result<ParsedArgv> {
 
     Ok(ParsedArgv::Parsed(command::Config {
         repo,
-        branch: matches.opt_str("b"),
+        branch,
         git_dir,
         args: matches.free,
         stdout,
