@@ -97,7 +97,7 @@ pub fn new<'a>(dir: &'a PathBuf, command: &'a str) -> Result<Git<'a>> {
 
 pub fn git_dir(dir: Option<String>, git_cmd: &str) -> Result<PathBuf> {
     let mut cmd = Command::new(if git_cmd != "" { git_cmd } else { "git" });
-    cmd.arg("rev-parse").arg("--git-dir");
+    cmd.arg("rev-parse").arg("--absolute-git-dir");
     if let Some(d) = dir {
         let d = fs::canonicalize(&d)
             .map_err(|e| format!("Cannot locate canonical path for '{}': {}", d, e))?;
