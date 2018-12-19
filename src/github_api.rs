@@ -60,6 +60,28 @@ impl Client {
         })
     }
 
+    pub fn send(&self, mut req: reqwest::RequestBuilder) -> Result<reqwest::Response> {
+        req = req.header(header::ACCEPT, "application/vnd.github.v3+json");
+        if let Some(token) = &self.token {
+            req = req.bearer_auth(token);
+        }
+
+        let mut res = req
+            .send()
+            .map_err(|e| format!("Cannot send request: {}", e))?;
+
+        let status = res.status();
+        if status != StatusCode::OK {
+            return Err(format!(
+                "API response status {}: {}",
+                status,
+                res.text().unwrap()
+            ));
+        }
+
+        Ok(res)
+    }
+
     pub fn find_pr_url<S, T, U, V>(&self, branch: S, author: T, owner: U, repo: V) -> Result<String>
     where
         S: AsRef<str>,
@@ -79,28 +101,8 @@ impl Client {
         )];
 
         let url = format!("https://api.{}/search/issues", self.host);
-        let mut req = self
-            .client
-            .get(url.as_str())
-            .header(header::ACCEPT, "application/vnd.github.v3+json")
-            .query(&params);
-        if let Some(token) = &self.token {
-            req = req.bearer_auth(token);
-        }
-
-        let mut res = req
-            .send()
-            .map_err(|err| format!("Cannot send request to {}: {}", url, err))?;
-
-        let status = res.status();
-        if status != StatusCode::OK {
-            return Err(format!(
-                "API response status {}: {}",
-                status,
-                res.text().unwrap()
-            ));
-        }
-
+        let req = self.client.get(url.as_str()).query(&params);
+        let mut res = self.send(req)?;
         let issues: Issues = res
             .json()
             .map_err(|err| format!("Cannot deserialize JSON from {}: {}", url, err,))?;
@@ -126,27 +128,8 @@ impl Client {
         let author = author.as_ref();
         let repo = repo.as_ref();
         let url = format!("https://api.{}/repos/{}/{}", self.host, author, repo);
-        let mut req = self
-            .client
-            .get(url.as_str())
-            .header(header::ACCEPT, "application/vnd.github.v3+json");
-        if let Some(token) = &self.token {
-            req = req.bearer_auth(token);
-        }
-
-        let mut res = req
-            .send()
-            .map_err(|e| format!("Cannot send request to {}: {}", url, e))?;
-
-        let status = res.status();
-        if status != StatusCode::OK {
-            return Err(format!(
-                "API response status {}: {}",
-                status,
-                res.text().unwrap()
-            ));
-        }
-
+        let req = self.client.get(url.as_str());
+        let mut res = self.send(req)?;
         let repo: Repo = res
             .json()
             .map_err(|e| format!("Cannot deserialize JSON from {}: {}", url, e))?;
