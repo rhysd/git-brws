@@ -82,22 +82,22 @@ impl Client {
         Ok(res)
     }
 
-    pub fn find_pr_url<S, T, U>(&self, branch: S, owner: T, repo: U) -> Result<Option<String>>
-    where
-        S: AsRef<str>,
-        T: AsRef<str>,
-        U: AsRef<str>,
-    {
-        let params = [(
-            "q",
+    pub fn find_pr_url(
+        &self,
+        branch: &str,
+        owner: &str,
+        repo: &str,
+        pr_author: Option<&str>,
+    ) -> Result<Option<String>> {
+        let query = if let Some(author) = pr_author {
             format!(
-                "type:pr head:{} repo:{}/{}",
-                branch.as_ref(),
-                owner.as_ref(),
-                repo.as_ref()
-            ),
-        )];
-
+                "type:pr head:{} author:{} repo:{}/{}",
+                branch, author, owner, repo,
+            )
+        } else {
+            format!("type:pr head:{} repo:{}/{}", branch, owner, repo)
+        };
+        let params = [("q", query)];
         let url = format!("https://{}/search/issues", self.endpoint);
         let req = self.client.get(url.as_str()).query(&params);
         let mut res = self.send(req)?;

@@ -15,18 +15,27 @@ fn find_github_pr_url(
     https_proxy: &Option<String>,
 ) -> Result<String> {
     let client = github_api::Client::build(host, token.clone(), https_proxy)?;
-    if let Some(url) = client.find_pr_url(branch, author, repo)? {
+
+    // Note: Search pull request URL in the case where the repository is an original, not a fork.
+    // Author should not be set since original repository's owner may be different from current
+    // user (e.g. organization name). And multiple branches which has the same name cannot exist
+    // in one repository.
+    if let Some(url) = client.find_pr_url(branch, author, repo, None)? {
         return Ok(url);
     }
 
     if let Some((owner, repo)) = client.parent_repo(author, repo)? {
-        if let Some(url) = client.find_pr_url(branch, owner.as_str(), repo.as_str())? {
+        // Note: Search pull request URL in the case where the repository was forked from original.
+        // Author should be set since other person may create another pull request with the same branch name.
+        if let Some(url) =
+            client.find_pr_url(branch, owner.as_str(), repo.as_str(), Some(author))?
+        {
             return Ok(url);
         }
     }
 
     Err(format!(
-        "No PR authored by @{} at {}@{}",
+        "No pull request authored by @{} at {}@{}",
         author, repo, branch
     ))
 }
