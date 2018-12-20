@@ -15,29 +15,20 @@ fn find_github_pr_url(
     https_proxy: &Option<String>,
 ) -> Result<String> {
     let client = github_api::Client::build(host, token.clone(), https_proxy)?;
-    if let Ok(url) = client.find_pr_url(branch, author, author, repo) {
+    if let Some(url) = client.find_pr_url(branch, author, author, repo)? {
         return Ok(url);
     }
 
-    let parent = client.parent_repo(author, repo)?;
-    if parent == None {
-        return Err(format!(
-            "No PR for {}/{} authored by @{} at branch {}",
-            author, repo, author, branch
-        ));
+    if let Some((owner, repo)) = client.parent_repo(author, repo)? {
+        if let Some(url) = client.find_pr_url(branch, author, owner.as_str(), repo.as_str())? {
+            return Ok(url);
+        }
     }
 
-    let (owner, repo) = match parent {
-        Some(pair) => pair,
-        None => {
-            return Err(format!(
-                "No PR for {}/{} authored by @{} at branch {}",
-                author, repo, author, branch
-            ))
-        }
-    };
-
-    client.find_pr_url(branch, author, owner, repo)
+    Err(format!(
+        "No PR authored by @{} at {}@{}",
+        author, repo, branch
+    ))
 }
 
 pub fn find_url<S: AsRef<str>>(repo_url: S, branch: S, env: &Envvar) -> Result<String> {

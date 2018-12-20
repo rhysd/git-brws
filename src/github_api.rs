@@ -82,7 +82,13 @@ impl Client {
         Ok(res)
     }
 
-    pub fn find_pr_url<S, T, U, V>(&self, branch: S, author: T, owner: U, repo: V) -> Result<String>
+    pub fn find_pr_url<S, T, U, V>(
+        &self,
+        branch: S,
+        author: T,
+        owner: U,
+        repo: V,
+    ) -> Result<Option<String>>
     where
         S: AsRef<str>,
         T: AsRef<str>,
@@ -108,16 +114,10 @@ impl Client {
             .map_err(|err| format!("Cannot deserialize JSON from {}: {}", url, err,))?;
 
         if issues.items.is_empty() {
-            return Err(format!(
-                "No result found for {}/{} authored by {} at branch {}",
-                owner.as_ref(),
-                repo.as_ref(),
-                author.as_ref(),
-                branch.as_ref(),
-            ));
+            Ok(None)
+        } else {
+            Ok(Some(issues.items[0].html_url.clone()))
         }
-
-        Ok(issues.items[0].html_url.clone())
     }
 
     pub fn parent_repo<S, T>(&self, author: S, repo: T) -> Result<Option<(String, String)>>
