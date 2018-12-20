@@ -75,7 +75,7 @@ fn parse_file_line() {
 }
 
 #[test]
-fn not_exsiting_file() {
+fn not_existing_file() {
     let c = config(
         "https://github.com/user/repo.git",
         None,

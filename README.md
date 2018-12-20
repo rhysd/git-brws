@@ -3,7 +3,7 @@ git brws
 [![Crate Badge][]][GitHub Project]
 [![Build Status][]][CI Results]
 
-`git brws` is a command line tool to open a repository, file, commit or diff in your web browser from command line.
+`git brws` is a command line tool to open a repository, file, commit, diff or pull request in your web browser from command line.
 
 Features:
 
@@ -12,6 +12,7 @@ Features:
   - File ([e.g.](https://github.com/rhysd/git-brws/blob/master/Cargo.toml))
   - Commit ([e.g.](https://github.com/rhysd/git-brws/commit/60024ab1280f9f10423b22bc708f3f6ef97db6b5))
   - Diff ([e.g.](https://github.com/rhysd/git-brws/compare/e3c18d0d50252112d37bde97061370204b3cdab7...60024ab1280f9f10423b22bc708f3f6ef97db6b5))
+  - Pull request (Only GitHub and GitHub Enterprise) ([e.g.](https://github.com/rust-lang/rust.vim/pull/290))
 - Supports below services
   - [GitHub](https://github.com)
   - [Bitbucket](https://bitbucket.org)
@@ -29,7 +30,7 @@ Features:
 $ cargo install git-brws
 ```
 
-- As single binary
+- As a single binary
 
 You can download a binary executable from [release page][].
 Unarchive downloaded file and put the binary in your `bin` directory. 
@@ -42,9 +43,10 @@ Usage: git brws [Options] {Args}
 Options:
     -r, --repo REPO     Shorthand format (user/repo, service/user/repo) or
                         remote name (e.g. origin) or Git URL you want to see
-    -b, --branch BRANCH Branch name of the repository
-    -d, --dir PATH      Directory path to your repository
+    -b, --branch BRANCH Branch name to browse
+    -d, --dir PATH      Directory path to the repository
     -u, --url           Output URL to STDOUT instead of opening in browser
+    -p, --pr            Open pull request page instead of repository page
     -h, --help          Print this help
     -v, --version       Show version
 ```
@@ -119,6 +121,29 @@ $ git brws HEAD~3..HEAD
 $ git brws 60024ab..113079b
 ```
 
+### Open a pull request page
+
+- Show pull request page of current branch of current repository
+
+```
+$ git brws --pr
+```
+
+- Show pull request page of specific branch of specific repository
+
+```
+# Specify my forked repository
+$ git brws --pr --repo rhysd/rust.vim -b async-contextual-keyword
+
+# Or specify original repository
+$ git brws --pr --repo rust-lang/rust.vim -b async-contextual-keyword
+```
+
+Note: Currently only GitHub and GitHub Enterprise are supported.
+
+Note: If you have created multple pull requests at the same repository with the same branch name,
+the command may not open a pull request page you want.
+
 ### Cooperate with other tools
 
 With `-u` option, `git brws` outputs URL to stdout.
@@ -139,13 +164,16 @@ And below can open editing file in your browser.
 
 You can customize behavior of this command with environment variables.
 
-- `$GIT_BRWS_GIT_COMMAND`: Git command to use. If not specified, `"git"` will be used.
-- `$GIT_BRWS_GHE_URL_HOST`: When you use your own GitHub Enterprise repository, you can specify its host to this variable.
-  By default, `git brws` detects `^github\.` as GHE host. If your GHE repository host does not match it, please specify
-  this variable. If your repository is `https://example-repo.org/user/repo`, `example-repo.org` should be set.
-- `GIT_BRWS_GHE_SSH_PORT`: When you set a number to it, the number will be used for the ssh port for GitHub Enterprise URLs.
-- `GIT_BRWS_GITLAB_SSH_PORT`: When you set a number to it, the number will be used for the ssh port for self-hosted GitLab URLs.
-  This is useful when your environment hosts GitLab to non-trivial ssh port URL.
+| Variable | Description |
+|----------|-------------|
+| `$GIT_BRWS_GIT_COMMAND` | Git command to use. If not specified, `"git"` will be used. |
+| `$GIT_BRWS_GHE_URL_HOST` | When you use your own GitHub Enterprise repository, you can specify its host to this variable. By default, `git brws` detects `^github\.` as GHE host. If your GHE repository host does not match it, please specify this variable. If your repository is `https://example-repo.org/user/repo`, `example-repo.org` should be set. |
+| `$GIT_BRWS_GHE_SSH_PORT` | When you set a number to it, the number will be used for the ssh port for GitHub Enterprise URLs. |
+| `$GIT_BRWS_GITLAB_SSH_PORT` | When you set a number to it, the number will be used for the ssh port for self-hosted GitLab URLs. This is useful when your environment hosts GitLab to non-trivial ssh port URL. |
+| `$GIT_BRWS_GITHUB_TOKEN` | This variable is used for `--pr` (or `-p`) only. API access token for github.com. They are optional, but useful for avoiding API rate limit and accessing to private repositories. Please generate a token from https://github.com/settings/tokens/new |
+| `$GITHUB_TOKEN` | Ditto. When `GIT_BRWS_GITHUB_TOKEN` is not set, `GITHUB_TOKEN` is looked. |
+| `$GIT_BRWS_GHE_TOKEN` | This variable is used for `--pr` (or `-p`) only. API access token for GitHub Enterprise instance. It is sometimes mandatory (depending on your GHE instance configuration). Please generate a token from `https://{YOUR GHE HOST}/settings/tokens/new`. |
+| `$https_proxy` | This variable is used for `--pr` (or `-p`) only. A HTTPS Proxy server URL if you use a web proxy. |
 
 ## Related Projects
 

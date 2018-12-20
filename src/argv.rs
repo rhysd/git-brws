@@ -49,8 +49,9 @@ fn normalize_repo_format(mut s: String, git: &git::Git) -> Result<String> {
 const USAGE: &'static str = "\
 Usage: git brws [Options] {Args}
 
-  Open a repository, file, commit or diff in your web browser from command line.
-  GitHub, Bitbucket, GitLab, GitHub Enterprise are supported as hosting service.
+  Open a repository, file, commit, diff or pull request in your web browser from
+  command line. GitHub, Bitbucket, GitLab, GitHub Enterprise are supported as
+  hosting service.
   Please see https://github.com/rhysd/git-brws for more detail.
 
 Examples:
@@ -72,7 +73,11 @@ Examples:
 
   - Open line 123 of file:
 
-    $ git brws some/file.txt#L123";
+    $ git brws some/file.txt#L123
+
+  - Open a pull request page:
+
+    $ git brws --pr";
 
 pub fn parse_options<T: AsRef<str>>(argv: &[T]) -> Result<ParsedArgv> {
     let mut opts = Options::new();
