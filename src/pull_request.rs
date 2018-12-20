@@ -15,12 +15,12 @@ fn find_github_pr_url(
     https_proxy: &Option<String>,
 ) -> Result<String> {
     let client = github_api::Client::build(host, token.clone(), https_proxy)?;
-    if let Some(url) = client.find_pr_url(branch, author, author, repo)? {
+    if let Some(url) = client.find_pr_url(branch, author, repo)? {
         return Ok(url);
     }
 
     if let Some((owner, repo)) = client.parent_repo(author, repo)? {
-        if let Some(url) = client.find_pr_url(branch, author, owner.as_str(), repo.as_str())? {
+        if let Some(url) = client.find_pr_url(branch, owner.as_str(), repo.as_str())? {
             return Ok(url);
         }
     }
@@ -44,10 +44,7 @@ pub fn find_url<S: AsRef<str>>(repo_url: S, branch: S, env: &Envvar) -> Result<S
             author,
             repo,
             branch.as_ref(),
-            match env.ghe_url_host {
-                Some(ref h) => h.as_str(),
-                None => "github.com",
-            },
+            "api.github.com",
             &env.github_token,
             &env.https_proxy,
         ),
@@ -62,9 +59,9 @@ pub fn find_url<S: AsRef<str>>(repo_url: S, branch: S, env: &Envvar) -> Result<S
             };
 
             let host = if let Some(ref p) = port {
-                format!("{}:{}", host, p)
+                format!("{}:{}/api/v3", host, p)
             } else {
-                host.to_string()
+                format!("{}/api/v3", host)
             };
 
             find_github_pr_url(

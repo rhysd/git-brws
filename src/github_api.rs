@@ -30,11 +30,11 @@ struct Issues {
 pub struct Client {
     client: reqwest::Client,
     token: Option<String>,
-    host: String,
+    endpoint: String,
 }
 
 impl Client {
-    pub fn build<T, U, V>(host: &T, token: Option<U>, https_proxy: &Option<V>) -> Result<Self>
+    pub fn build<T, U, V>(endpoint: &T, token: Option<U>, https_proxy: &Option<V>) -> Result<Self>
     where
         T: ToString + ?Sized,
         U: ToString,
@@ -56,7 +56,7 @@ impl Client {
         Ok(Self {
             client,
             token: token.map(|s| s.to_string()),
-            host: host.to_string(),
+            endpoint: endpoint.to_string(),
         })
     }
 
@@ -82,31 +82,23 @@ impl Client {
         Ok(res)
     }
 
-    pub fn find_pr_url<S, T, U, V>(
-        &self,
-        branch: S,
-        author: T,
-        owner: U,
-        repo: V,
-    ) -> Result<Option<String>>
+    pub fn find_pr_url<S, T, U>(&self, branch: S, owner: T, repo: U) -> Result<Option<String>>
     where
         S: AsRef<str>,
         T: AsRef<str>,
         U: AsRef<str>,
-        V: AsRef<str>,
     {
         let params = [(
             "q",
             format!(
-                "type:pr head:{} author:{} repo:{}/{}",
+                "type:pr head:{} repo:{}/{}",
                 branch.as_ref(),
-                author.as_ref(),
                 owner.as_ref(),
                 repo.as_ref()
             ),
         )];
 
-        let url = format!("https://api.{}/search/issues", self.host);
+        let url = format!("https://{}/search/issues", self.endpoint);
         let req = self.client.get(url.as_str()).query(&params);
         let mut res = self.send(req)?;
         let issues: Issues = res
@@ -127,7 +119,7 @@ impl Client {
     {
         let author = author.as_ref();
         let repo = repo.as_ref();
-        let url = format!("https://api.{}/repos/{}/{}", self.host, author, repo);
+        let url = format!("https://{}/repos/{}/{}", self.endpoint, author, repo);
         let req = self.client.get(url.as_str());
         let mut res = self.send(req)?;
         let repo: Repo = res
