@@ -45,10 +45,8 @@ fn normalize_repo_format(mut s: String, git: &git::Git) -> Result<String> {
     }
 }
 
-fn usage(program: &str) -> String {
-    format!(
-        "\
-Usage: {} [Options] {{Args}}
+const USAGE: &'static str = "\
+Usage: git brws [Options] {Args}
 
   Open a repository, file, commit or diff in your web browser from command line.
   GitHub, Bitbucket, GitLab, GitHub Enterprise are supported as hosting service.
@@ -73,13 +71,9 @@ Examples:
 
   - Open line 123 of file:
 
-    $ git brws some/file.txt#L123",
-        program
-    )
-}
+    $ git brws some/file.txt#L123";
 
 pub fn parse_options<T: AsRef<str>>(argv: &[T]) -> Result<ParsedArgv> {
-    let program = argv[0].as_ref().to_owned();
     let mut opts = Options::new();
 
     opts.optopt("r", "repo", "Shorthand format (user/repo, service/user/repo) or remote name (e.g. origin) or Git URL you want to see", "REPO");
@@ -98,8 +92,7 @@ pub fn parse_options<T: AsRef<str>>(argv: &[T]) -> Result<ParsedArgv> {
         .map_err(|f| format!("{}", f))?;
 
     if matches.opt_present("h") {
-        let brief = usage(&program);
-        return Ok(ParsedArgv::Help(opts.usage(&brief)));
+        return Ok(ParsedArgv::Help(opts.usage(USAGE)));
     }
 
     if matches.opt_present("v") {
