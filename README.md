@@ -141,7 +141,7 @@ $ git brws --pr --repo rust-lang/rust.vim -b async-contextual-keyword
 
 Note: Currently only GitHub and GitHub Enterprise are supported.
 
-Note: If you have created multple pull requests at the same repository with the same branch name,
+Note: If you have created multiple pull requests at the same repository with the same branch name,
 the command may not open a pull request page you want.
 
 ### Cooperate with other tools

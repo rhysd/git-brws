@@ -97,7 +97,7 @@ impl Client {
         } else {
             format!("type:pr head:{} repo:{}/{}", branch, owner, repo)
         };
-        let params = [("q", query)];
+        let params = [("q", query.as_str()), ("sort", "updated")];
         let url = format!("https://{}/search/issues", self.endpoint);
         let req = self.client.get(url.as_str()).query(&params);
         let mut res = self.send(req)?;
