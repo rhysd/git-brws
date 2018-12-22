@@ -40,14 +40,18 @@ fn find_github_pr_url(
     ))
 }
 
-pub fn find_url<S: AsRef<str>>(repo_url: S, branch: S, env: &Envvar) -> Result<String> {
+pub fn find_url<U: AsRef<str>, B: AsRef<str>>(
+    repo_url: U,
+    branch: B,
+    env: &Envvar,
+) -> Result<String> {
     let repo_url = Url::parse(repo_url.as_ref())
         .map_err(|e| format!("Failed to parse URL '{}': {}", repo_url.as_ref(), e))?;
     let path = repo_url.path();
     let (author, repo) = slug_from_path(path)?;
     match repo_url
         .host_str()
-        .ok_or_else(|| format!("Failed to parse host from {}", repo_url))?
+        .ok_or_else(|| format!("Cannot handle host in URL {}", repo_url))?
     {
         "github.com" => find_github_pr_url(
             author,
@@ -63,7 +67,7 @@ pub fn find_url<S: AsRef<str>>(repo_url: S, branch: S, env: &Envvar) -> Result<S
             } else {
                 match env.ghe_url_host {
                     Some(ref h) if host == h => &env.ghe_ssh_port,
-                    _ => return Err(format!("--pr or -p is not supported for service {}", host)),
+                    _ => return Err(format!("--pr or -p does not support the service {}", host)),
                 }
             };
 
