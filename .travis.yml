@@ -1,5 +1,5 @@
 language: rust
-dist: trusty
+dist: xenial
 
 matrix:
   include:
@@ -9,12 +9,40 @@ matrix:
     - os: linux
       rust: stable
       env: TARGET=x86_64-unknown-linux-gnu
+      addons:
+        apt:
+          packages:
+            - libssl-dev
+          update: true
     - os: linux
       rust: stable
       env: TARGET=i686-unknown-linux-gnu
+      addons:
+        apt:
+          packages:
+            - gcc-4.8-multilib
+            - libssl-dev:i386
+          update: true
     - os: linux
       rust: stable
       env: TARGET=aarch64-unknown-linux-gnu
+      addons:
+        apt:
+          sources:
+            - sourceline: 'deb [arch=arm64] http://ports.ubuntu.com/ubuntu-ports xenial main'
+          packages:
+            - gcc-4.8-multilib
+            - gcc-4.8-aarch64-linux-gnu
+            - gcc-aarch64-linux-gnu
+            - libc6-arm64-cross
+            - libc6-dev-arm64-cross
+            - libssl1.0.0:arm64
+            - zlib1g-dev:arm64
+            - libssl-dev:arm64
+            - zlib1g:arm64
+            - zlib1g:arm64
+            - libc6-dev:arm64
+          update: true
 
 before_script:
   - rustc -V
@@ -35,7 +63,7 @@ before_script:
   - git rev-parse HEAD
 
 script:
-  - cargo build --target $TARGET
+  - export PKG_CONFIG_ALLOW_CROSS=1
   - cargo test --verbose --features="on-ci"
 
 notifications:
@@ -44,6 +72,7 @@ notifications:
     on_failure: change
 
 before_deploy:
+  - export PKG_CONFIG_ALLOW_CROSS=1
   - cargo build --target $TARGET --release
   - mkdir "git-brws-${TRAVIS_TAG}-${TARGET}"
   - cp target/$TARGET/release/git-brws LICENSE.txt README.md "git-brws-${TRAVIS_TAG}-${TARGET}"
@@ -62,11 +91,3 @@ deploy:
     # Only deploy tagged commit
     tags: true
 
-addons:
-  apt:
-    packages:
-      - gcc-4.8-multilib
-      - gcc-4.8-aarch64-linux-gnu
-      - gcc-aarch64-linux-gnu
-      - libc6-arm64-cross
-      - libc6-dev-arm64-cross
