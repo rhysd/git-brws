@@ -1,9 +1,14 @@
+#[macro_use]
+extern crate serde_derive;
+
 mod argv;
 mod command;
 mod envvar;
 mod errors;
 mod git;
+mod github_api;
 mod page;
+mod pull_request;
 mod service;
 
 #[cfg(test)]

@@ -14,6 +14,7 @@ fn smoke() {
         git_dir: d,
         args: vec![],
         stdout: false,
+        pull_request: false,
         env: empty_env(),
     };
     match url(&c) {

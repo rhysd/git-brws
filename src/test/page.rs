@@ -17,6 +17,7 @@ fn config(repo: &str, branch: Option<&str>, args: Vec<&str>) -> Config {
         git_dir: dir,
         args: a,
         stdout: false,
+        pull_request: false,
         env: empty_env(),
     }
 }
@@ -74,7 +75,7 @@ fn parse_file_line() {
 }
 
 #[test]
-fn not_exsiting_file() {
+fn not_existing_file() {
     let c = config(
         "https://github.com/user/repo.git",
         None,

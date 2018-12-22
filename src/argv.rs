@@ -18,6 +18,7 @@ fn convert_ssh_url(mut url: String) -> String {
     url
 }
 
+#[cfg_attr(feature = "cargo-clippy", allow(clippy::large_enum_variant))]
 #[derive(Debug)]
 pub enum ParsedArgv {
     Help(String),
@@ -45,13 +46,12 @@ fn normalize_repo_format(mut s: String, git: &git::Git) -> Result<String> {
     }
 }
 
-fn usage(program: &str) -> String {
-    format!(
-        "\
-Usage: {} [Options] {{Args}}
+const USAGE: &'static str = "\
+Usage: git brws [Options] {Args}
 
-  Open a repository, file, commit or diff in your web browser from command line.
-  GitHub, Bitbucket, GitLab, GitHub Enterprise are supported as hosting service.
+  Open a repository, file, commit, diff or pull request in your web browser from
+  command line. GitHub, Bitbucket, GitLab, GitHub Enterprise are supported as
+  hosting service.
   Please see https://github.com/rhysd/git-brws for more detail.
 
 Examples:
@@ -73,13 +73,13 @@ Examples:
 
   - Open line 123 of file:
 
-    $ git brws some/file.txt#L123",
-        program
-    )
-}
+    $ git brws some/file.txt#L123
+
+  - Open a pull request page:
+
+    $ git brws --pr";
 
 pub fn parse_options<T: AsRef<str>>(argv: &[T]) -> Result<ParsedArgv> {
-    let program = argv[0].as_ref().to_owned();
     let mut opts = Options::new();
 
     opts.optopt("r", "repo", "Shorthand format (user/repo, service/user/repo) or remote name (e.g. origin) or Git URL you want to see", "REPO");
@@ -90,6 +90,11 @@ pub fn parse_options<T: AsRef<str>>(argv: &[T]) -> Result<ParsedArgv> {
         "url",
         "Output URL to STDOUT instead of opening in browser",
     );
+    opts.optflag(
+        "p",
+        "pr",
+        "Open pull request page instead of repository page",
+    );
     opts.optflag("h", "help", "Print this help");
     opts.optflag("v", "version", "Show version");
 
@@ -98,8 +103,7 @@ pub fn parse_options<T: AsRef<str>>(argv: &[T]) -> Result<ParsedArgv> {
         .map_err(|f| format!("{}", f))?;
 
     if matches.opt_present("h") {
-        let brief = usage(&program);
-        return Ok(ParsedArgv::Help(opts.usage(&brief)));
+        return Ok(ParsedArgv::Help(opts.usage(USAGE)));
     }
 
     if matches.opt_present("v") {
@@ -123,6 +127,7 @@ pub fn parse_options<T: AsRef<str>>(argv: &[T]) -> Result<ParsedArgv> {
     let repo = convert_ssh_url(repo);
 
     let stdout = matches.opt_present("u");
+    let pull_request = matches.opt_present("p");
 
     Ok(ParsedArgv::Parsed(command::Config {
         repo,
@@ -130,6 +135,7 @@ pub fn parse_options<T: AsRef<str>>(argv: &[T]) -> Result<ParsedArgv> {
         git_dir,
         args: matches.free,
         stdout,
+        pull_request,
         env,
     }))
 }
