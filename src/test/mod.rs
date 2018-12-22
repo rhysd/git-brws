@@ -1,5 +1,8 @@
+#[macro_use]
+mod helper;
+
 mod argv;
 mod command;
-mod helper;
+mod github_api;
 mod page;
 mod service;
