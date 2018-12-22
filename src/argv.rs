@@ -46,7 +46,7 @@ fn normalize_repo_format(mut s: String, git: &git::Git) -> Result<String> {
     }
 }
 
-const USAGE: &'static str = "\
+const USAGE: &str = "\
 Usage: git brws [Options] {Args}
 
   Open a repository, file, commit, diff or pull request in your web browser from
