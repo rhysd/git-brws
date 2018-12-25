@@ -77,7 +77,11 @@ Examples:
 
   - Open a pull request page:
 
-    $ git brws --pr";
+    $ git brws --pr
+
+  - Open diff between topic and topic's merge base commit:
+
+    $ git brws master...topic";
 
 pub fn parse_options<T: AsRef<str>>(argv: &[T]) -> Result<ParsedArgv> {
     let mut opts = Options::new();

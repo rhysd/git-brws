@@ -1,5 +1,5 @@
 use crate::command::Config;
-use crate::page::{parse_page, Page};
+use crate::page::{parse_page, DiffOp, Page};
 use crate::test::helper::empty_env;
 use std::env;
 use std::path::Path;
@@ -128,34 +128,38 @@ fn parse_short_commit_hash() {
 
 #[test]
 fn parse_diff_ref_name() {
-    let c = config(
-        "https://github.com/user/repo.git",
-        None,
-        vec!["HEAD^..HEAD"],
-    );
-    match parse_page(&c).unwrap() {
-        Page::Diff { lhs, rhs } => {
-            assert!(!lhs.is_empty());
-            assert!(!rhs.is_empty());
+    for &(arg, expected_op) in &[
+        ("HEAD^..HEAD", DiffOp::TwoDots),
+        ("HEAD^...HEAD", DiffOp::ThreeDots),
+    ] {
+        let c = config("https://github.com/user/repo.git", None, vec![arg]);
+        match parse_page(&c).unwrap() {
+            Page::Diff { lhs, rhs, op } => {
+                assert!(!lhs.is_empty());
+                assert!(!rhs.is_empty());
+                assert_eq!(op, expected_op, "arg is {}", arg);
+            }
+            p => assert!(false, "Unexpected result: {:?}", p),
         }
-        p => assert!(false, "Unexpected result: {:?}", p),
     }
 }
 
 #[test]
 #[cfg_attr(feature = "on-ci", ignore)]
-fn parse_diff() {
-    let c = config(
-        "https://github.com/user/repo.git",
-        None,
-        vec!["499edbb..bc869a1"],
-    );
-    match parse_page(&c).unwrap() {
-        Page::Diff { lhs, rhs } => {
-            assert_eq!(lhs, "499edbbbad4d8054e4a47e12944e5fb4a2ef7ec5");
-            assert_eq!(rhs, "bc869a14617a131fefe8fa1a3dcdeba0745880d5");
+fn parse_diff_revisions() {
+    for &(arg, expected_op) in &[
+        ("499edbb..bc869a1", DiffOp::TwoDots),
+        ("499edbb...bc869a1", DiffOp::ThreeDots),
+    ] {
+        let c = config("https://github.com/user/repo.git", None, vec![arg]);
+        match parse_page(&c).unwrap() {
+            Page::Diff { lhs, rhs, op } => {
+                assert_eq!(lhs, "499edbbbad4d8054e4a47e12944e5fb4a2ef7ec5");
+                assert_eq!(rhs, "bc869a14617a131fefe8fa1a3dcdeba0745880d5");
+                assert_eq!(op, expected_op, "arg is {}", arg);
+            }
+            p => assert!(false, "Unexpected result: {:?}", p),
         }
-        p => assert!(false, "Unexpected result: {:?}", p),
     }
 }
 

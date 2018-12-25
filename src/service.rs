@@ -1,7 +1,7 @@
 extern crate url;
 
 use self::url::Url;
-use crate::page::Page;
+use crate::page::{DiffOp, Page};
 use std::path::Path;
 
 use crate::envvar;
@@ -22,9 +22,13 @@ fn build_github_like_url(
                 format!("https://{}/{}/{}", host, user, repo)
             }
         }
-        Page::Diff { ref lhs, ref rhs } => format!(
-            "https://{}/{}/{}/compare/{}...{}",
-            host, user, repo, lhs, rhs
+        Page::Diff {
+            ref lhs,
+            ref rhs,
+            ref op,
+        } => format!(
+            "https://{}/{}/{}/compare/{}{}{}",
+            host, user, repo, lhs, op, rhs
         ),
         Page::Commit { ref hash } => format!("https://{}/{}/{}/commit/{}", host, user, repo, hash),
         Page::FileOrDir {
@@ -64,6 +68,24 @@ fn build_custom_github_like_url(
         ),
         _ => build_github_like_url(host, user, repo, branch, page),
     }
+}
+
+fn build_gitlab_url(
+    host: &str,
+    user: &str,
+    repo: &str,
+    branch: &Option<String>,
+    page: &Page,
+) -> Result<String> {
+    if let Page::Diff { op, .. } = page {
+        if *op == DiffOp::TwoDots {
+            return Err(
+                "GitLab does not support '..' for comparing diff between commits. Please use '...'"
+                    .to_string(),
+            );
+        }
+    }
+    Ok(build_github_like_url(host, user, repo, branch, page))
 }
 
 fn build_bitbucket_url(
@@ -124,9 +146,8 @@ pub fn parse_and_build_page_url(
         .host_str()
         .ok_or_else(|| format!("Failed to parse host from {}", repo))?;
     match host {
-        "github.com" | "gitlab.com" => {
-            Ok(build_github_like_url(host, user, repo_name, branch, page))
-        }
+        "github.com" => Ok(build_github_like_url(host, user, repo_name, branch, page)),
+        "gitlab.com" => build_gitlab_url(host, user, repo_name, branch, page),
         "bitbucket.org" => build_bitbucket_url(user, repo_name, branch, page),
         _ => {
             let port_env = if host.starts_with("github.") {

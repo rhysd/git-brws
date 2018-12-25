@@ -1,8 +1,24 @@
+use std::fmt;
 use std::fs;
 
 use crate::command;
 use crate::errors::Result;
 use crate::git;
+
+#[derive(Debug, PartialEq, Copy, Clone)]
+pub enum DiffOp {
+    TwoDots,   // '..'
+    ThreeDots, // '...'
+}
+
+impl fmt::Display for DiffOp {
+    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+        match self {
+            DiffOp::TwoDots => write!(f, ".."),
+            DiffOp::ThreeDots => write!(f, "..."),
+        }
+    }
+}
 
 #[derive(Debug, PartialEq)]
 pub enum Page {
@@ -10,6 +26,7 @@ pub enum Page {
     Diff {
         lhs: String,
         rhs: String,
+        op: DiffOp, // '...' or '..'
     },
     Commit {
         hash: String,
@@ -40,7 +57,12 @@ impl<'a> BrowsePageParser<'a> {
             return Err("  Invalid number of arguments for diff (1 is expected)".to_string());
         }
 
-        let mut split = self.cfg.args[0].splitn(2, "..");
+        let dots = if self.cfg.args[0].contains("...") {
+            "..."
+        } else {
+            ".."
+        };
+        let mut split = self.cfg.args[0].splitn(2, dots);
         let lhs = split.next().unwrap();
         let rhs = split.next().ok_or_else(|| {
             format!(
@@ -52,6 +74,11 @@ impl<'a> BrowsePageParser<'a> {
         Ok(Page::Diff {
             lhs: self.git.hash(&lhs)?,
             rhs: self.git.hash(&rhs)?,
+            op: if dots == ".." {
+                DiffOp::TwoDots
+            } else {
+                DiffOp::ThreeDots
+            },
         })
     }
 

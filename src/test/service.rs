@@ -1,4 +1,4 @@
-use crate::page::Page;
+use crate::page::{DiffOp, Page};
 use crate::service::parse_and_build_page_url;
 use crate::test::helper::empty_env;
 
@@ -119,26 +119,60 @@ fn parse_and_build_commit_page() {
 
 #[test]
 fn parse_and_build_diff_page() {
+    for (ref op, ref opstr) in &[(DiffOp::TwoDots, ".."), (DiffOp::ThreeDots, "...")] {
+        let p = Page::Diff {
+            lhs: "561848bad7164d7568658456088b107ec9efd9f3".to_string(),
+            rhs: "90601f1037142605a32426f9ece0c07d479b9cc5".to_string(),
+            op: *op,
+        };
+
+        // github-like
+        for &(repo, expected) in &[
+            (
+                "https://github.com/user/repo.git",
+                format!("https://github.com/user/repo/compare/561848bad7164d7568658456088b107ec9efd9f3{}90601f1037142605a32426f9ece0c07d479b9cc5", opstr).as_str(),
+            ),
+            (
+                "https://github.somewhere.com/user/repo.git",
+                format!("https://github.somewhere.com/user/repo/compare/561848bad7164d7568658456088b107ec9efd9f3{}90601f1037142605a32426f9ece0c07d479b9cc5", opstr).as_str(),
+            ),
+        ] {
+            assert_eq!(parse_and_build_page_url(&repo, &p, &None, &empty_env()).unwrap(), expected, "for {:?}", op);
+        }
+    }
+}
+
+#[test]
+fn parse_and_build_diff_page_for_gitlab() {
+    fn page(op: DiffOp) -> Page {
+        Page::Diff {
+            lhs: "561848bad7164d7568658456088b107ec9efd9f3".to_string(),
+            rhs: "90601f1037142605a32426f9ece0c07d479b9cc5".to_string(),
+            op,
+        }
+    }
+
+    let p = page(DiffOp::TwoDots);
+    assert!(
+        parse_and_build_page_url("https://gitlab.com/user/repo.git", &p, &None, &empty_env())
+            .is_err(),
+        "GitLab does not support '..' but error did not occur"
+    );
+
+    let p = page(DiffOp::ThreeDots);
+    assert_eq!(
+        parse_and_build_page_url("https://gitlab.com/user/repo.git", &p, &None, &empty_env()).unwrap(),
+        "https://gitlab.com/user/repo/compare/561848bad7164d7568658456088b107ec9efd9f3...90601f1037142605a32426f9ece0c07d479b9cc5",
+    );
+}
+
+#[test]
+fn parse_and_build_diff_page_for_bitbucket() {
     let p = Page::Diff {
         lhs: "561848bad7164d7568658456088b107ec9efd9f3".to_string(),
         rhs: "90601f1037142605a32426f9ece0c07d479b9cc5".to_string(),
+        op: DiffOp::ThreeDots,
     };
-    for &(repo, expected) in &[
-        (
-            "https://github.com/user/repo.git",
-            "https://github.com/user/repo/compare/561848bad7164d7568658456088b107ec9efd9f3...90601f1037142605a32426f9ece0c07d479b9cc5",
-        ),
-        (
-            "https://github.somewhere.com/user/repo.git",
-            "https://github.somewhere.com/user/repo/compare/561848bad7164d7568658456088b107ec9efd9f3...90601f1037142605a32426f9ece0c07d479b9cc5",
-        ),
-        (
-            "https://gitlab.com/user/repo.git",
-            "https://gitlab.com/user/repo/compare/561848bad7164d7568658456088b107ec9efd9f3...90601f1037142605a32426f9ece0c07d479b9cc5",
-        ),
-    ] {
-        assert_eq!(parse_and_build_page_url(&repo, &p, &None, &empty_env()).unwrap(), expected);
-    }
     assert!(
         parse_and_build_page_url(&"https://bitbucket.org/user/repo", &p, &None, &empty_env())
             .is_err(),

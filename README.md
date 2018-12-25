@@ -11,7 +11,7 @@ Features:
   - Repository ([e.g.](https://github.com/rhysd/git-brws))
   - File ([e.g.](https://github.com/rhysd/git-brws/blob/master/Cargo.toml))
   - Commit ([e.g.](https://github.com/rhysd/git-brws/commit/60024ab1280f9f10423b22bc708f3f6ef97db6b5))
-  - Diff ([e.g.](https://github.com/rhysd/git-brws/compare/e3c18d0d50252112d37bde97061370204b3cdab7...60024ab1280f9f10423b22bc708f3f6ef97db6b5))
+  - Diff (`..`: [e.g.](https://github.com/rhysd/git-brws/compare/e3c18d0d50252112d37bde97061370204b3cdab7..60024ab1280f9f10423b22bc708f3f6ef97db6b5), `...`: [e.g.](https://github.com/rhysd/git-brws/compare/e3c18d0d50252112d37bde97061370204b3cdab7...60024ab1280f9f10423b22bc708f3f6ef97db6b5))
   - Pull request (Only GitHub and GitHub Enterprise) ([e.g.](https://github.com/rust-lang/rust.vim/pull/290))
 - Supports below services
   - [GitHub](https://github.com)
@@ -107,7 +107,7 @@ $ git brws ./some/file.txt#L123
 $ git brws HEAD
 ```
 
-### Show a specific diff page
+### Show a diff page between commits
 
 - Show diff between `HEAD` and `HEAD~3`
 
@@ -120,6 +120,20 @@ $ git brws HEAD~3..HEAD
 ```
 $ git brws 60024ab..113079b
 ```
+
+Note: Only GitHub and GitHub Enterprise support `...`. For GitLab, only `...` is available.
+
+### Show a diff page from specific commit and its merge base
+
+Not only `..`, `...` is supported.
+
+- Show diff between `branchB` and the merge base commit from `branchB` into `branchA`
+
+```
+$ git brws branchA...branchB
+```
+
+If you don't know the difference between `..` and `...`, please read `git diff --help`.
 
 ### Open a pull request page
 
