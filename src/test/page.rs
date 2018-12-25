@@ -33,12 +33,16 @@ fn parse_empty_args() {
 
 #[test]
 fn parse_file_or_dir() {
-    for &(entry, relative) in &[
-        ("./README.md", "README.md"),
-        ("src", "src"),
-        ("./src/main.rs", "src/main.rs"),
+    for &(ref entry, relative) in &[
+        (Path::new(".").join("README.md"), "README.md"),
+        (PathBuf::from("src"), "src"),
+        (Path::new(".").join("src").join("main.rs"), "src/main.rs"),
     ] {
-        let c = config("https://github.com/user/repo.git", None, vec![&entry]);
+        let c = config(
+            "https://github.com/user/repo.git",
+            None,
+            vec![&entry.to_str().unwrap()],
+        );
         match parse_page(&c).unwrap() {
             Page::FileOrDir {
                 relative_path,
@@ -55,12 +59,16 @@ fn parse_file_or_dir() {
 
 #[test]
 fn parse_file_line() {
-    for &(file, expected) in &[
-        ("./README.md#21", Some(21)),
-        ("./src/main.rs#10", Some(10)),
-        ("LICENSE.txt", None),
+    for &(ref file, expected) in &[
+        (Path::new(".").join("README.md#21"), Some(21)),
+        (Path::new(".").join("src").join("main.rs#10"), Some(10)),
+        (PathBuf::from("LICENSE.txt"), None),
     ] {
-        let c = config("https://github.com/user/repo.git", None, vec![&file]);
+        let c = config(
+            "https://github.com/user/repo.git",
+            None,
+            vec![&file.to_str().unwrap()],
+        );
         match parse_page(&c).unwrap() {
             Page::FileOrDir {
                 relative_path: _,

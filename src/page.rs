@@ -46,7 +46,10 @@ struct BrowsePageParser<'a> {
 impl<'a> BrowsePageParser<'a> {
     fn try_parse_commit(&self) -> Result<Page> {
         if self.cfg.args.len() != 1 {
-            return Err("  Invalid number of arguments for commit (1 is expected)".to_string());
+            return Err(format!(
+                "  Invalid number of arguments for commit. 1 is expected but given {:?}",
+                self.cfg.args,
+            ));
         }
         let hash = self.git.hash(&self.cfg.args[0])?;
         Ok(Page::Commit { hash })
@@ -54,7 +57,10 @@ impl<'a> BrowsePageParser<'a> {
 
     fn try_parse_diff(&self) -> Result<Page> {
         if self.cfg.args.len() != 1 {
-            return Err("  Invalid number of arguments for diff (1 is expected)".to_string());
+            return Err(format!(
+                "  Invalid number of arguments for diff. 1 is expected but given {:?}",
+                self.cfg.args,
+            ));
         }
 
         let dots = if self.cfg.args[0].contains("...") {
@@ -67,14 +73,14 @@ impl<'a> BrowsePageParser<'a> {
         let rhs = split.next().ok_or_else(|| {
             format!(
                 "  Diff format must be either LHS..RHS or LHS...RHS but found {}",
-                self.cfg.args[0]
+                self.cfg.args[0],
             )
         })?;
 
         if lhs.is_empty() || rhs.is_empty() {
             return Err(format!(
                 "  Not a diff format since LHS and/or RHS is empty {}",
-                self.cfg.args[0]
+                self.cfg.args[0],
             ));
         }
 
@@ -107,10 +113,10 @@ impl<'a> BrowsePageParser<'a> {
     fn try_parse_file_or_dir(&self) -> Result<Page> {
         let len = self.cfg.args.len();
         if len != 1 && len != 2 {
-            return Err(
-                "  Invalid number of arguments for file or directory (1..2 is expected)"
-                    .to_string(),
-            );
+            return Err(format!(
+                "  Invalid number of arguments for file or directory. 1..2 is expected but given {:?}",
+                self.cfg.args,
+            ));
         }
 
         let (path, line) = self.parse_path_and_line();
