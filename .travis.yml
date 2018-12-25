@@ -1,5 +1,10 @@
 language: rust
+rust: stable
 dist: xenial
+
+env:
+  global:
+    - RUST_STACKTRACE=full
 
 matrix:
   include:
@@ -36,7 +41,8 @@ before_script:
 
 script:
   - export PKG_CONFIG_ALLOW_CROSS=1
-  - cargo test --verbose --features="on-ci"
+  - cargo build --target $TARGET && file target/${TARGET}/debug/git-brws
+  - if [[ "${TARGET}" != "i686-unknown-linux-gnu" ]]; then cargo test --verbose --features="on-ci"; fi
 
 notifications:
   email:
