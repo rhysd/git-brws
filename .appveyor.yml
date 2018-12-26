@@ -7,12 +7,12 @@ init:
   - mkdir c:\rustup
   - SET PATH=c:\cargo\bin;%PATH%
 
-clone_folder: c:\projects\git-brws
+clone_folder: c:\git-brws
 
 environment:
   CARGO_HOME: "c:\\cargo"
   RUSTUP_HOME: "c:\\rustup"
-  CARGO_TARGET_DIR: "c:\\projects\\git-brws\\target"
+  CARGO_TARGET_DIR: "c:\\git-brws\\target"
   global:
     RUST_BACKTRACE: full
   matrix:
@@ -34,6 +34,7 @@ install:
 build: false
 
 test_script:
+  - cd "c:\\git-brws"
   - cargo build
   - cargo test --verbose --features="on-ci"
 
