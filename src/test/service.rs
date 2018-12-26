@@ -1,5 +1,5 @@
 use crate::page::{DiffOp, Page};
-use crate::service::parse_and_build_page_url;
+use crate::service::build_page_url;
 use crate::test::helper::empty_env;
 
 // Note:
@@ -18,7 +18,7 @@ fn convert_ssh_url() {
         ),
     ] {
         assert_eq!(
-            parse_and_build_page_url(&repo.to_string(), &p, &None, &empty_env()).unwrap(),
+            build_page_url(&repo.to_string(), &p, &None, &empty_env()).unwrap(),
             expected
         );
     }
@@ -46,7 +46,7 @@ fn parse_and_build_open_page() {
         ),
     ] {
         assert_eq!(
-            parse_and_build_page_url(&repo.to_string(), &p, &None, &empty_env()).unwrap(),
+            build_page_url(&repo.to_string(), &p, &None, &empty_env()).unwrap(),
             expected
         );
     }
@@ -78,7 +78,7 @@ fn parse_and_build_open_branch_page() {
         ),
     ] {
         assert_eq!(
-            parse_and_build_page_url(
+            build_page_url(
                 &repo.to_string(),
                 &p,
                 &Some("dev".to_string()),
@@ -113,7 +113,7 @@ fn parse_and_build_commit_page() {
             "https://gitlab.com/user/repo/commit/90601f1037142605a32426f9ece0c07d479b9cc5",
         ),
     ] {
-        assert_eq!(parse_and_build_page_url(repo, &p, &None, &empty_env()).unwrap(), expected);
+        assert_eq!(build_page_url(repo, &p, &None, &empty_env()).unwrap(), expected);
     }
 }
 
@@ -137,7 +137,7 @@ fn parse_and_build_diff_page() {
                 format!("https://github.somewhere.com/user/repo/compare/561848bad7164d7568658456088b107ec9efd9f3{}90601f1037142605a32426f9ece0c07d479b9cc5", opstr).as_str(),
             ),
         ] {
-            assert_eq!(parse_and_build_page_url(&repo, &p, &None, &empty_env()).unwrap(), expected, "for {:?}", op);
+            assert_eq!(build_page_url(&repo, &p, &None, &empty_env()).unwrap(), expected, "for {:?}", op);
         }
     }
 }
@@ -154,14 +154,13 @@ fn parse_and_build_diff_page_for_gitlab() {
 
     let p = page(DiffOp::TwoDots);
     assert!(
-        parse_and_build_page_url("https://gitlab.com/user/repo.git", &p, &None, &empty_env())
-            .is_err(),
+        build_page_url("https://gitlab.com/user/repo.git", &p, &None, &empty_env()).is_err(),
         "GitLab does not support '..' but error did not occur"
     );
 
     let p = page(DiffOp::ThreeDots);
     assert_eq!(
-        parse_and_build_page_url("https://gitlab.com/user/repo.git", &p, &None, &empty_env()).unwrap(),
+        build_page_url("https://gitlab.com/user/repo.git", &p, &None, &empty_env()).unwrap(),
         "https://gitlab.com/user/repo/compare/561848bad7164d7568658456088b107ec9efd9f3...90601f1037142605a32426f9ece0c07d479b9cc5",
     );
 }
@@ -174,8 +173,7 @@ fn parse_and_build_diff_page_for_bitbucket() {
         op: DiffOp::ThreeDots,
     };
     assert!(
-        parse_and_build_page_url(&"https://bitbucket.org/user/repo", &p, &None, &empty_env())
-            .is_err(),
+        build_page_url("https://bitbucket.org/user/repo", &p, &None, &empty_env()).is_err(),
         "bitbucket does not support diff page"
     );
 }
@@ -205,7 +203,7 @@ fn parse_and_build_file_page() {
             "https://gitlab.com/user/repo/blob/561848bad7164d7568658456088b107ec9efd9f3/src/main.rs",
         ),
     ] {
-        assert_eq!(parse_and_build_page_url(&repo, &p, &None, &empty_env()).unwrap(), expected);
+        assert_eq!(build_page_url(&repo, &p, &None, &empty_env()).unwrap(), expected);
     }
 }
 
@@ -234,7 +232,7 @@ fn parse_and_build_file_page_with_line_number() {
             "https://gitlab.com/user/repo/blob/561848bad7164d7568658456088b107ec9efd9f3/src/main.rs#L12",
         ),
     ] {
-        assert_eq!(parse_and_build_page_url(&repo, &p, &None, &empty_env()).unwrap(), expected);
+        assert_eq!(build_page_url(&repo, &p, &None, &empty_env()).unwrap(), expected);
     }
 }
 
@@ -246,7 +244,7 @@ fn invalid_repo_url() {
         "https://unknown.hosting_service.com/user/repo.git",
     ] {
         assert!(
-            parse_and_build_page_url(&repo, &Page::Open, &None, &empty_env()).is_err(),
+            build_page_url(&repo, &Page::Open, &None, &empty_env()).is_err(),
             "{} must be invalid",
             repo
         );
@@ -279,7 +277,7 @@ fn customized_ssh_port() {
         ),
     ] {
         assert_eq!(
-            parse_and_build_page_url(&repo, &p, &None, &envs),
+            build_page_url(&repo, &p, &None, &envs),
             Ok(expected.to_string())
         );
     }
@@ -299,8 +297,8 @@ fn customized_ghe_host() {
     ] {
         envs.ghe_ssh_port = port.clone();
         assert_eq!(
-            parse_and_build_page_url(
-                &"https://my-original-ghe.org/user/repo.git",
+            build_page_url(
+                "https://my-original-ghe.org/user/repo.git",
                 &Page::Open,
                 &None,
                 &envs,

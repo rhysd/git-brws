@@ -32,11 +32,11 @@ impl<'a> Git<'a> {
         Ok(s.trim().to_string())
     }
 
-    pub fn hash<S: AsRef<str>>(&self, commit: &S) -> Result<String> {
+    pub fn hash<S: AsRef<str>>(&self, commit: S) -> Result<String> {
         self.command(&["rev-parse", commit.as_ref()])
     }
 
-    pub fn remote_url<S: AsRef<str>>(&self, name: &S) -> Result<String> {
+    pub fn remote_url<S: AsRef<str>>(&self, name: S) -> Result<String> {
         // XXX:
         // `git remote get-url {name}` is not available because it's added recently (at 2.6.1).
         // Note that git installed in Ubuntu 14.04 is 1.9.1.
@@ -54,7 +54,7 @@ impl<'a> Git<'a> {
             Ok(stdout) => stdout,
             Err(stderr) => {
                 return if stderr.find("does not point to a branch").is_some() {
-                    Ok(self.remote_url(&"origin")?)
+                    Ok(self.remote_url("origin")?)
                 } else {
                     Err(format!(
                         "Failed to retrieve default remote name: {}",
@@ -66,7 +66,7 @@ impl<'a> Git<'a> {
 
         // out is formatted as '{remote-url}/{branch-name}'
         match out.splitn(2, '/').next() {
-            Some(ref u) => self.remote_url(&u),
+            Some(ref u) => self.remote_url(u),
             None => Err(format!("Invalid tracking remote name: {}", out)),
         }
     }

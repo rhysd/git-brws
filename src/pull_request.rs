@@ -1,7 +1,7 @@
 extern crate url;
 
 use self::url::Url;
-use crate::envvar::Envvar;
+use crate::env::Env;
 use crate::errors::Result;
 use crate::github_api;
 use crate::service::slug_from_path;
@@ -40,11 +40,7 @@ fn find_github_pr_url(
     ))
 }
 
-pub fn find_url<U: AsRef<str>, B: AsRef<str>>(
-    repo_url: U,
-    branch: B,
-    env: &Envvar,
-) -> Result<String> {
+pub fn find_url<U: AsRef<str>, B: AsRef<str>>(repo_url: U, branch: B, env: &Env) -> Result<String> {
     let repo_url = Url::parse(repo_url.as_ref())
         .map_err(|e| format!("Failed to parse URL '{}': {}", repo_url.as_ref(), e))?;
     let path = repo_url.path();

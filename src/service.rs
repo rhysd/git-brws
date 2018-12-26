@@ -4,7 +4,7 @@ use self::url::Url;
 use crate::page::{DiffOp, Page};
 use std::path::Path;
 
-use crate::envvar;
+use crate::env::Env;
 use crate::errors::Result;
 
 fn build_github_like_url(
@@ -133,11 +133,11 @@ pub fn slug_from_path<'a>(path: &'a str) -> Result<(&'a str, &'a str)> {
 // Known URL formats
 //  1. https://hosting_service.com/user/repo.git
 //  2. git@hosting_service.com:user/repo.git (-> ssh://git@hosting_service.com:22/user/repo.git)
-pub fn parse_and_build_page_url(
+pub fn build_page_url(
     repo: &str,
     page: &Page,
     branch: &Option<String>,
-    env: &envvar::Envvar,
+    env: &Env,
 ) -> Result<String> {
     let url = Url::parse(repo).map_err(|e| format!("Failed to parse URL '{}': {}", repo, e))?;
     let path = url.path();

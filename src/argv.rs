@@ -2,7 +2,7 @@ extern crate getopts;
 
 use self::getopts::Options;
 use crate::command;
-use crate::envvar;
+use crate::env::Env;
 use crate::errors::Result;
 use crate::git;
 
@@ -71,17 +71,17 @@ Examples:
 
     $ git brws HEAD~3..HEAD
 
+  - Open diff between topic and topic's merge base commit:
+
+    $ git brws master...topic
+
   - Open line 123 of file:
 
     $ git brws some/file.txt#L123
 
-  - Open a pull request page:
+  - Open a pull request page (for GitHub and GitHub Enterprise):
 
-    $ git brws --pr
-
-  - Open diff between topic and topic's merge base commit:
-
-    $ git brws master...topic";
+    $ git brws --pr";
 
 pub fn parse_options<T: AsRef<str>>(argv: &[T]) -> Result<ParsedArgv> {
     let mut opts = Options::new();
@@ -92,7 +92,7 @@ pub fn parse_options<T: AsRef<str>>(argv: &[T]) -> Result<ParsedArgv> {
     opts.optflag(
         "u",
         "url",
-        "Output URL to STDOUT instead of opening in browser",
+        "Output URL to stdout instead of opening in browser",
     );
     opts.optflag(
         "p",
@@ -116,7 +116,7 @@ pub fn parse_options<T: AsRef<str>>(argv: &[T]) -> Result<ParsedArgv> {
         ));
     }
 
-    let env = envvar::new();
+    let env = Env::new();
     let git_dir = git::git_dir(matches.opt_str("d"), env.git_command.as_str())?;
     let branch = matches.opt_str("b");
     let repo = {

@@ -45,7 +45,7 @@ Options:
                         remote name (e.g. origin) or Git URL you want to see
     -b, --branch BRANCH Branch name to browse
     -d, --dir PATH      Directory path to the repository
-    -u, --url           Output URL to STDOUT instead of opening in browser
+    -u, --url           Output URL to stdout instead of opening in browser
     -p, --pr            Open pull request page instead of repository page
     -h, --help          Print this help
     -v, --version       Show version

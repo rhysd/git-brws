@@ -63,24 +63,23 @@ impl<'a> BrowsePageParser<'a> {
             ));
         }
 
-        let dots = if self.cfg.args[0].contains("...") {
+        let arg = &self.cfg.args[0];
+        let dots = if arg.contains("...") {
             "..."
-        } else {
+        } else if arg.contains("..") {
             ".."
+        } else {
+            return Err("'..' or '...' must be contained for diff".to_string());
         };
-        let mut split = self.cfg.args[0].splitn(2, dots);
+
+        let mut split = arg.splitn(2, dots);
         let lhs = split.next().unwrap();
-        let rhs = split.next().ok_or_else(|| {
-            format!(
-                "  Diff format must be either LHS..RHS or LHS...RHS but found {}",
-                self.cfg.args[0],
-            )
-        })?;
+        let rhs = split.next().unwrap();
 
         if lhs.is_empty() || rhs.is_empty() {
             return Err(format!(
                 "  Not a diff format since LHS and/or RHS is empty {}",
-                self.cfg.args[0],
+                arg,
             ));
         }
 
@@ -145,9 +144,9 @@ impl<'a> BrowsePageParser<'a> {
             .to_string();
 
         let hash = if len == 2 {
-            self.git.hash(&self.cfg.args[1].as_str())?
+            self.git.hash(self.cfg.args[1].as_str())?
         } else {
-            self.git.hash(&"HEAD")?
+            self.git.hash("HEAD")?
         };
         Ok(Page::FileOrDir {
             relative_path,

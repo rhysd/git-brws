@@ -3,7 +3,7 @@ extern crate serde_derive;
 
 mod argv;
 mod command;
-mod envvar;
+mod env;
 mod errors;
 mod git;
 mod github_api;
@@ -15,11 +15,11 @@ mod service;
 mod test;
 
 use crate::argv::{parse_options, ParsedArgv};
-use std::env;
+use std::env::args;
 use std::process::exit;
 
 fn main() {
-    let argv = env::args().collect::<Vec<_>>();
+    let argv = args().collect::<Vec<_>>();
     let parsed = match parse_options(argv.as_slice()) {
         Ok(p) => p,
         Err(reason) => {

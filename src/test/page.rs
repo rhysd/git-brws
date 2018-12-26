@@ -94,12 +94,12 @@ fn not_existing_file() {
 
 #[test]
 fn file_at_specific_commit() {
-    let c = config("https://github.com/user/repo.git", None, vec![&"README.md"]);
+    let c = config("https://github.com/user/repo.git", None, vec!["README.md"]);
     let p = parse_page(&c).unwrap();
     let c = config(
         "https://github.com/user/repo.git",
         None,
-        vec![&"README.md", "HEAD^"],
+        vec!["README.md", "HEAD^"],
     );
     let p2 = parse_page(&c).unwrap();
     assert!(p != p2, format!("{:?} v.s. {:?}", p, p2));

@@ -51,7 +51,8 @@ before_deploy:
   - appveyor PushArtifact ../git-brws-%APPVEYOR_REPO_TAG_NAME%-%TARGET%.zip
 
 deploy:
-  description: 'Release automatically deployed at Appveyor'
+  # https://help.appveyor.com/discussions/problems/2975-github-deployment
+  description: ""
   artifact: /.*\.zip/
   auth_token:
     secure: BpQjnOw9ebli0aAKCxskQvdu28Ahj8D9ByDoNFbEgRRtWKEbqESWLiZnHyQIgR5m

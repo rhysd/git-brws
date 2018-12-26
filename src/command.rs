@@ -1,6 +1,6 @@
 extern crate open;
 
-use crate::envvar;
+use crate::env::Env;
 use crate::errors::*;
 use crate::git;
 use crate::page::parse_page;
@@ -16,7 +16,7 @@ pub struct Config {
     pub args: Vec<String>,
     pub stdout: bool,
     pub pull_request: bool,
-    pub env: envvar::Envvar,
+    pub env: Env,
 }
 
 pub fn url(cfg: &Config) -> Result<String> {
@@ -30,7 +30,7 @@ pub fn url(cfg: &Config) -> Result<String> {
         }
     } else {
         let page = parse_page(&cfg)?;
-        service::parse_and_build_page_url(&cfg.repo, &page, &cfg.branch, &cfg.env)
+        service::build_page_url(&cfg.repo, &page, &cfg.branch, &cfg.env)
     }
 }
 
@@ -61,7 +61,7 @@ pub fn browse(cfg: &Config) -> Option<ErrorMsg> {
             println!("{}", url);
             None
         }
-        Ok(url) => open(url.as_str()),
+        Ok(ref url) => open(url),
         Err(msg) => Some(msg),
     }
 }
