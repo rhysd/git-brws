@@ -34,18 +34,28 @@ fn parse_empty_args() {
 #[test]
 fn parse_file_or_dir() {
     for &(entry, relative) in &[
-        ("./README.md", "README.md"),
-        ("src", "src"),
-        ("./src/main.rs", "src/main.rs"),
+        (
+            Path::new(".").join("README.md").as_path(),
+            Path::new("README.md"),
+        ),
+        (Path::new("src"), Path::new("src")),
+        (
+            Path::new(".").join("src").join("main.rs").as_path(),
+            Path::new("src").join("main.rs").as_path(),
+        ),
     ] {
-        let c = config("https://github.com/user/repo.git", None, vec![&entry]);
+        let c = config(
+            "https://github.com/user/repo.git",
+            None,
+            vec![&entry.to_str().unwrap()],
+        );
         match parse_page(&c).unwrap() {
             Page::FileOrDir {
                 relative_path,
                 hash,
                 line: None,
             } => {
-                assert_eq!(relative_path, relative);
+                assert_eq!(relative_path, relative.to_str().unwrap());
                 assert!(!hash.is_empty());
             }
             p => assert!(false, "Unexpected result: {:?}", p),
@@ -55,21 +65,19 @@ fn parse_file_or_dir() {
 
 #[test]
 fn parse_file_line() {
-    for &(file, expected) in &[
-        ("./README.md#21", Some(21)),
-        ("./src/main.rs#10", Some(10)),
-        ("LICENSE.txt", None),
+    for &(ref file, expected) in &[
+        (Path::new(".").join("README.md#21"), Some(21)),
+        (Path::new(".").join("src").join("main.rs#10"), Some(10)),
+        (PathBuf::from("LICENSE.txt"), None),
     ] {
-        let c = config("https://github.com/user/repo.git", None, vec![&file]);
+        let c = config(
+            "https://github.com/user/repo.git",
+            None,
+            vec![&file.to_str().unwrap()],
+        );
         match parse_page(&c).unwrap() {
-            Page::FileOrDir {
-                relative_path: _,
-                hash: _,
-                line,
-            } => {
-                assert_eq!(line, expected);
-            }
-            p => assert!(false, "Unexpected result: {:?}", p),
+            Page::FileOrDir { line, .. } => assert_eq!(line, expected, "input: {:?}", file),
+            p => assert!(false, "Unexpected result: {:?}, input: {:?}", p, file),
         }
     }
 }
