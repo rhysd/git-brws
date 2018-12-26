@@ -33,10 +33,16 @@ fn parse_empty_args() {
 
 #[test]
 fn parse_file_or_dir() {
-    for &(ref entry, relative) in &[
-        (Path::new(".").join("README.md"), "README.md"),
-        (PathBuf::from("src"), "src"),
-        (Path::new(".").join("src").join("main.rs"), "src/main.rs"),
+    for &(entry, relative) in &[
+        (
+            Path::new(".").join("README.md").as_path(),
+            Path::new("README.md"),
+        ),
+        (Path::new("src"), Path::new("src")),
+        (
+            Path::new(".").join("src").join("main.rs").as_path(),
+            Path::new("src").join("main.rs").as_path(),
+        ),
     ] {
         let c = config(
             "https://github.com/user/repo.git",
@@ -49,7 +55,7 @@ fn parse_file_or_dir() {
                 hash,
                 line: None,
             } => {
-                assert_eq!(relative_path, relative);
+                assert_eq!(relative_path, relative.to_str().unwrap());
                 assert!(!hash.is_empty());
             }
             p => assert!(false, "Unexpected result: {:?}", p),
