@@ -52,7 +52,8 @@ Usage: git brws [Options] {Args}
   Open a repository, file, commit, diff or pull request in your web browser from
   command line. GitHub, Bitbucket, GitLab, GitHub Enterprise are supported as
   hosting service.
-  Please see https://github.com/rhysd/git-brws for more detail.
+  git-brws looks some environment variables for configuration. Please see
+  https://github.com/rhysd/git-brws for more detail.
 
 Examples:
   - Open current repository:

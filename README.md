@@ -3,7 +3,8 @@ git brws
 [![Crate Badge][]][GitHub Project]
 [![Build Status][]][CI Results]
 
-`git brws` is a command line tool to open a repository, file, commit, diff or pull request in your web browser from command line.
+`git brws` is a command line tool to open a repository, file, commit, diff or pull request in your web
+browser from command line. 'brws' is an abbreviation of 'browse'.
 
 Features:
 
@@ -19,10 +20,11 @@ Features:
   - [GitHub Enterprise](https://enterprise.github.com/home)
   - [GitLab](https://about.gitlab.com/)
 - Prefers commit-specific page URL
+- Available on Linux, macOS and Windows
 
 ## Installation
 
-`git brws` currently supports Linux and macOS.
+`git brws` currently supports Linux, macOS and Windows.
 
 - With [cargo](https://crates.io/)
 
@@ -32,8 +34,8 @@ $ cargo install git-brws
 
 - As a single binary
 
-You can download a binary executable from [release page][] for macOS and Linux (x86\_64, i686).
-Unarchive downloaded file and put the binary in your `bin` directory.
+You can download a binary executable from [release page][] for macOS, Linux (x86\_64, i686) and Windows
+(64bit, 32bit). Unarchive downloaded file and put the binary in a directory in `$PATH`.
 
 ## Usage
 
