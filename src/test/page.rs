@@ -70,14 +70,8 @@ fn parse_file_line() {
             vec![&file.to_str().unwrap()],
         );
         match parse_page(&c).unwrap() {
-            Page::FileOrDir {
-                relative_path: _,
-                hash: _,
-                line,
-            } => {
-                assert_eq!(line, expected);
-            }
-            p => assert!(false, "Unexpected result: {:?}", p),
+            Page::FileOrDir { line, .. } => assert_eq!(line, expected, "input: {:?}", file),
+            p => assert!(false, "Unexpected result: {:?}, input: {:?}", p, file),
         }
     }
 }
