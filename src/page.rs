@@ -127,9 +127,19 @@ impl<'a> BrowsePageParser<'a> {
             env::current_dir().map_err(|e| format!("{}", e))?.join(path)
         };
 
+        if !abs_path.exists() {
+            return Err(format!("File or directory does not exist: {:?}", abs_path));
+        }
+
+        let repo_root = self.git.root_dir()?;
         let relative_path = abs_path
-            .strip_prefix(&self.git.root_dir()?)
-            .map_err(|e| format!("  Unable to locate the file in repository: {}", e))?
+            .strip_prefix(&repo_root)
+            .map_err(|e| {
+                format!(
+                    "  Given path is not in repository '{:?}': {}",
+                    &repo_root, e,
+                )
+            })?
             .to_str()
             .ok_or("  Failed to convert path into UTF-8 string")?
             .to_string();
