@@ -1,7 +1,8 @@
 git brws
 ========
 [![Crate Badge][]][GitHub Project]
-[![Build Status][]][CI Results]
+[![Linux and macOS CI][travis-badge]][travis-ci]
+[![Windows CI][appveyor-badge]][appveyor]
 
 `git brws` is a command line tool to open a repository, file, commit, diff or pull request in your web
 browser from command line. 'brws' is an abbreviation of 'browse'.
@@ -12,7 +13,7 @@ Features:
   - Repository ([e.g.](https://github.com/rhysd/git-brws))
   - File ([e.g.](https://github.com/rhysd/git-brws/blob/master/Cargo.toml))
   - Commit ([e.g.](https://github.com/rhysd/git-brws/commit/60024ab1280f9f10423b22bc708f3f6ef97db6b5))
-  - Diff (`..`: [e.g.](https://github.com/rhysd/git-brws/compare/e3c18d0d50252112d37bde97061370204b3cdab7..60024ab1280f9f10423b22bc708f3f6ef97db6b5), `...`: [e.g.](https://github.com/rhysd/git-brws/compare/e3c18d0d50252112d37bde97061370204b3cdab7...60024ab1280f9f10423b22bc708f3f6ef97db6b5))
+  - Diff ([e.g.](https://github.com/rhysd/git-brws/compare/e3c18d0d50252112d37bde97061370204b3cdab7..60024ab1280f9f10423b22bc708f3f6ef97db6b5), [e.g.](https://github.com/rhysd/git-brws/compare/e3c18d0d50252112d37bde97061370204b3cdab7...60024ab1280f9f10423b22bc708f3f6ef97db6b5))
   - Pull request (Only GitHub and GitHub Enterprise) ([e.g.](https://github.com/rust-lang/rust.vim/pull/290))
 - Supports below services
   - [GitHub](https://github.com)
@@ -24,7 +25,7 @@ Features:
 
 ## Installation
 
-`git brws` currently supports Linux, macOS and Windows.
+`git brws` is available on Linux, macOS and Windows.
 
 - With [cargo](https://crates.io/)
 
@@ -219,6 +220,8 @@ cargo watch
 
 [GitHub Project]: https://github.com/rhysd/git-brws
 [Crate Badge]: https://img.shields.io/crates/v/git-brws.svg
-[CI Results]: https://travis-ci.org/rhysd/git-brws
-[Build Status]: https://travis-ci.org/rhysd/git-brws.svg?branch=master
+[travis-ci]: https://travis-ci.org/rhysd/git-brws
+[travis-badge]: https://travis-ci.org/rhysd/git-brws.svg?branch=master
+[appveyor-badge]: https://ci.appveyor.com/api/projects/status/q9gvpd30k1k5jsf0/branch/master?svg=true
+[appveyor]: https://ci.appveyor.com/project/rhysd/git-brws/branch/master
 [release page]: https://github.com/rhysd/git-brws/releases

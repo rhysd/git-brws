@@ -8,6 +8,11 @@ readme = "README.md"
 include = ["src/**/*.rs", "Cargo.toml", "LICENSE.txt"]
 license-file = "LICENSE.txt"
 
+[badges]
+travis-ci = { repository = "rhysd/git-brws" }
+appveyor = { repository = "rhysd/git-brws" }
+maintenance = { status = "actively-developed" }
+
 [package.metadata.release]
 no-dev-version = true
 
