@@ -1,5 +1,5 @@
-use std::fmt;
-use std::fs;
+use std::path::Path;
+use std::{env, fmt};
 
 use crate::command;
 use crate::errors::Result;
@@ -120,10 +120,14 @@ impl<'a> BrowsePageParser<'a> {
         }
 
         let (path, line) = self.parse_path_and_line();
+        let path = Path::new(path);
+        let abs_path = if path.is_absolute() {
+            path.to_owned()
+        } else {
+            env::current_dir().map_err(|e| format!("{}", e))?.join(path)
+        };
 
-        let entry = fs::canonicalize(path)
-            .map_err(|e| format!("  Unable to locate file '{}': {}", path, e))?;
-        let relative_path = entry
+        let relative_path = abs_path
             .strip_prefix(&self.git.root_dir()?)
             .map_err(|e| format!("  Unable to locate the file in repository: {}", e))?
             .to_str()

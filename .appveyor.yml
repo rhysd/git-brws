@@ -35,8 +35,8 @@ build: false
 
 test_script:
   - cd "c:\\git-brws"
-  - cargo build
   - cargo test --verbose --features="on-ci"
+  - cargo build
 
 before_deploy:
   # Generate artifacts for release
