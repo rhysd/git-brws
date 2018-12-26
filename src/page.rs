@@ -66,10 +66,17 @@ impl<'a> BrowsePageParser<'a> {
         let lhs = split.next().unwrap();
         let rhs = split.next().ok_or_else(|| {
             format!(
-                "  Diff format must be specified as LHS..RHS but found {}",
+                "  Diff format must be either LHS..RHS or LHS...RHS but found {}",
                 self.cfg.args[0]
             )
         })?;
+
+        if lhs.is_empty() || rhs.is_empty() {
+            return Err(format!(
+                "  Not a diff format since LHS and/or RHS is empty {}",
+                self.cfg.args[0]
+            ));
+        }
 
         Ok(Page::Diff {
             lhs: self.git.hash(&lhs)?,

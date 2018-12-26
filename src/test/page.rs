@@ -2,7 +2,7 @@ use crate::command::Config;
 use crate::page::{parse_page, DiffOp, Page};
 use crate::test::helper::empty_env;
 use std::env;
-use std::path::Path;
+use std::path::{Path, PathBuf};
 
 fn config(repo: &str, branch: Option<&str>, args: Vec<&str>) -> Config {
     let mut dir = env::current_dir().unwrap();
@@ -191,4 +191,23 @@ fn file_for_unknown_commit() {
         vec!["README.md", "HEAD~114514"],
     );
     assert!(parse_page(&c).is_err());
+}
+
+#[test]
+fn diff_lhs_or_rhs_empty() {
+    for ref path in &[
+        Path::new("..").join("foo.txt"),
+        Path::new("foo").join(".."),
+        PathBuf::from(".."),
+    ] {
+        let c = config(
+            "https://github.com/user/repo.git",
+            None,
+            vec![path.to_str().unwrap()],
+        );
+        match parse_page(&c) {
+            Ok(p @ Page::Diff { .. }) => assert!(false, "Unexpectedly parsed as diff: {:?}", p),
+            _ => { /*ok*/ }
+        }
+    }
 }
