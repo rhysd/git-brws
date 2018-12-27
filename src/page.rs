@@ -1,5 +1,5 @@
-use std::path::Path;
-use std::{env, fmt};
+use std::fmt;
+use std::fs;
 
 use crate::command;
 use crate::errors::Result;
@@ -119,19 +119,11 @@ impl<'a> BrowsePageParser<'a> {
         }
 
         let (path, line) = self.parse_path_and_line();
-        let path = Path::new(path);
-        let abs_path = if path.is_absolute() {
-            path.to_owned()
-        } else {
-            env::current_dir().map_err(|e| format!("{}", e))?.join(path)
-        };
-
-        if !abs_path.exists() {
-            return Err(format!("File or directory does not exist: {:?}", abs_path));
-        }
+        let path = fs::canonicalize(path)
+            .map_err(|e| format!("Cannot resolve given path {}: {}", path, e))?;
 
         let repo_root = self.git.root_dir()?;
-        let relative_path = abs_path
+        let relative_path = path
             .strip_prefix(&repo_root)
             .map_err(|e| {
                 format!(

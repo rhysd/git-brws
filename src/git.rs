@@ -2,6 +2,7 @@ use crate::errors::Result;
 use std::env;
 use std::ffi::OsStr;
 use std::fmt::Debug;
+use std::fs;
 use std::path::{Path, PathBuf};
 use std::process::Command;
 use std::str;
@@ -105,6 +106,8 @@ pub fn git_dir(dir: Option<String>, git_cmd: &str) -> Result<PathBuf> {
     let mut cmd = Command::new(if git_cmd != "" { git_cmd } else { "git" });
     cmd.arg("rev-parse").arg("--absolute-git-dir");
     if let Some(d) = dir {
+        let d = fs::canonicalize(&d)
+            .map_err(|e| format!("Cannot resolve repository directory {}: {}", &d, e))?;
         cmd.current_dir(d);
     }
 

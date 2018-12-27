@@ -2,11 +2,13 @@ use crate::command::Config;
 use crate::page::{parse_page, DiffOp, Page};
 use crate::test::helper::empty_env;
 use std::env;
+use std::fs;
 use std::path::{Path, PathBuf};
 
 fn config(repo: &str, branch: Option<&str>, args: Vec<&str>) -> Config {
     let mut dir = env::current_dir().unwrap();
     dir.push(Path::new(".git"));
+    let dir = fs::canonicalize(dir).unwrap();
     let mut a = Vec::new();
     for arg in args {
         a.push(arg.to_string());
@@ -43,6 +45,20 @@ fn parse_file_or_dir() {
             Path::new(".").join("src").join("main.rs").as_path(),
             Path::new("src").join("main.rs").as_path(),
         ),
+        // Contains '..'
+        (
+            Path::new(".")
+                .join("src")
+                .join("..")
+                .join("README.md")
+                .as_path(),
+            Path::new("README.md"),
+        ),
+        // Suffix '..'
+        (
+            Path::new(".").join("src").join("test").join("..").as_path(),
+            Path::new("src"),
+        ),
     ] {
         let c = config(
             "https://github.com/user/repo.git",
@@ -69,6 +85,10 @@ fn parse_file_line() {
         (Path::new(".").join("README.md#21"), Some(21)),
         (Path::new(".").join("src").join("main.rs#10"), Some(10)),
         (PathBuf::from("LICENSE.txt"), None),
+        (
+            Path::new(".").join("src").join("..").join("README.md#21"),
+            Some(21),
+        ),
     ] {
         let c = config(
             "https://github.com/user/repo.git",
