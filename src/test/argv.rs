@@ -1,6 +1,6 @@
 use crate::argv::*;
 use std::env;
-use std::path::Path;
+use std::fs;
 
 #[test]
 fn no_option() {
@@ -102,15 +102,13 @@ fn unknown_options() {
 
 #[test]
 fn detect_git_dir() {
-    let current = env::current_dir().unwrap();
-    let mut p = current.clone();
-    p.push(Path::new("src/test/"));
+    let current = fs::canonicalize(env::current_dir().unwrap()).unwrap();
+    let p = current.join("src").join("test");
     match parse_options(&["git-brws", "-d", p.to_str().unwrap()]).unwrap() {
         ParsedArgv::Parsed(o) => {
-            let mut expected = current.clone();
-            expected.push(".git");
+            let expected = current.join(".git");
             assert_eq!(o.git_dir, expected);
         }
-        _ => assert!(false),
+        p => assert!(false, "{:?}", p),
     }
 }
