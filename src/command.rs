@@ -2,7 +2,7 @@ extern crate open;
 
 use crate::env::Env;
 use crate::errors::*;
-use crate::git;
+use crate::git::Git;
 use crate::page::parse_page;
 use crate::pull_request;
 use crate::service;
@@ -24,7 +24,7 @@ pub fn url(cfg: &Config) -> Result<String> {
         match cfg.branch {
             Some(ref b) => pull_request::find_url(cfg.repo.as_str(), b.as_str(), &cfg.env),
             None => {
-                let git = git::new(&cfg.git_dir, cfg.env.git_command.as_str())?;
+                let git = Git::new(&cfg.git_dir, cfg.env.git_command.as_str());
                 pull_request::find_url(cfg.repo.as_str(), git.current_branch()?.as_str(), &cfg.env)
             }
         }

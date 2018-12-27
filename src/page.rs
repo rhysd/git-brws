@@ -3,7 +3,7 @@ use std::fs;
 
 use crate::command;
 use crate::errors::Result;
-use crate::git;
+use crate::git::Git;
 
 #[derive(Debug, PartialEq, Copy, Clone)]
 pub enum DiffOp {
@@ -40,7 +40,7 @@ pub enum Page {
 
 struct BrowsePageParser<'a> {
     cfg: &'a command::Config,
-    git: git::Git<'a>,
+    git: Git<'a>,
 }
 
 impl<'a> BrowsePageParser<'a> {
@@ -125,12 +125,7 @@ impl<'a> BrowsePageParser<'a> {
         let repo_root = self.git.root_dir()?;
         let relative_path = path
             .strip_prefix(&repo_root)
-            .map_err(|e| {
-                format!(
-                    "  Given path is not in repository '{:?}': {}",
-                    &repo_root, e,
-                )
-            })?
+            .map_err(|e| format!("  Given path is not in repository {:?}: {}", &repo_root, e))?
             .to_str()
             .ok_or("  Failed to convert path into UTF-8 string")?
             .to_string();
@@ -153,7 +148,7 @@ pub fn parse_page(cfg: &command::Config) -> Result<Page> {
 
     let parser = BrowsePageParser {
         cfg,
-        git: git::new(&cfg.git_dir, cfg.env.git_command.as_str())?,
+        git: Git::new(&cfg.git_dir, cfg.env.git_command.as_str()),
     };
 
     if cfg.args.is_empty() {

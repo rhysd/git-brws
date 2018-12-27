@@ -5,6 +5,7 @@ use crate::command;
 use crate::env::Env;
 use crate::errors::Result;
 use crate::git;
+use crate::git::Git;
 
 fn convert_ssh_url(mut url: String) -> String {
     if url.starts_with("git@") {
@@ -26,7 +27,7 @@ pub enum ParsedArgv {
     Parsed(command::Config),
 }
 
-fn normalize_repo_format(mut s: String, git: &git::Git) -> Result<String> {
+fn normalize_repo_format(mut s: String, git: &Git) -> Result<String> {
     if let Ok(url) = git.remote_url(&s) {
         return Ok(url);
     }
@@ -122,7 +123,7 @@ pub fn parse_options<T: AsRef<str>>(argv: &[T]) -> Result<ParsedArgv> {
     let branch = matches.opt_str("b");
     let repo = {
         // Create scope for borrowing git_dir ref
-        let git = git::new(&git_dir, env.git_command.as_str())?;
+        let git = Git::new(&git_dir, env.git_command.as_str());
         match matches.opt_str("r") {
             Some(r) => normalize_repo_format(r, &git)?,
             None => git.tracking_remote(&branch)?,

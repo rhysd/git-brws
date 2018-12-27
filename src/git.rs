@@ -1,5 +1,4 @@
 use crate::errors::Result;
-use std::env;
 use std::ffi::OsStr;
 use std::fmt::Debug;
 use std::fs;
@@ -9,7 +8,7 @@ use std::str;
 
 pub struct Git<'a> {
     command: &'a str,
-    git_dir: &'a str,
+    git_dir: &'a Path,
 }
 
 impl<'a> Git<'a> {
@@ -24,7 +23,7 @@ impl<'a> Git<'a> {
             let stderr = str::from_utf8(&out.stderr)
                 .expect("Failed to convert git command output from UTF8");
             return Err(format!(
-                "Git command exited with non-zero status (git-dir: '{}', args: '{:?}'): {}",
+                "Git command exited with non-zero status (git-dir: '{:?}', args: '{:?}'): {}",
                 self.git_dir, args, stderr
             ));
         }
@@ -41,8 +40,7 @@ impl<'a> Git<'a> {
         // XXX:
         // `git remote get-url {name}` is not available because it's added recently (at 2.6.1).
         // Note that git installed in Ubuntu 14.04 is 1.9.1.
-        let url = self.command(&["config", "--get", &format!("remote.{}.url", name.as_ref())])?;
-        Ok(url)
+        self.command(&["config", "--get", &format!("remote.{}.url", name.as_ref())])
     }
 
     pub fn tracking_remote<S: AsRef<str>>(&self, branch: &Option<S>) -> Result<String> {
@@ -78,9 +76,9 @@ impl<'a> Git<'a> {
         // `git --git-dir ../.git rev-parse --show-toplevel` always returns
         // current working directory.
         // So here root directory is calculated from git-dir.
-        let p = Path::new(self.git_dir).parent().ok_or_else(|| {
+        let p = self.git_dir.parent().ok_or_else(|| {
             format!(
-                "Cannot locate root directory from git-dir '{}'",
+                "Cannot locate root directory from git-dir '{:?}'",
                 self.git_dir
             )
         })?;
@@ -95,11 +93,13 @@ impl<'a> Git<'a> {
     }
 }
 
-pub fn new<'a>(dir: &'a PathBuf, command: &'a str) -> Result<Git<'a>> {
-    let git_dir = dir
-        .to_str()
-        .ok_or_else(|| format!("Failed to retrieve git_dir path as UTF8 string: {:?}", dir))?;
-    Ok(Git { command, git_dir })
+impl<'a> Git<'a> {
+    pub fn new<P: AsRef<Path>>(dir: &'a P, command: &'a str) -> Git<'a> {
+        Git {
+            command,
+            git_dir: dir.as_ref(),
+        }
+    }
 }
 
 pub fn git_dir(dir: Option<String>, git_cmd: &str) -> Result<PathBuf> {
@@ -125,12 +125,7 @@ pub fn git_dir(dir: Option<String>, git_cmd: &str) -> Result<PathBuf> {
         .map_err(|e| format!("Invalid UTF-8 sequence in output of git command: {}", e))?
         .trim();
 
-    let p = Path::new(stdout);
-    if p.is_relative() {
-        let current = env::current_dir()
-            .map_err(|e| format!("Unable to get current working directory: {}", e))?;
-        Ok(current.join(&p))
-    } else {
-        Ok(p.to_owned())
-    }
+    Path::new(stdout)
+        .canonicalize()
+        .map_err(|e| format!("Cannot resolve $GIT_DIR: {}", e))
 }
