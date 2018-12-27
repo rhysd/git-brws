@@ -1,7 +1,7 @@
 extern crate open;
 
 use crate::env::Env;
-use crate::errors::*;
+use crate::error::{Error, Result};
 use crate::git::Git;
 use crate::page::parse_page;
 use crate::pull_request;
@@ -34,34 +34,31 @@ pub fn url(cfg: &Config) -> Result<String> {
     }
 }
 
-fn open(url: &str) -> Option<ErrorMsg> {
+fn open(url: &str) -> Result<()> {
     match open::that(url) {
+        Ok(status) if status.success() => Ok(()),
         Ok(status) => {
-            if status.success() {
-                None
-            } else if let Some(code) = status.code() {
-                Some(format!(
-                    "Error on opening URL {}: Command exited with non-zero status {}",
-                    url, code
-                ))
+            let url = url.to_string();
+            let msg = if let Some(code) = status.code() {
+                format!("Command exited with non-zero status {}", code)
             } else {
-                Some(format!(
-                    "Error on opening URL {}: Command terminated by signal",
-                    url
-                ))
-            }
+                "Error on opening URL {}: Command terminated by signal".to_string()
+            };
+            Err(Error::OpenUrlFailure { url, msg })
         }
-        Err(e) => Some(format!("Error on opening URL {}: {}", url, e)),
+        Err(e) => Err(Error::OpenUrlFailure {
+            url: url.to_string(),
+            msg: format!("{}", e),
+        }),
     }
 }
 
-pub fn browse(cfg: &Config) -> Option<ErrorMsg> {
-    match url(cfg) {
-        Ok(ref url) if cfg.stdout => {
-            println!("{}", url);
-            None
-        }
-        Ok(ref url) => open(url),
-        Err(msg) => Some(msg),
+pub fn browse(cfg: &Config) -> Result<()> {
+    let u = url(cfg)?;
+    if cfg.stdout {
+        println!("{}", u);
+        Ok(())
+    } else {
+        open(&u)
     }
 }

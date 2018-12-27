@@ -1,9 +1,8 @@
+use crate::command;
+use crate::error::{Error, Result};
+use crate::git::Git;
 use std::fmt;
 use std::fs;
-
-use crate::command;
-use crate::errors::Result;
-use crate::git::Git;
 
 #[derive(Debug, PartialEq, Copy, Clone)]
 pub enum DiffOp {
@@ -46,10 +45,7 @@ struct BrowsePageParser<'a> {
 impl<'a> BrowsePageParser<'a> {
     fn try_parse_commit(&self) -> Result<Page> {
         if self.cfg.args.len() != 1 {
-            return Err(format!(
-                "  Invalid number of arguments for commit. 1 is expected but given {:?}",
-                self.cfg.args,
-            ));
+            return Err(Error::DiffWrongNumberOfArgs(self.cfg.args.len()));
         }
         let hash = self.git.hash(&self.cfg.args[0])?;
         Ok(Page::Commit { hash })
@@ -57,10 +53,7 @@ impl<'a> BrowsePageParser<'a> {
 
     fn try_parse_diff(&self) -> Result<Page> {
         if self.cfg.args.len() != 1 {
-            return Err(format!(
-                "  Invalid number of arguments for diff. 1 is expected but given {:?}",
-                self.cfg.args,
-            ));
+            return Err(Error::DiffWrongNumberOfArgs(self.cfg.args.len()));
         }
 
         let arg = &self.cfg.args[0];
@@ -69,7 +62,7 @@ impl<'a> BrowsePageParser<'a> {
         } else if arg.contains("..") {
             ".."
         } else {
-            return Err("'..' or '...' must be contained for diff".to_string());
+            return Err(Error::DiffDotsNotFound);
         };
 
         let mut split = arg.splitn(2, dots);
@@ -77,10 +70,9 @@ impl<'a> BrowsePageParser<'a> {
         let rhs = split.next().unwrap();
 
         if lhs.is_empty() || rhs.is_empty() {
-            return Err(format!(
-                "  Not a diff format since LHS and/or RHS is empty {}",
-                arg,
-            ));
+            return Err(Error::DiffHandIsEmpty {
+                input: arg.to_string(),
+            });
         }
 
         Ok(Page::Diff {
@@ -112,22 +104,21 @@ impl<'a> BrowsePageParser<'a> {
     fn try_parse_file_or_dir(&self) -> Result<Page> {
         let len = self.cfg.args.len();
         if len != 1 && len != 2 {
-            return Err(format!(
-                "  Invalid number of arguments for file or directory. 1..2 is expected but given {:?}",
-                self.cfg.args,
-            ));
+            return Err(Error::FileDirWrongNumberOfArgs(len));
         }
 
         let (path, line) = self.parse_path_and_line();
-        let path = fs::canonicalize(path)
-            .map_err(|e| format!("Cannot resolve given path {}: {}", path, e))?;
+        let path = fs::canonicalize(path)?;
 
         let repo_root = self.git.root_dir()?;
         let relative_path = path
             .strip_prefix(&repo_root)
-            .map_err(|e| format!("  Given path is not in repository {:?}: {}", &repo_root, e))?
+            .map_err(|_| Error::FileDirNotInRepo {
+                repo_root: repo_root.to_owned(),
+                path: path.clone(),
+            })?
             .to_str()
-            .ok_or("  Failed to convert path into UTF-8 string")?
+            .expect("Failed to convert path into UTF-8 string")
             .to_string();
 
         let hash = if len == 2 {
@@ -135,6 +126,7 @@ impl<'a> BrowsePageParser<'a> {
         } else {
             self.git.hash("HEAD")?
         };
+
         Ok(Page::FileOrDir {
             relative_path,
             hash,
@@ -144,7 +136,7 @@ impl<'a> BrowsePageParser<'a> {
 }
 
 pub fn parse_page(cfg: &command::Config) -> Result<Page> {
-    let mut errors = vec!["Error on parsing command line arguments".to_string()];
+    let mut attempts = Vec::new();
 
     let parser = BrowsePageParser {
         cfg,
@@ -157,18 +149,21 @@ pub fn parse_page(cfg: &command::Config) -> Result<Page> {
 
     match parser.try_parse_file_or_dir() {
         Ok(p) => return Ok(p),
-        Err(msg) => errors.push(msg),
+        Err(msg) => attempts.push(msg),
     }
 
     match parser.try_parse_diff() {
         Ok(p) => return Ok(p),
-        Err(msg) => errors.push(msg),
+        Err(msg) => attempts.push(msg),
     }
 
     match parser.try_parse_commit() {
         Ok(p) => return Ok(p),
-        Err(msg) => errors.push(msg),
+        Err(msg) => attempts.push(msg),
     }
 
-    Err(errors.join("\n"))
+    Err(Error::PageParseError {
+        args: cfg.args.clone(),
+        attempts,
+    })
 }

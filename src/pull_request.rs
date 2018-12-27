@@ -2,7 +2,7 @@ extern crate url;
 
 use self::url::Url;
 use crate::env::Env;
-use crate::errors::Result;
+use crate::error::{Error, Result};
 use crate::github_api;
 use crate::service::slug_from_path;
 
@@ -34,21 +34,25 @@ fn find_github_pr_url(
         }
     }
 
-    Err(format!(
-        "No pull request authored by @{} at {}@{}",
-        author, repo, branch
-    ))
+    Err(Error::GitHubPullReqNotFound {
+        author: author.to_string(),
+        repo: repo.to_string(),
+        branch: branch.to_string(),
+    })
 }
 
 pub fn find_url<U: AsRef<str>, B: AsRef<str>>(repo_url: U, branch: B, env: &Env) -> Result<String> {
-    let repo_url = Url::parse(repo_url.as_ref())
-        .map_err(|e| format!("Failed to parse URL '{}': {}", repo_url.as_ref(), e))?;
-    let path = repo_url.path();
+    let url = Url::parse(repo_url.as_ref()).map_err(|e| Error::BrokenUrl {
+        url: repo_url.as_ref().to_string(),
+        msg: format!("{}", e),
+    })?;
+    // .map_err(|e| format!("Failed to parse URL '{}': {}", repo_url.as_ref(), e))?;
+    let path = url.path();
     let (author, repo) = slug_from_path(path)?;
-    match repo_url
-        .host_str()
-        .ok_or_else(|| format!("Cannot handle host in URL {}", repo_url))?
-    {
+    match url.host_str().ok_or_else(|| Error::BrokenUrl {
+        url: repo_url.as_ref().to_string(),
+        msg: "No host in URL".to_string(),
+    })? {
         "github.com" => find_github_pr_url(
             author,
             repo,
@@ -63,7 +67,11 @@ pub fn find_url<U: AsRef<str>, B: AsRef<str>>(repo_url: U, branch: B, env: &Env)
             } else {
                 match env.ghe_url_host {
                     Some(ref h) if host == h => &env.ghe_ssh_port,
-                    _ => return Err(format!("--pr or -p does not support the service {}", host)),
+                    _ => {
+                        return Err(Error::PullReqNotSupported {
+                            service: host.to_string(),
+                        })
+                    }
                 }
             };
 

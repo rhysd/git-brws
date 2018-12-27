@@ -2,7 +2,7 @@ extern crate reqwest;
 extern crate serde;
 
 use self::reqwest::{header, Proxy, StatusCode};
-use crate::errors::Result;
+use crate::error::{Error, Result};
 
 #[derive(Debug, Deserialize)]
 struct ParentRepoOwner {
@@ -43,18 +43,11 @@ impl Client {
         let mut b = reqwest::Client::builder();
 
         if let Some(ref p) = https_proxy {
-            b = b.proxy(
-                Proxy::https(p.as_ref())
-                    .map_err(|e| format!("Cannot setup HTTPS proxy {}: {}", p.as_ref(), e))?,
-            );
+            b = b.proxy(Proxy::https(p.as_ref())?);
         }
 
-        let client = b
-            .build()
-            .map_err(|e| format!("Cannot setup HTTP client: {}", e))?;
-
         Ok(Self {
-            client,
+            client: b.build()?,
             token: token.map(|s| s.to_string()),
             endpoint: endpoint.to_string(),
         })
@@ -66,20 +59,17 @@ impl Client {
             req = req.bearer_auth(token);
         }
 
-        let mut res = req
-            .send()
-            .map_err(|e| format!("Cannot send request: {}", e))?;
+        let mut res = req.send()?;
 
         let status = res.status();
-        if status != StatusCode::OK {
-            return Err(format!(
-                "API response status {}: {}",
+        if status == StatusCode::OK {
+            Ok(res)
+        } else {
+            Err(Error::GitHubStatusFailure {
                 status,
-                res.text().unwrap()
-            ));
+                msg: res.text().unwrap(),
+            })
         }
-
-        Ok(res)
     }
 
     pub fn find_pr_url(
@@ -101,9 +91,7 @@ impl Client {
         let url = format!("https://{}/search/issues", self.endpoint);
         let req = self.client.get(url.as_str()).query(&params);
         let mut res = self.send(req)?;
-        let issues: Issues = res
-            .json()
-            .map_err(|err| format!("Cannot deserialize JSON from {}: {}", url, err,))?;
+        let issues: Issues = res.json()?;
 
         if issues.items.is_empty() {
             Ok(None)
@@ -122,9 +110,7 @@ impl Client {
         let url = format!("https://{}/repos/{}/{}", self.endpoint, author, repo);
         let req = self.client.get(url.as_str());
         let mut res = self.send(req)?;
-        let repo: Repo = res
-            .json()
-            .map_err(|e| format!("Cannot deserialize JSON from {}: {}", url, e))?;
+        let repo: Repo = res.json()?;
 
         match repo.parent {
             Some(p) => Ok(Some((p.owner.login, p.name))),

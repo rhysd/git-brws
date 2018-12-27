@@ -1,11 +1,10 @@
 extern crate url;
 
 use self::url::Url;
+use crate::env::Env;
+use crate::error::{Error, Result};
 use crate::page::{DiffOp, Page};
 use std::path::Path;
-
-use crate::env::Env;
-use crate::errors::Result;
 
 fn build_github_like_url(
     host: &str,
@@ -79,10 +78,7 @@ fn build_gitlab_url(
 ) -> Result<String> {
     if let Page::Diff { op, .. } = page {
         if *op == DiffOp::TwoDots {
-            return Err(
-                "GitLab does not support '..' for comparing diff between commits. Please use '...'"
-                    .to_string(),
-            );
+            return Err(Error::GitLabDiffNotSupported);
         }
     }
     Ok(build_github_like_url(host, user, repo, branch, page))
@@ -95,34 +91,56 @@ fn build_bitbucket_url(
     page: &Page,
 ) -> Result<String> {
     match page {
-        Page::Open => if let Some(ref b) = branch {
-            Ok(format!("https://bitbucket.org/{}/{}/branch/{}", user, repo, b))
-        } else {
-            Ok(format!("https://bitbucket.org/{}/{}", user, repo))
-        },
-        Page::Diff {..} => Err("BitBucket does not support diff between commits (see https://bitbucket.org/site/master/issues/4779/ability-to-diff-between-any-two-commits)".to_string()),
-        Page::Commit {ref hash} => Ok(format!("https://bitbucket.org/{}/{}/commits/{}", user, repo, hash)),
-        Page::FileOrDir {ref relative_path, ref hash, line: None} => Ok(format!("https://bitbucket.org/{}/{}/src/{}/{}", user, repo, hash, relative_path)),
-        Page::FileOrDir {ref relative_path, ref hash, line: Some(line)} => {
+        Page::Open => {
+            if let Some(ref b) = branch {
+                Ok(format!(
+                    "https://bitbucket.org/{}/{}/branch/{}",
+                    user, repo, b
+                ))
+            } else {
+                Ok(format!("https://bitbucket.org/{}/{}", user, repo))
+            }
+        }
+        Page::Diff { .. } => Err(Error::BitbucketDiffNotSupported),
+        Page::Commit { ref hash } => Ok(format!(
+            "https://bitbucket.org/{}/{}/commits/{}",
+            user, repo, hash
+        )),
+        Page::FileOrDir {
+            ref relative_path,
+            ref hash,
+            line: None,
+        } => Ok(format!(
+            "https://bitbucket.org/{}/{}/src/{}/{}",
+            user, repo, hash, relative_path
+        )),
+        Page::FileOrDir {
+            ref relative_path,
+            ref hash,
+            line: Some(line),
+        } => {
             let file = Path::new(relative_path)
                 .file_name()
                 .ok_or_else(|| format!("Cannot get file name from path: {}", relative_path))?
                 .to_str()
                 .ok_or_else(|| format!("Cannot convert path to UTF8 string: {}", relative_path))?;
-            Ok(format!("https://bitbucket.org/{}/{}/src/{}/{}#{}-{}", user, repo, hash, relative_path, file, line))
-        },
+            Ok(format!(
+                "https://bitbucket.org/{}/{}/src/{}/{}#{}-{}",
+                user, repo, hash, relative_path, file, line
+            ))
+        }
     }
 }
 
 // Note: Parse '/user/repo.git' or '/user/repo' or 'user/repo' into 'user' and 'repo'
 pub fn slug_from_path<'a>(path: &'a str) -> Result<(&'a str, &'a str)> {
     let mut split = path.split('/').skip_while(|s| s.is_empty());
-    let user = split
-        .next()
-        .ok_or_else(|| format!("Can't detect user name from path {}", path))?;
-    let mut repo = split
-        .next()
-        .ok_or_else(|| format!("Can't detect repository name from path {}", path))?;
+    let user = split.next().ok_or_else(|| Error::NoUserInPath {
+        path: path.to_string(),
+    })?;
+    let mut repo = split.next().ok_or_else(|| Error::NoRepoInPath {
+        path: path.to_string(),
+    })?;
     if repo.ends_with(".git") {
         // Slice '.git' from 'repo.git'
         repo = &repo[0..repo.len() - 4];
@@ -158,7 +176,9 @@ pub fn build_page_url(
                 match env.ghe_url_host {
                     Some(ref v) if v == host => &env.ghe_ssh_port,
                     _ => {
-                        return Err(format!("Unknown hosting service for URL {}. If you want to use custom URL for GitHub Enterprise, please set $GIT_BRWS_GHE_URL_HOST", repo));
+                        return Err(Error::UnknownHostingService {
+                            url: repo.to_string(),
+                        });
                     }
                 }
             };

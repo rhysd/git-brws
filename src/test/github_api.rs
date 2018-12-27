@@ -1,3 +1,4 @@
+use crate::error::Error;
 use crate::github_api::Client;
 use crate::test::helper::https_proxy;
 
@@ -64,9 +65,7 @@ fn test_request_failure() {
         Client::build("unknown.endpoint.example.com", None::<&str>, &None::<&str>).unwrap();
     match client.parent_repo("rhysd", "git-brws") {
         Ok(_) => assert!(false, "request succeeded"),
-        Err(e) => {
-            let msg = format!("{:?}", e);
-            assert!(msg.contains("Cannot send request"), msg);
-        }
+        Err(Error::HttpClientError(..)) => { /* ok */ }
+        Err(e) => assert!(false, "unexpected error: {}", e),
     }
 }

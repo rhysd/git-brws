@@ -1,3 +1,4 @@
+use crate::error::Error;
 use crate::pull_request::find_url;
 use crate::test::helper;
 
@@ -51,11 +52,8 @@ fn test_find_pr_from_original_repo_url() {
 fn test_not_supported_service() {
     let env = helper::empty_env();
     match find_url("https://gitlab.com/rhysd/foo", "some-branch", &env) {
-        Ok(v) => assert!(false, "Unexpected success: {}", v),
-        Err(e) => {
-            let msg = format!("{}", e);
-            assert!(msg.contains("--pr or -p does not support the service"), msg);
-        }
+        Err(Error::PullReqNotSupported { service }) => assert_eq!(service, "gitlab.com"),
+        v => assert!(false, "Unexpected success or error: {:?}", v),
     }
 }
 
@@ -68,12 +66,16 @@ fn test_no_pr_found() {
         &env,
     ) {
         Ok(v) => assert!(false, "Unexpected success: {}", v),
-        Err(e) => {
-            assert_eq!(
-                format!("{}", e).as_str(),
-                "No pull request authored by @rhysd at git-brws@unknown-branch-which-does-not-exist-for-test",
-            );
+        Err(Error::GitHubPullReqNotFound {
+            author,
+            repo,
+            branch,
+        }) => {
+            assert_eq!(author, "rhysd");
+            assert_eq!(repo, "git-brws");
+            assert_eq!(branch, "unknown-branch-which-does-not-exist-for-test");
         }
+        v => assert!(false, "Unexpected success or error: {:?}", v),
     }
 }
 
@@ -86,21 +88,15 @@ fn test_unknown_github_enterprise_url() {
         "some-branch",
         &env,
     ) {
-        Ok(v) => assert!(false, "Unexpected success: {}", v),
-        Err(e) => {
-            let msg = format!("{}", e);
-            assert!(msg.contains("Cannot send request"), msg);
-        }
+        Err(Error::HttpClientError(..)) => { /* ok */ }
+        v => assert!(false, "Unexpected success or error: {:?}", v),
     }
 }
 
 #[test]
 fn test_invalid_url() {
     match find_url("https://", "some-branch", &helper::empty_env()) {
-        Ok(v) => assert!(false, "Unexpected success: {}", v),
-        Err(e) => {
-            let msg = format!("{}", e);
-            assert!(msg.contains("Failed to parse URL"), msg);
-        }
+        Err(Error::BrokenUrl { msg, .. }) => assert!(msg.contains("empty host"), "{}", msg),
+        v => assert!(false, "Unexpected success or error: {:?}", v),
     }
 }

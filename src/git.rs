@@ -1,4 +1,4 @@
-use crate::errors::Result;
+use crate::error::{Error, Result};
 use std::ffi::OsStr;
 use std::fmt::Debug;
 use std::fs;
@@ -17,19 +17,21 @@ impl<'a> Git<'a> {
             .arg("--git-dir")
             .arg(self.git_dir)
             .args(args)
-            .output()
-            .map_err(|e| format!("Error on executing git command: {}", e))?;
-        if !out.status.success() {
+            .output()?;
+        if out.status.success() {
+            let s = str::from_utf8(&out.stdout)
+                .expect("Failed to convert git command stdout from UTF8");
+            Ok(s.trim().to_string())
+        } else {
             let stderr = str::from_utf8(&out.stderr)
-                .expect("Failed to convert git command output from UTF8");
-            return Err(format!(
-                "Git command exited with non-zero status (git-dir: '{:?}', args: '{:?}'): {}",
-                self.git_dir, args, stderr
-            ));
+                .expect("Failed to convert git command stderr from UTF8")
+                .trim()
+                .to_string();
+            Err(Error::GitCommandError {
+                stderr,
+                args: args.iter().map(|a| a.as_ref().to_owned()).collect(),
+            })
         }
-        let s = str::from_utf8(&out.stdout)
-            .map_err(|e| format!("Invalid UTF-8 sequence in output of git command: {}", e))?;
-        Ok(s.trim().to_string())
     }
 
     pub fn hash<S: AsRef<str>>(&self, commit: S) -> Result<String> {
@@ -51,22 +53,18 @@ impl<'a> Git<'a> {
 
         let out = match self.command(&["rev-parse", "--abbrev-ref", "--symbolic", rev.as_str()]) {
             Ok(stdout) => stdout,
-            Err(stderr) => {
-                return if stderr.find("does not point to a branch").is_some() {
-                    Ok(self.remote_url("origin")?)
-                } else {
-                    Err(format!(
-                        "Failed to retrieve default remote name: {}",
-                        stderr
-                    ))
-                }
+            Err(Error::GitCommandError { ref stderr, .. })
+                if stderr.find("does not point to a branch").is_some() =>
+            {
+                return Ok(self.remote_url("origin")?)
             }
+            Err(err) => return Err(err),
         };
 
         // out is formatted as '{remote-url}/{branch-name}'
         match out.splitn(2, '/').next() {
             Some(ref u) => self.remote_url(u),
-            None => Err(format!("Invalid tracking remote name: {}", out)),
+            None => Err(Error::UnexpectedRemoteName(out.clone())),
         }
     }
 
@@ -76,20 +74,17 @@ impl<'a> Git<'a> {
         // `git --git-dir ../.git rev-parse --show-toplevel` always returns
         // current working directory.
         // So here root directory is calculated from git-dir.
-        let p = self.git_dir.parent().ok_or_else(|| {
-            format!(
-                "Cannot locate root directory from git-dir '{:?}'",
-                self.git_dir
-            )
-        })?;
+        let p = self
+            .git_dir
+            .parent()
+            .ok_or_else(|| Error::GitRootDirNotFound {
+                git_dir: self.git_dir.to_owned(),
+            })?;
         Ok(p.to_owned())
     }
 
     pub fn current_branch(&self) -> Result<String> {
-        match self.command(&["rev-parse", "--abbrev-ref", "--symbolic", "HEAD"]) {
-            Ok(stdout) => Ok(stdout),
-            Err(stderr) => Err(format!("Cannot get current branch: {}", stderr)),
-        }
+        self.command(&["rev-parse", "--abbrev-ref", "--symbolic", "HEAD"])
     }
 }
 
@@ -106,26 +101,27 @@ pub fn git_dir(dir: Option<String>, git_cmd: &str) -> Result<PathBuf> {
     let mut cmd = Command::new(if git_cmd != "" { git_cmd } else { "git" });
     cmd.arg("rev-parse").arg("--absolute-git-dir");
     if let Some(d) = dir {
-        let d = fs::canonicalize(&d)
-            .map_err(|e| format!("Cannot resolve repository directory {}: {}", &d, e))?;
-        cmd.current_dir(d);
+        cmd.current_dir(fs::canonicalize(&d)?);
     }
 
     let out = cmd.output().map_err(|e| format!("{}", e))?;
     if !out.status.success() {
         let stderr = str::from_utf8(&out.stderr)
-            .map_err(|e| format!("Failed to convert git command output as UTF-8: {}", e))?;
-        return Err(format!(
-            "Git command exited with non-zero status: {}",
-            stderr
-        ));
+            .expect("Failed to convert git command stderr as UTF-8")
+            .to_string();
+        return Err(Error::GitCommandError {
+            stderr,
+            args: vec![
+                OsStr::new(git_cmd).to_os_string(),
+                OsStr::new("rev-parse").to_os_string(),
+                OsStr::new("--absolute-git-dir").to_os_string(),
+            ],
+        });
     }
 
     let stdout = str::from_utf8(&out.stdout)
-        .map_err(|e| format!("Invalid UTF-8 sequence in output of git command: {}", e))?
+        .expect("Invalid UTF-8 sequence in stdout of git command")
         .trim();
 
-    Path::new(stdout)
-        .canonicalize()
-        .map_err(|e| format!("Cannot resolve $GIT_DIR: {}", e))
+    Ok(Path::new(stdout).canonicalize()?)
 }

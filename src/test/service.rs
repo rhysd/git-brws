@@ -277,8 +277,8 @@ fn customized_ssh_port() {
         ),
     ] {
         assert_eq!(
-            build_page_url(&repo, &p, &None, &envs),
-            Ok(expected.to_string())
+            build_page_url(&repo, &p, &None, &envs).unwrap(),
+            expected.to_string(),
         );
     }
 }
@@ -302,8 +302,9 @@ fn customized_ghe_host() {
                 &Page::Open,
                 &None,
                 &envs,
-            ),
-            Ok(expected.to_string()),
+            )
+            .unwrap(),
+            expected.to_string(),
         );
     }
 }

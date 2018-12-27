@@ -3,7 +3,7 @@ extern crate getopts;
 use self::getopts::Options;
 use crate::command;
 use crate::env::Env;
-use crate::errors::Result;
+use crate::error::{Error, Result};
 use crate::git;
 use crate::git::Git;
 
@@ -43,7 +43,7 @@ fn normalize_repo_format(mut s: String, git: &Git) -> Result<String> {
     match s.chars().filter(|c| *c == '/').count() {
         1 => Ok(format!("https://github.com/{}", s)),
         2 => Ok(format!("https://{}", s)),
-        _ => Err(format!("Error: Invalid repository format '{}'. Format must be one of 'user/repo', 'service/user/repo' or remote name or Git URL.", s)),
+        _ => Err(Error::BrokenRepoFormat { input: s }),
     }
 }
 
@@ -104,9 +104,7 @@ pub fn parse_options<T: AsRef<str>>(argv: &[T]) -> Result<ParsedArgv> {
     opts.optflag("h", "help", "Print this help");
     opts.optflag("v", "version", "Show version");
 
-    let matches = opts
-        .parse(argv[1..].iter().map(|a| a.as_ref()))
-        .map_err(|f| format!("{}", f))?;
+    let matches = opts.parse(argv[1..].iter().map(|a| a.as_ref()))?;
 
     if matches.opt_present("h") {
         return Ok(ParsedArgv::Help(opts.usage(USAGE)));
