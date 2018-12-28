@@ -14,13 +14,13 @@ Features:
   - File ([e.g.](https://github.com/rhysd/git-brws/blob/master/Cargo.toml))
   - Commit ([e.g.](https://github.com/rhysd/git-brws/commit/60024ab1280f9f10423b22bc708f3f6ef97db6b5))
   - Diff ([e.g.](https://github.com/rhysd/git-brws/compare/e3c18d0d50252112d37bde97061370204b3cdab7..60024ab1280f9f10423b22bc708f3f6ef97db6b5), [e.g.](https://github.com/rhysd/git-brws/compare/e3c18d0d50252112d37bde97061370204b3cdab7...60024ab1280f9f10423b22bc708f3f6ef97db6b5))
-  - Pull request (Only GitHub and GitHub Enterprise) ([e.g.](https://github.com/rust-lang/rust.vim/pull/290))
-- Supports below services
+  - Pull request (only for GitHub and GitHub Enterprise) ([e.g.](https://github.com/rust-lang/rust.vim/pull/290))
+- Supports following services
   - [GitHub](https://github.com)
   - [Bitbucket](https://bitbucket.org)
   - [GitHub Enterprise](https://enterprise.github.com/home)
   - [GitLab](https://about.gitlab.com/)
-- Prefers commit-specific page URL
+- Prefers commit-specific page URL (permlink)
 - Available on Linux, macOS and Windows
 
 ## Installation
@@ -33,10 +33,10 @@ Features:
 $ cargo install git-brws
 ```
 
-- As a single binary
+- As a single executable binary
 
 You can download a binary executable from [release page][] for macOS, Linux (x86\_64, i686) and Windows
-(64bit, 32bit). Unarchive downloaded file and put the binary in a directory in `$PATH`.
+(64bit, 32bit). Unarchive downloaded file and put the executable in `$PATH`.
 
 ## Usage
 
@@ -53,8 +53,6 @@ Options:
     -h, --help          Print this help
     -v, --version       Show version
 ```
-
-## Usage Examples
 
 ### Open a repository page
 
@@ -124,11 +122,9 @@ $ git brws HEAD~3..HEAD
 $ git brws 60024ab..113079b
 ```
 
-Note: Only GitHub and GitHub Enterprise support `...`. For GitLab, only `...` is available.
-
 ### Show a diff page from specific commit and its merge base
 
-Not only `..`, `...` is supported.
+In addition to `..`, diff with `...` is supported.
 
 - Show diff between `branchB` and the merge base commit from `branchB` into `branchA`
 
@@ -137,6 +133,8 @@ $ git brws branchA...branchB
 ```
 
 If you don't know the difference between `..` and `...`, please read `git diff --help`.
+
+Note: Only GitHub and GitHub Enterprise support `...`. For GitLab, only `...` is available.
 
 ### Open a pull request page
 
@@ -209,13 +207,27 @@ Please see [the project page](https://github.com/rhysd/git-brws/projects/1).
 
 ## Development
 
-```sh
-cargo install cargo-watch
-```
+To watch file changes and run linter/tests automatically:
 
 ```sh
-# Watch and build sources/tests automatically
-cargo watch
+cargo install cargo-watch
+cargo watch -x clippy -x test
+```
+
+Some tests require GitHub API access token. To run full tests:
+
+```sh
+export GITHUB_TOKEN=xxxxxxxxxxx
+cargo test
+```
+
+`cargo test` and `cargo clippy` are automatically run on pushing to remote by [cargo-husky](https://github.com/rhysd/cargo-husky).
+But some tests fail when the remote tracking branch does not exist. When you create a new branch,
+please use `--no-verify`. Please do not use `--no-verify` otherwise.
+
+```sh
+git checkout -b new-branch
+git push -u origin new-branch --no-verify
 ```
 
 [GitHub Project]: https://github.com/rhysd/git-brws
