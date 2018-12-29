@@ -1,6 +1,8 @@
+use crate::error::Error;
 use crate::page::{DiffOp, Page};
 use crate::service::build_page_url;
 use crate::test::helper::empty_env;
+use std::path::Path;
 
 // Note:
 // git@ -> ssh://git@ conversion is done in git.rs.
@@ -181,7 +183,10 @@ fn parse_and_build_diff_page_for_bitbucket() {
 #[test]
 fn parse_and_build_file_page() {
     let p = Page::FileOrDir {
-        relative_path: "src/main.rs".to_string(),
+        relative_path: Path::new("src")
+            .join("main.rs")
+            .to_string_lossy()
+            .into_owned(),
         hash: "561848bad7164d7568658456088b107ec9efd9f3".to_string(),
         line: None,
     };
@@ -210,7 +215,10 @@ fn parse_and_build_file_page() {
 #[test]
 fn parse_and_build_file_page_with_line_number() {
     let p = Page::FileOrDir {
-        relative_path: "src/main.rs".to_string(),
+        relative_path: Path::new("src")
+            .join("main.rs")
+            .to_string_lossy()
+            .into_owned(),
         hash: "561848bad7164d7568658456088b107ec9efd9f3".to_string(),
         line: Some(12),
     };
@@ -221,7 +229,7 @@ fn parse_and_build_file_page_with_line_number() {
         ),
         (
             "https://bitbucket.org/user/repo.git",
-            "https://bitbucket.org/user/repo/src/561848bad7164d7568658456088b107ec9efd9f3/src/main.rs#main.rs-12",
+            "https://bitbucket.org/user/repo/src/561848bad7164d7568658456088b107ec9efd9f3/src/main.rs#lines-12",
         ),
         (
             "https://github.somewhere.com/user/repo.git",
@@ -306,5 +314,19 @@ fn customized_ghe_host() {
             .unwrap(),
             expected.to_string(),
         );
+    }
+}
+
+#[test]
+fn broken_repo_url() {
+    let env = &empty_env();
+    for &url in &[
+        "https://foo@/foo.bar", // empty host
+        "https://foo bar",      // invalid domain character
+    ] {
+        match build_page_url(&url, &Page::Open, &None, env) {
+            Err(Error::BrokenUrl { .. }) => { /* ok */ }
+            v => assert!(false, "Unexpected error or success: {:?}", v),
+        }
     }
 }
