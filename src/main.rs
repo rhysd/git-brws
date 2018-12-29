@@ -16,14 +16,22 @@ mod test;
 
 use crate::argv::{parse_options, ParsedArgv};
 use std::env::args;
+use std::process::exit;
 
-#[allow(clippy::unit_arg)]
-fn main() -> error::Result<()> {
+fn run() -> error::Result<()> {
     let argv = args().collect::<Vec<_>>();
-    let parsed = parse_options(argv.as_slice())?;
-    match parsed {
-        ParsedArgv::Help(usage) => Ok(eprintln!("{}", usage)),
-        ParsedArgv::Version(version) => Ok(println!("{}", version)),
-        ParsedArgv::Parsed(opts) => command::browse(&opts),
+    match parse_options(argv.as_slice())? {
+        ParsedArgv::Help(usage) => eprintln!("{}", usage),
+        ParsedArgv::Version(version) => println!("{}", version),
+        ParsedArgv::Parsed(opts) => command::browse(&opts)?,
+    }
+    Ok(())
+}
+
+// Note: fn main() -> error::Result<()> is not available since it uses {:?} for error message.
+fn main() {
+    if let Err(e) = run() {
+        eprintln!("Error: {}", e);
+        exit(3);
     }
 }

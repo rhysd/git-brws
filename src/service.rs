@@ -4,7 +4,6 @@ use self::url::Url;
 use crate::env::Env;
 use crate::error::{Error, Result};
 use crate::page::{DiffOp, Page};
-use std::path::Path;
 
 fn build_github_like_url(
     host: &str,
@@ -118,17 +117,10 @@ fn build_bitbucket_url(
             ref relative_path,
             ref hash,
             line: Some(line),
-        } => {
-            let file = Path::new(relative_path)
-                .file_name()
-                .ok_or_else(|| format!("Cannot get file name from path: {}", relative_path))?
-                .to_str()
-                .ok_or_else(|| format!("Cannot convert path to UTF8 string: {}", relative_path))?;
-            Ok(format!(
-                "https://bitbucket.org/{}/{}/src/{}/{}#{}-{}",
-                user, repo, hash, relative_path, file, line
-            ))
-        }
+        } => Ok(format!(
+            "https://bitbucket.org/{}/{}/src/{}/{}#lines-{}",
+            user, repo, hash, relative_path, line
+        )),
     }
 }
 
@@ -157,12 +149,16 @@ pub fn build_page_url(
     branch: &Option<String>,
     env: &Env,
 ) -> Result<String> {
-    let url = Url::parse(repo).map_err(|e| format!("Failed to parse URL '{}': {}", repo, e))?;
+    let url = Url::parse(repo).map_err(|e| Error::BrokenUrl {
+        url: repo.to_string(),
+        msg: format!("{}", e),
+    })?;
     let path = url.path();
     let (user, repo_name) = slug_from_path(path)?;
-    let host = url
-        .host_str()
-        .ok_or_else(|| format!("Failed to parse host from {}", repo))?;
+    let host = url.host_str().ok_or_else(|| Error::BrokenUrl {
+        url: repo.to_string(),
+        msg: "No host in URL".to_string(),
+    })?;
     match host {
         "github.com" => Ok(build_github_like_url(host, user, repo_name, branch, page)),
         "gitlab.com" => build_gitlab_url(host, user, repo_name, branch, page),

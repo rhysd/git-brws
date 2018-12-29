@@ -104,7 +104,7 @@ pub fn git_dir(dir: Option<String>, git_cmd: &str) -> Result<PathBuf> {
         cmd.current_dir(fs::canonicalize(&d)?);
     }
 
-    let out = cmd.output().map_err(|e| format!("{}", e))?;
+    let out = cmd.output()?;
     if !out.status.success() {
         let stderr = str::from_utf8(&out.stderr)
             .expect("Failed to convert git command stderr as UTF-8")

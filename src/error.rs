@@ -93,7 +93,6 @@ pub enum Error {
         args: Vec<String>,
         attempts: Vec<Error>,
     },
-    Todo(String),
 }
 
 impl fmt::Display for Error {
@@ -128,7 +127,6 @@ impl fmt::Display for Error {
                 }
                 Ok(())
             }
-            Error::Todo(msg) => write!(f, "Error: {}", msg),
         }
     }
 }
@@ -148,12 +146,6 @@ impl From<reqwest::Error> for Error {
 impl From<self::getopts::Fail> for Error {
     fn from(f: self::getopts::Fail) -> Error {
         Error::CliParseFail(f)
-    }
-}
-
-impl From<String> for Error {
-    fn from(msg: String) -> Error {
-        Error::Todo(msg)
     }
 }
 
