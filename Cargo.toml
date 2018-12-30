@@ -8,21 +8,22 @@ readme = "README.md"
 include = ["src/**/*.rs", "Cargo.toml", "LICENSE.txt"]
 license-file = "LICENSE.txt"
 
+[package.metadata.release]
+no-dev-version = true
+
 [badges]
 travis-ci = { repository = "rhysd/git-brws" }
 appveyor = { repository = "rhysd/git-brws" }
 maintenance = { status = "actively-developed" }
 
-[package.metadata.release]
-no-dev-version = true
-
 [dependencies]
 getopts = "0.2"
 url = "1.7"
 open = "1.2"
-reqwest = "0.9.5"
-serde_derive = "1.0.82"
-serde = "1.0.82"
+reqwest = "0.9"
+serde_derive = "1.0"
+serde = "1.0"
+path-slash = "0.1"
 
 [dev-dependencies.cargo-husky]
 version = "1.2"

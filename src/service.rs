@@ -1,9 +1,23 @@
+extern crate path_slash;
 extern crate url;
 
 use self::url::Url;
 use crate::env::Env;
 use crate::error::{Error, Result};
 use crate::page::{DiffOp, Page};
+
+#[cfg(target_os = "windows")]
+fn to_slash<S: AsRef<str>>(s: &S) -> String {
+    use self::path_slash::PathExt;
+    use std::path::Path;
+    Path::new(s.as_ref()).to_slash_lossy()
+}
+
+// Do nothing on Windows
+#[cfg(not(target_os = "windows"))]
+fn to_slash<S: AsRef<str>>(s: &S) -> &str {
+    s.as_ref()
+}
 
 fn build_github_like_url(
     host: &str,
@@ -35,7 +49,11 @@ fn build_github_like_url(
             line: None,
         } => format!(
             "https://{}/{}/{}/blob/{}/{}",
-            host, user, repo, hash, relative_path
+            host,
+            user,
+            repo,
+            hash,
+            to_slash(relative_path)
         ),
         Page::FileOrDir {
             ref relative_path,
@@ -43,7 +61,12 @@ fn build_github_like_url(
             line: Some(line),
         } => format!(
             "https://{}/{}/{}/blob/{}/{}#L{}",
-            host, user, repo, hash, relative_path, line
+            host,
+            user,
+            repo,
+            hash,
+            to_slash(relative_path),
+            line
         ),
     }
 }
@@ -111,7 +134,10 @@ fn build_bitbucket_url(
             line: None,
         } => Ok(format!(
             "https://bitbucket.org/{}/{}/src/{}/{}",
-            user, repo, hash, relative_path
+            user,
+            repo,
+            hash,
+            to_slash(relative_path)
         )),
         Page::FileOrDir {
             ref relative_path,
@@ -119,7 +145,11 @@ fn build_bitbucket_url(
             line: Some(line),
         } => Ok(format!(
             "https://bitbucket.org/{}/{}/src/{}/{}#lines-{}",
-            user, repo, hash, relative_path, line
+            user,
+            repo,
+            hash,
+            to_slash(relative_path),
+            line
         )),
     }
 }
