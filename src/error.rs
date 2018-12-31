@@ -33,6 +33,21 @@ use std::io;
 use std::path::PathBuf;
 
 #[derive(Debug)]
+pub enum ExpectedNumberOfArgs {
+    Single(usize),
+    Range(usize, usize),
+}
+
+impl fmt::Display for ExpectedNumberOfArgs {
+    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+        match self {
+            ExpectedNumberOfArgs::Single(num) => write!(f, "{}", num),
+            ExpectedNumberOfArgs::Range(min, max) => write!(f, "{}..{}", min, max),
+        }
+    }
+}
+
+#[derive(Debug)]
 pub enum Error {
     BrokenRepoFormat {
         input: String,
@@ -79,12 +94,15 @@ pub enum Error {
     GitRootDirNotFound {
         git_dir: PathBuf,
     },
-    DiffWrongNumberOfArgs(usize),
+    WrongNumberOfArgs {
+        expected: ExpectedNumberOfArgs,
+        actual: usize,
+        kind: String,
+    },
     DiffDotsNotFound,
     DiffHandIsEmpty {
         input: String,
     },
-    FileDirWrongNumberOfArgs(usize),
     FileDirNotInRepo {
         repo_root: PathBuf,
         path: PathBuf,
@@ -93,6 +111,7 @@ pub enum Error {
         args: Vec<String>,
         attempts: Vec<Error>,
     },
+    InvalidIssueNumberFormat,
 }
 
 impl fmt::Display for Error {
@@ -115,10 +134,9 @@ impl fmt::Display for Error {
             Error::GitCommandError{stderr, args} => write!(f, "Git command {:?} exited with non-zero status: {}", args, stderr),
             Error::GitRootDirNotFound{git_dir} => write!(f, "Cannot locate root directory from GIT_DIR {:?}", git_dir),
             Error::UnexpectedRemoteName(name) => write!(f, "Tracking name must be remote-url/branch-name: {}", name),
-            Error::DiffWrongNumberOfArgs(arity) => write!(f, "Invalid number of arguments for commit. 1 is expected but given {}", arity),
+            Error::WrongNumberOfArgs{expected, actual, kind} => write!(f, "Invalid number of arguments for {}. {} is expected but given {}", kind, expected, actual),
             Error::DiffDotsNotFound => write!(f, "'..' or '...' must be contained for diff"),
             Error::DiffHandIsEmpty{input} => write!(f, "Not a diff format since LHS and/or RHS is empty {}", input),
-            Error::FileDirWrongNumberOfArgs(arity) => write!(f, "Invalid number of arguments for file or directory. 1..2 is expected but given {}", arity),
             Error::FileDirNotInRepo{repo_root, path} => write!(f, "Given path '{:?}' is not in repository '{:?}'", path, repo_root),
             Error::PageParseError{args, attempts} => {
                 write!(f, "Error on parsing command line arguments {:?}", args)?;
@@ -127,6 +145,7 @@ impl fmt::Display for Error {
                 }
                 Ok(())
             }
+            Error::InvalidIssueNumberFormat => write!(f, "Issue number must start with '#' followed by numbers like #123"),
         }
     }
 }

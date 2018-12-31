@@ -68,6 +68,7 @@ fn build_github_like_url(
             to_slash(relative_path),
             line
         ),
+        Page::Issue { number } => format!("https://{}/{}/{}/issues/{}", host, user, repo, number),
     }
 }
 
@@ -150,6 +151,10 @@ fn build_bitbucket_url(
             hash,
             to_slash(relative_path),
             line
+        )),
+        Page::Issue { number } => Ok(format!(
+            "https://bitbucket.org/{}/{}/issues/{}",
+            user, repo, number
         )),
     }
 }
