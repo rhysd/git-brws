@@ -330,3 +330,31 @@ fn broken_repo_url() {
         }
     }
 }
+
+#[test]
+fn parse_and_build_issue_number() {
+    let p = Page::Issue { number: 123 };
+    for &(repo, expected) in &[
+        (
+            "https://github.com/user/repo.git",
+            "https://github.com/user/repo/issues/123",
+        ),
+        (
+            "https://bitbucket.org/user/repo.git",
+            "https://bitbucket.org/user/repo/issues/123",
+        ),
+        (
+            "https://github.somewhere.com/user/repo.git",
+            "https://github.somewhere.com/user/repo/issues/123",
+        ),
+        (
+            "https://gitlab.com/user/repo.git",
+            "https://gitlab.com/user/repo/issues/123",
+        ),
+    ] {
+        assert_eq!(
+            build_page_url(&repo, &p, &None, &empty_env()).unwrap(),
+            expected
+        );
+    }
+}
