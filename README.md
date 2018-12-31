@@ -15,6 +15,7 @@ Features:
   - Commit ([e.g.](https://github.com/rhysd/git-brws/commit/60024ab1280f9f10423b22bc708f3f6ef97db6b5))
   - Diff ([e.g.](https://github.com/rhysd/git-brws/compare/e3c18d0d50252112d37bde97061370204b3cdab7..60024ab1280f9f10423b22bc708f3f6ef97db6b5), [e.g.](https://github.com/rhysd/git-brws/compare/e3c18d0d50252112d37bde97061370204b3cdab7...60024ab1280f9f10423b22bc708f3f6ef97db6b5))
   - Pull request (only for GitHub and GitHub Enterprise) ([e.g.](https://github.com/rust-lang/rust.vim/pull/290))
+  - Issue ([e.g.](https://github.com/rhysd/git-brws/issues/8))
 - Supports following services
   - [GitHub](https://github.com)
   - [Bitbucket](https://bitbucket.org)
@@ -158,6 +159,16 @@ Note: Currently only GitHub and GitHub Enterprise are supported.
 
 Note: If you have created multiple pull requests at the same repository with the same branch name,
 the command may not open a pull request page you want.
+
+### Open an issue page
+
+- Show issue #8
+
+```
+$ git brws '#8'
+```
+
+Note: `#` is usually used for a line comment in major shells. Please quote the argument
 
 ### Cooperate with other tools
 
