@@ -1,0 +1,352 @@
+.\" generated with Ronn/v0.7.3
+.\" http://github.com/rtomayko/ronn/tree/0.7.3
+.
+.TH "GIT\-BRWS" "1" "December 2018" "" ""
+.
+.SH "NAME"
+\fBgit\-brws\fR \- open a repository, file, commit, diff, pull request or issue in your web browser
+.
+.SH "SYNOPSIS"
+\fBgit brws\fR
+.
+.br
+\fBgit brws\fR \fIfile\fR\.\.\.
+.
+.br
+\fBgit brws\fR \fIfile\fR#L\fInum\fR\.\.\.
+.
+.br
+\fBgit brws\fR \fIbranch\fR
+.
+.br
+\fBgit brws\fR \fIcommit\fR\.\.\fIcommit\fR
+.
+.br
+\fBgit brws\fR \fIcommit\fR\.\.\.\fIcommit\fR
+.
+.br
+\fBgit brws\fR \-\-pr
+.
+.br
+.
+.SH "DESCRIPTION"
+\fBgit\-brws\fR is a command line tool to open a repository, file, commit, diff, pull request or issue in your web browser from command line\. \'brws\' is an abbreviation of \'browse\'\.
+.
+.P
+Example of pages which \fBgit\-brws\fR can open are:
+.
+.IP "\(bu" 4
+\fBRepository\fR: https://github\.com/rhysd/git\-brws
+.
+.IP "\(bu" 4
+\fBFile\fR: https://github\.com/rhysd/git\-brws/blob/master/Cargo\.toml
+.
+.IP "\(bu" 4
+\fBCommit\fR: https://github\.com/rhysd/git\-brws/commit/60024ab
+.
+.IP "\(bu" 4
+\fBDiff\fR: https://github\.com/rhysd/git\-brws/compare/e3c18d0\.\.60024ab
+.
+.IP "\(bu" 4
+\fBPull request\fR: https://github\.com/rust\-lang/rust\.vim/pull/290
+.
+.IP "\(bu" 4
+\fBIssue\fR: https://github\.com/rhysd/git\-brws/issues/8
+.
+.IP "" 0
+.
+.P
+\fBgit\-brws\fR prefers permlink to the latest page since the latest page will change when new commit is pushed to the branch\.
+.
+.SH "SERVICES"
+\fBgit\-brws\fR supports GitHub, GitHub Enterprise, BitBucket, GitLab as Git repository hosting services\.
+.
+.IP "\(bu" 4
+\fBGitHub\fR: https://github\.com
+.
+.IP "\(bu" 4
+\fBBitbucket\fR: https://bitbucket\.org
+.
+.IP "\(bu" 4
+\fBGitHub Enterprise\fR: https://enterprise\.github\.com/home
+.
+.IP "\(bu" 4
+\fBGitLab\fR: https://about\.gitlab\.com/
+.
+.IP "" 0
+.
+.SH "OPTIONS"
+In addition to arguments described in \fISERVICES\fR, following options are available as command line arguments\. All are optional\.
+.
+.IP "\(bu" 4
+\fB\-r\fR, \fB\-\-repo\fR \fIREPO\fR: Specify which repository should be open\. \fIREPO\fR is one of (1) shorthand format (user/repo, service/user/repo), (2) remote name (e\.g\. origin) or (3) Git URL you want to see\.
+.
+.IP "\(bu" 4
+\fB\-b\fR, \fB\-\-branch\fR \fIBRANCH\fR Branch name to browse\.
+.
+.IP "\(bu" 4
+\fB\-d\fR, \fB\-\-dir\fR \fIPATH\fR: Directory path to the repository\.
+.
+.IP "\(bu" 4
+\fB\-u\fR, \fB\-\-url\fR: Output URL to stdout instead of opening in browser\.
+.
+.IP "\(bu" 4
+\fB\-p\fR, \fB\-\-pr\fR: Open pull request page instead of repository page\.
+.
+.IP "\(bu" 4
+\fB\-h\fR, \fB\-\-help\fR: Print this help\.
+.
+.IP "\(bu" 4
+\fB\-v\fR, \fB\-\-version\fR: Show version\.
+.
+.IP "" 0
+.
+.SH "EXAMPLES"
+Open current repository page\.
+.
+.IP "" 4
+.
+.nf
+
+$ git brws
+.
+.fi
+.
+.IP "" 0
+.
+.P
+Open \'develop\' branch\.
+.
+.IP "" 4
+.
+.nf
+
+$ git brws \-b develop
+.
+.fi
+.
+.IP "" 0
+.
+.P
+Open \'origin\' remote of \'develop\' branch\.
+.
+.IP "" 4
+.
+.nf
+
+$ git brws \-r origin \-b develop
+.
+.fi
+.
+.IP "" 0
+.
+.P
+Open @rhysd\'s \'Shiba\' repository\.
+.
+.IP "" 4
+.
+.nf
+
+$ git brws \-r rhysd/Shiba
+.
+.fi
+.
+.IP "" 0
+.
+.P
+Open a repository specified by directory\.
+.
+.IP "" 4
+.
+.nf
+
+$ git brws \-d ~/\.go/src/github\.com/rhysd/dot\-github
+.
+.fi
+.
+.IP "" 0
+.
+.P
+Open specific file of current branch of current remote\.
+.
+.IP "" 4
+.
+.nf
+
+$ git brws \./some/file\.txt
+.
+.fi
+.
+.IP "" 0
+.
+.P
+Open specific line of the file\.
+.
+.IP "" 4
+.
+.nf
+
+$ git brws \./some/file\.txt#L123
+.
+.fi
+.
+.IP "" 0
+.
+.P
+Open \'HEAD\' page of current repository\.
+.
+.IP "" 4
+.
+.nf
+
+$ git brws HEAD
+.
+.fi
+.
+.IP "" 0
+.
+.P
+Show diff between \'HEAD\' and \'HEAD~3\'\.
+.
+.IP "" 4
+.
+.nf
+
+$ git brws HEAD~3\.\.HEAD
+.
+.fi
+.
+.IP "" 0
+.
+.P
+Show diff between \'113079b\' and \'60024ab\'\.
+.
+.IP "" 4
+.
+.nf
+
+$ git brws 60024ab\.\.113079b
+.
+.fi
+.
+.IP "" 0
+.
+.P
+In addition to \'\.\.\', diff with \'\.\.\.\' is supported\. Show diff between \'branchB\' and the merge base commit from \'branchB\' into \'branchA\' If you don\'t know the difference between \'\.\.\' and \'\.\.\.\', please read \'git diff \-\-help\'\.
+.
+.P
+\fINote:\fR Only GitHub and GitHub Enterprise support \'\.\.\.\'\. For GitLab, only \'\.\.\.\' is available\.
+.
+.IP "" 4
+.
+.nf
+
+$ git brws branchA\.\.\.branchB
+.
+.fi
+.
+.IP "" 0
+.
+.P
+Show pull request page of current branch of current repository\.
+.
+.IP "" 4
+.
+.nf
+
+$ git brws \-\-pr
+.
+.fi
+.
+.IP "" 0
+.
+.P
+Show pull request page of specific branch of specific repository\.
+.
+.P
+\fINote:\fR Currently only GitHub and GitHub Enterprise are supported\.
+.
+.P
+\fINote:\fR If you have created multiple pull requests at the same repository with the same branch name, the command may not open a pull request page you want\.
+.
+.IP "" 4
+.
+.nf
+
+# Specify my forked repository
+$ git brws \-\-pr \-\-repo rhysd/rust\.vim \-b async\-contextual\-keyword
+
+# Or specify original repository
+$ git brws \-\-pr \-\-repo rust\-lang/rust\.vim \-b async\-contextual\-keyword
+.
+.fi
+.
+.IP "" 0
+.
+.P
+Open an issue page\.
+.
+.P
+\fINote:\fR \'#\' is usually used for a line comment in major shells\. Please quote the argument
+.
+.IP "" 4
+.
+.nf
+
+$ git brws \'#8\'
+.
+.fi
+.
+.IP "" 0
+.
+.SH "ENVIRONMENT"
+.
+.TP
+\fB$GIT_BRWS_GIT_COMMAND\fR
+Git command to use\. If not specified, "git" will be used\.
+.
+.TP
+\fB$GIT_BRWS_GHE_URL_HOST\fR
+When you use your own GitHub Enterprise repository, you can specify its host to this variable\. By default, \fBgit\-brws\fR detects \'^github\.\' as GHE host\. If your GHE repository host does not match it, please specify this variable\. If your repository is \'https://example\-repo\.org/user/repo\', \'example\-repo\.org\' should be set\.
+.
+.TP
+\fB$GIT_BRWS_GHE_SSH_PORT\fR
+When you set a number to it, the number will be used for the ssh port for GitHub Enterprise URLs\.
+.
+.TP
+\fB$GIT_BRWS_GITLAB_SSH_PORT\fR
+When you set a number to it, the number will be used for the ssh port for self\-hosted GitLab URLs\. This is useful when your environment hosts GitLab to non\-trivial ssh port URL\.
+.
+.TP
+\fB$GIT_BRWS_GITHUB_TOKEN\fR
+This variable is used for \'\-\-pr\' (or \'\-p\') only\. API access token for github\.com\. They are optional, but useful for avoiding API rate limit and accessing to private repositories\. Please generate a token from https://github\.com/settings/tokens/new
+.
+.TP
+\fB$GITHUB_TOKEN\fR
+Ditto\. When $GIT_BRWS_GITHUB_TOKEN is not set, $GITHUB_TOKEN is looked\.
+.
+.TP
+\fB$GIT_BRWS_GHE_TOKEN\fR
+This variable is used for \'\-\-pr\' (or \'\-p\') only\. API access token for GitHub Enterprise instance\. It is sometimes mandatory (depending on your GHE instance configuration)\. Please generate a token from \'https://{YOUR GHE HOST}/settings/tokens/new\'\.
+.
+.TP
+\fB$https_proxy\fR
+This variable is used for \'\-\-pr\' (or \'\-p\') only\. A HTTPS Proxy server URL if you use a web proxy\.
+.
+.SH "REPOSITORY"
+\fBgit\-brws\fR is developed at repository hosted on GitHub\.
+.
+.P
+https://github\.com/rhysd/git\-brws
+.
+.SH "BUGS"
+Please visit issues page to see known bugs\. If you\'ve found a new bug, please report it here\.
+.
+.P
+https://github\.com/rhysd/git\-brws/issues
+.
+.SH "COPYRIGHT"
+\fBgit\-brws\fR is licensed under the MIT License Copyright (c) 2016 rhysd
+.
+.SH "SEE ALSO"
+GIT(1)

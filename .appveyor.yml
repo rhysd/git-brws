@@ -45,6 +45,7 @@ before_deploy:
   - copy target\release\git-brws.exe staging
   - copy README.md staging
   - copy LICENSE.txt staging
+  - copy git-brws.1 staging
   - cd staging
   # release zipfile will look like 'git-brws-1.2.3-x86_64-pc-windows-msvc'
   - 7z a ../git-brws-%APPVEYOR_REPO_TAG_NAME%-%TARGET%.zip *

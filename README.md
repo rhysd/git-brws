@@ -4,8 +4,8 @@ git brws
 [![Linux and macOS CI][travis-badge]][travis-ci]
 [![Windows CI][appveyor-badge]][appveyor]
 
-`git brws` is a command line tool to open a repository, file, commit, diff or pull request in your web
-browser from command line. 'brws' is an abbreviation of 'browse'.
+`git brws` is a command line tool to open a repository, file, commit, diff, pull request or issue in
+your web browser from command line. 'brws' is an abbreviation of 'browse'.
 
 Features:
 
@@ -38,6 +38,12 @@ $ cargo install git-brws
 
 You can download a binary executable from [release page][] for macOS, Linux (x86\_64, i686) and Windows
 (64bit, 32bit). Unarchive downloaded file and put the executable in `$PATH`.
+
+Manpage for `man` command is available. Please find `git-brws.1` in the unarchived directory or download
+it from [here](https://raw.githubusercontent.com/rhysd/git-brws/master/git-brws.1) and copy it to the
+`man` directory in your system (e.g. `/usr/local/share/man/man1/`).
+
+Note: `git brws --help` only works when it is installed.
 
 ## Usage
 
@@ -239,6 +245,14 @@ please use `--no-verify`. Please do not use `--no-verify` otherwise.
 ```sh
 git checkout -b new-branch
 git push -u origin new-branch --no-verify
+```
+
+To update manpage file `git-brws.1`, please edit `git-brws.1.ronn` and generate `git-brws.1`
+automatically with `ronn` command.
+
+```sh
+gem install ronn
+ronn git-brws.1.ronn
 ```
 
 [GitHub Project]: https://github.com/rhysd/git-brws
