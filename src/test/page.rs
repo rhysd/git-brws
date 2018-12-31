@@ -267,17 +267,20 @@ fn issue_number() {
 
 #[test]
 fn line_cannot_be_set_to_dir() {
-    let c = config("https://github.com/user/repo.git", None, vec!["src#123"]);
-    match parse_page(&c) {
-        Err(Error::PageParseError { attempts, .. }) => assert!(
-            attempts.iter().any(|err| match err {
-                Error::LineSpecifiedForDir(path) => format!("{:?}", path).contains("src"),
-                _ => false,
-            }),
-            "{:?}",
-            attempts,
-        ),
-        v => assert!(false, "Unexpected result {:?}", v),
+    for arg in &["src#123", "src#12-23"] {
+        let c = config("https://github.com/user/repo.git", None, vec![arg]);
+        match parse_page(&c) {
+            Err(Error::PageParseError { attempts, .. }) => assert!(
+                attempts.iter().any(|err| match err {
+                    Error::LineSpecifiedForDir(path) => format!("{:?}", path).contains("src"),
+                    _ => false,
+                }),
+                "{:?} for {}",
+                attempts,
+                arg,
+            ),
+            v => assert!(false, "Unexpected result {:?} for {}", v, arg),
+        }
     }
 }
 
