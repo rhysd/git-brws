@@ -28,6 +28,16 @@ Features:
 
 `git brws` is available on Linux, macOS and Windows.
 
+- With [Homebrew](https://brew.sh/)
+
+```
+$ brew tap "rhysd/git-brws" "https://github.com/rhysd/git-brws"
+$ brew install git-brws
+```
+
+It installs `git-brws` to `/usr/local/bin` and `git-brws.1` to `/usr/local/share/man/man1`.
+This is recommended way for installation on macOS since updating to the new version is easy.
+
 - With [cargo](https://crates.io/)
 
 ```
