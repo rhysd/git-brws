@@ -1,5 +1,5 @@
 use crate::command;
-use crate::error::{Error, Result};
+use crate::error::{Error, ExpectedNumberOfArgs, Result};
 use crate::git::Git;
 use std::fmt;
 use std::fs;
@@ -35,6 +35,9 @@ pub enum Page {
         hash: String,
         line: Option<usize>,
     },
+    Issue {
+        number: usize,
+    },
 }
 
 struct BrowsePageParser<'a> {
@@ -45,7 +48,11 @@ struct BrowsePageParser<'a> {
 impl<'a> BrowsePageParser<'a> {
     fn try_parse_commit(&self) -> Result<Page> {
         if self.cfg.args.len() != 1 {
-            return Err(Error::DiffWrongNumberOfArgs(self.cfg.args.len()));
+            return Err(Error::WrongNumberOfArgs {
+                expected: ExpectedNumberOfArgs::Single(1),
+                actual: self.cfg.args.len(),
+                kind: "commit".to_string(),
+            });
         }
         let hash = self.git.hash(&self.cfg.args[0])?;
         Ok(Page::Commit { hash })
@@ -53,7 +60,11 @@ impl<'a> BrowsePageParser<'a> {
 
     fn try_parse_diff(&self) -> Result<Page> {
         if self.cfg.args.len() != 1 {
-            return Err(Error::DiffWrongNumberOfArgs(self.cfg.args.len()));
+            return Err(Error::WrongNumberOfArgs {
+                expected: ExpectedNumberOfArgs::Single(1),
+                actual: self.cfg.args.len(),
+                kind: "diff".to_string(),
+            });
         }
 
         let arg = &self.cfg.args[0];
@@ -104,7 +115,11 @@ impl<'a> BrowsePageParser<'a> {
     fn try_parse_file_or_dir(&self) -> Result<Page> {
         let len = self.cfg.args.len();
         if len != 1 && len != 2 {
-            return Err(Error::FileDirWrongNumberOfArgs(len));
+            return Err(Error::WrongNumberOfArgs {
+                expected: ExpectedNumberOfArgs::Range(1, 2),
+                actual: len,
+                kind: "file or directory".to_string(),
+            });
         }
 
         let (path, line) = self.parse_path_and_line();
@@ -133,10 +148,28 @@ impl<'a> BrowsePageParser<'a> {
             line,
         })
     }
+
+    fn try_parse_issue_number(&self) -> Result<Page> {
+        if self.cfg.args.len() != 1 {
+            return Err(Error::WrongNumberOfArgs {
+                expected: ExpectedNumberOfArgs::Single(1),
+                actual: self.cfg.args.len(),
+                kind: "issue number".to_string(),
+            });
+        }
+
+        let arg = &self.cfg.args[0];
+        if !arg.starts_with('#') {
+            return Err(Error::InvalidIssueNumberFormat);
+        }
+        let arg = &arg[1..];
+        let number: usize = arg.parse().map_err(|_| Error::InvalidIssueNumberFormat)?;
+        Ok(Page::Issue { number })
+    }
 }
 
 pub fn parse_page(cfg: &command::Config) -> Result<Page> {
-    let mut attempts = Vec::new();
+    let mut attempts = Vec::with_capacity(4);
 
     let parser = BrowsePageParser {
         cfg,
@@ -145,6 +178,11 @@ pub fn parse_page(cfg: &command::Config) -> Result<Page> {
 
     if cfg.args.is_empty() {
         return Ok(Page::Open);
+    }
+
+    match parser.try_parse_issue_number() {
+        Ok(p) => return Ok(p),
+        Err(msg) => attempts.push(msg),
     }
 
     match parser.try_parse_file_or_dir() {

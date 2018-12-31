@@ -83,7 +83,11 @@ Examples:
 
   - Open a pull request page (for GitHub and GitHub Enterprise):
 
-    $ git brws --pr";
+    $ git brws --pr
+
+  - Open an issue page:
+
+    $ git brws '#8'";
 
 pub fn parse_options<T: AsRef<str>>(argv: &[T]) -> Result<ParsedArgv> {
     let mut opts = Options::new();

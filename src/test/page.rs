@@ -1,4 +1,5 @@
 use crate::command::Config;
+use crate::error::Error;
 use crate::page::{parse_page, DiffOp, Page};
 use crate::test::helper::empty_env;
 use std::env;
@@ -196,9 +197,20 @@ fn wrong_num_of_args() {
     let c = config(
         "https://github.com/user/repo.git",
         None,
-        vec!["foo", "bar", "piyo"],
+        vec!["foo", "bar", "piyo", "blah"],
     );
-    assert!(parse_page(&c).is_err());
+    match parse_page(&c) {
+        Err(Error::PageParseError { attempts, .. }) => {
+            assert!(!attempts.is_empty());
+            for err in attempts {
+                match err {
+                    Error::WrongNumberOfArgs { actual, .. } => assert_eq!(actual, 4),
+                    err => assert!(false, "Unexpected error: {}", err),
+                }
+            }
+        }
+        v => assert!(false, "Unexpected success or error: {:?}", v),
+    }
 }
 
 #[test]
@@ -237,5 +249,14 @@ fn diff_lhs_or_rhs_empty() {
             Ok(p @ Page::Diff { .. }) => assert!(false, "Unexpectedly parsed as diff: {:?}", p),
             _ => { /*ok*/ }
         }
+    }
+}
+
+#[test]
+fn issue_number() {
+    let c = config("https://github.com/user/repo.git", None, vec!["#123"]);
+    match parse_page(&c) {
+        Ok(Page::Issue { number }) => assert_eq!(number, 123),
+        v => assert!(false, "Unexpected result {:?}", v),
     }
 }
