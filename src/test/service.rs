@@ -1,5 +1,5 @@
 use crate::error::Error;
-use crate::page::{DiffOp, Page};
+use crate::page::{DiffOp, Line, Page};
 use crate::service::build_page_url;
 use crate::test::helper::empty_env;
 use std::path::Path;
@@ -220,7 +220,7 @@ fn parse_and_build_file_page_with_line_number() {
             .to_string_lossy()
             .into_owned(),
         hash: "561848bad7164d7568658456088b107ec9efd9f3".to_string(),
-        line: Some(12),
+        line: Some(Line::At(12)),
     };
     for &(repo, expected) in &[
         (
@@ -238,6 +238,38 @@ fn parse_and_build_file_page_with_line_number() {
         (
             "https://gitlab.com/user/repo.git",
             "https://gitlab.com/user/repo/blob/561848bad7164d7568658456088b107ec9efd9f3/src/main.rs#L12",
+        ),
+    ] {
+        assert_eq!(build_page_url(&repo, &p, &None, &empty_env()).unwrap(), expected);
+    }
+}
+
+#[test]
+fn parse_and_build_file_page_with_line_range() {
+    let p = Page::FileOrDir {
+        relative_path: Path::new("src")
+            .join("main.rs")
+            .to_string_lossy()
+            .into_owned(),
+        hash: "561848bad7164d7568658456088b107ec9efd9f3".to_string(),
+        line: Some(Line::Range(1, 2)),
+    };
+    for &(repo, expected) in &[
+        (
+            "https://github.com/user/repo.git",
+            "https://github.com/user/repo/blob/561848bad7164d7568658456088b107ec9efd9f3/src/main.rs#L1-L2",
+        ),
+        (
+            "https://bitbucket.org/user/repo.git",
+            "https://bitbucket.org/user/repo/src/561848bad7164d7568658456088b107ec9efd9f3/src/main.rs#lines-1:2",
+        ),
+        (
+            "https://github.somewhere.com/user/repo.git",
+            "https://github.somewhere.com/user/repo/blob/561848bad7164d7568658456088b107ec9efd9f3/src/main.rs#L1-L2",
+        ),
+        (
+            "https://gitlab.com/user/repo.git",
+            "https://gitlab.com/user/repo/blob/561848bad7164d7568658456088b107ec9efd9f3/src/main.rs#L1-L2",
         ),
     ] {
         assert_eq!(build_page_url(&repo, &p, &None, &empty_env()).unwrap(), expected);

@@ -4,7 +4,7 @@ extern crate url;
 use self::url::Url;
 use crate::env::Env;
 use crate::error::{Error, Result};
-use crate::page::{DiffOp, Page};
+use crate::page::{DiffOp, Line, Page};
 
 #[cfg(target_os = "windows")]
 fn to_slash<S: AsRef<str>>(s: &S) -> String {
@@ -40,7 +40,7 @@ fn build_github_like_url(
             ref op,
         } => format!(
             "https://{}/{}/{}/compare/{}{}{}",
-            host, user, repo, lhs, op, rhs
+            host, user, repo, lhs, op, rhs,
         ),
         Page::Commit { ref hash } => format!("https://{}/{}/{}/commit/{}", host, user, repo, hash),
         Page::FileOrDir {
@@ -53,12 +53,12 @@ fn build_github_like_url(
             user,
             repo,
             hash,
-            to_slash(relative_path)
+            to_slash(relative_path),
         ),
         Page::FileOrDir {
             ref relative_path,
             ref hash,
-            line: Some(line),
+            line: Some(Line::At(line)),
         } => format!(
             "https://{}/{}/{}/blob/{}/{}#L{}",
             host,
@@ -66,7 +66,21 @@ fn build_github_like_url(
             repo,
             hash,
             to_slash(relative_path),
-            line
+            line,
+        ),
+        Page::FileOrDir {
+            ref relative_path,
+            ref hash,
+            line: Some(Line::Range(start, end)),
+        } => format!(
+            "https://{}/{}/{}/blob/{}/{}#L{}-L{}",
+            host,
+            user,
+            repo,
+            hash,
+            to_slash(relative_path),
+            start,
+            end,
         ),
         Page::Issue { number } => format!("https://{}/{}/{}/issues/{}", host, user, repo, number),
     }
@@ -118,7 +132,7 @@ fn build_bitbucket_url(
             if let Some(ref b) = branch {
                 Ok(format!(
                     "https://bitbucket.org/{}/{}/branch/{}",
-                    user, repo, b
+                    user, repo, b,
                 ))
             } else {
                 Ok(format!("https://bitbucket.org/{}/{}", user, repo))
@@ -127,7 +141,7 @@ fn build_bitbucket_url(
         Page::Diff { .. } => Err(Error::BitbucketDiffNotSupported),
         Page::Commit { ref hash } => Ok(format!(
             "https://bitbucket.org/{}/{}/commits/{}",
-            user, repo, hash
+            user, repo, hash,
         )),
         Page::FileOrDir {
             ref relative_path,
@@ -138,23 +152,36 @@ fn build_bitbucket_url(
             user,
             repo,
             hash,
-            to_slash(relative_path)
+            to_slash(relative_path),
         )),
         Page::FileOrDir {
             ref relative_path,
             ref hash,
-            line: Some(line),
+            line: Some(Line::At(line)),
         } => Ok(format!(
             "https://bitbucket.org/{}/{}/src/{}/{}#lines-{}",
             user,
             repo,
             hash,
             to_slash(relative_path),
-            line
+            line,
+        )),
+        Page::FileOrDir {
+            ref relative_path,
+            ref hash,
+            line: Some(Line::Range(start, end)),
+        } => Ok(format!(
+            "https://bitbucket.org/{}/{}/src/{}/{}#lines-{}:{}",
+            user,
+            repo,
+            hash,
+            to_slash(relative_path),
+            start,
+            end,
         )),
         Page::Issue { number } => Ok(format!(
             "https://bitbucket.org/{}/{}/issues/{}",
-            user, repo, number
+            user, repo, number,
         )),
     }
 }

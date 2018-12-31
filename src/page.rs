@@ -20,6 +20,12 @@ impl fmt::Display for DiffOp {
 }
 
 #[derive(Debug, PartialEq)]
+pub enum Line {
+    At(usize),
+    Range(usize, usize), // start and end
+}
+
+#[derive(Debug, PartialEq)]
 pub enum Page {
     Open,
     Diff {
@@ -33,7 +39,7 @@ pub enum Page {
     FileOrDir {
         relative_path: String,
         hash: String,
-        line: Option<usize>,
+        line: Option<Line>,
     },
     Issue {
         number: usize,
@@ -97,19 +103,42 @@ impl<'a> BrowsePageParser<'a> {
         })
     }
 
-    fn parse_path_and_line(&self) -> (&str, Option<usize>) {
+    fn parse_path_and_line(&self) -> (&str, Option<Line>) {
         let arg = &self.cfg.args[0];
+
         let line_start = match arg.find('#') {
             Some(i) => i,
             None => return (arg.as_str(), None),
         };
+
         let mut idx = line_start;
         if arg.chars().nth(idx + 1) == Some('L') {
             // Skip 'L' of file#L123
             idx += 1;
         }
-        let line = (&arg[idx + 1..]).parse().ok();
-        (&arg[..line_start], line)
+
+        let path = &arg[..line_start];
+        let line_spec = &arg[idx + 1..];
+        if let Some(mut dash_idx) = line_spec.find('-') {
+            let start = (&line_spec[..dash_idx]).parse().ok();
+
+            if line_spec.chars().nth(dash_idx + 1) == Some('L') {
+                // Skip second 'L' of file#L123-L345
+                dash_idx += 1;
+            }
+            let end = (&line_spec[dash_idx + 1..]).parse().ok();
+
+            (
+                path,
+                start.map(|s| match end {
+                    Some(e) => Line::Range(s, e),
+                    None => Line::At(s),
+                }),
+            )
+        } else {
+            let line = line_spec.parse().ok();
+            (path, line.map(Line::At))
+        }
     }
 
     fn try_parse_file_or_dir(&self) -> Result<Page> {

@@ -117,6 +117,16 @@ $ git brws ./some/file.txt
 $ git brws ./some/file.txt#L123
 ```
 
+Note: The `L` can be omit.
+
+- Open region from line to line of the file
+
+```
+$ git brws ./some/file.txt#L123-L126
+```
+
+Note: The `L` can be omit.
+
 ### Open a specific commit page
 
 - Open `HEAD` page of current repository

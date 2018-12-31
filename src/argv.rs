@@ -81,6 +81,10 @@ Examples:
 
     $ git brws some/file.txt#L123
 
+  - Open range from line 123 to line 126 of file:
+
+    $ git brws some/file.txt#L123-L126
+
   - Open a pull request page (for GitHub and GitHub Enterprise):
 
     $ git brws --pr

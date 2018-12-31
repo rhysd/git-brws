@@ -96,7 +96,15 @@ Open specific file of current branch of current remote.
 
 Open specific line of the file.
 
+*Note:* The 'L' can be omit.
+
     $ git brws ./some/file.txt#L123
+
+Open range from line to line of the file.
+
+*Note:* The 'L' can be omit.
+
+    $ git brws ./some/file.txt#L123-L126
 
 Open 'HEAD' page of current repository.
 

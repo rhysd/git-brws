@@ -1,6 +1,6 @@
 use crate::command::Config;
 use crate::error::Error;
-use crate::page::{parse_page, DiffOp, Page};
+use crate::page::{parse_page, DiffOp, Line, Page};
 use crate::test::helper::empty_env;
 use std::env;
 use std::fs;
@@ -81,15 +81,19 @@ fn parse_file_or_dir() {
 }
 
 #[test]
-fn parse_file_line() {
-    for &(ref file, expected) in &[
-        (Path::new(".").join("README.md#21"), Some(21)),
-        (Path::new(".").join("src").join("main.rs#10"), Some(10)),
+fn parse_file_single_line() {
+    for &(ref file, ref expected) in &[
+        (Path::new(".").join("README.md#21"), Some(Line::At(21))),
+        (
+            Path::new(".").join("src").join("main.rs#10"),
+            Some(Line::At(10)),
+        ),
         (PathBuf::from("LICENSE.txt"), None),
         (
             Path::new(".").join("src").join("..").join("README.md#21"),
-            Some(21),
+            Some(Line::At(21)),
         ),
+        (Path::new(".").join("README.md#L21"), Some(Line::At(21))),
     ] {
         let c = config(
             "https://github.com/user/repo.git",
@@ -97,7 +101,7 @@ fn parse_file_line() {
             vec![&file.to_str().unwrap()],
         );
         match parse_page(&c).unwrap() {
-            Page::FileOrDir { line, .. } => assert_eq!(line, expected, "input: {:?}", file),
+            Page::FileOrDir { ref line, .. } => assert_eq!(line, expected, "input: {:?}", file),
             p => assert!(false, "Unexpected result: {:?}, input: {:?}", p, file),
         }
     }
@@ -274,5 +278,27 @@ fn line_cannot_be_set_to_dir() {
             attempts,
         ),
         v => assert!(false, "Unexpected result {:?}", v),
+    }
+}
+
+#[test]
+fn parse_file_line_range() {
+    for file in &[
+        Path::new("README.md#1-2"),
+        Path::new("README.md#L1-2"),
+        Path::new("README.md#1-L2"),
+        Path::new("README.md#L1-L2"),
+    ] {
+        let c = config(
+            "https://github.com/user/repo.git",
+            None,
+            vec![&file.to_str().unwrap()],
+        );
+        match parse_page(&c).unwrap() {
+            Page::FileOrDir { line, .. } => {
+                assert_eq!(line, Some(Line::Range(1, 2)), "input: {:?}", file)
+            }
+            p => assert!(false, "Unexpected result: {:?}, input: {:?}", p, file),
+        }
     }
 }
