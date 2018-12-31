@@ -1,28 +1,3 @@
-/*
-use std::ffi::OsString;
-use std::io;
-
-pub type Result<T> = ::std::result::Result<T, failure::Error>;
-
-#[derive(Debug, Fail)]
-pub enum Error {
-    #[fail(
-        display = "Invalid repository format '{}'. Format must be one of 'user/repo', 'service/user/repo', remote name or Git URL",
-        input
-    )]
-    InvalidRepoFormat { input: String },
-    #[fail(display = "Git command with argument {:?} failed: {}", args, err)]
-    GitExecutionFail { args: Vec<OsString>, err: io::Error },
-    #[fail(
-        display = "Git command with argument {:?} exited with non-zero status: {}",
-        args, stderr
-    )]
-    GitExitFailure { args: Vec<OsString>, stderr: String },
-    #[fail(display = "Default remote name not found: {}", message)]
-    GitDefaultRemoteNotFound { message: String },
-}
-*/
-
 extern crate getopts;
 extern crate reqwest;
 extern crate url;
@@ -112,6 +87,7 @@ pub enum Error {
         attempts: Vec<Error>,
     },
     InvalidIssueNumberFormat,
+    LineSpecifiedForDir(PathBuf),
 }
 
 impl fmt::Display for Error {
@@ -141,11 +117,12 @@ impl fmt::Display for Error {
             Error::PageParseError{args, attempts} => {
                 write!(f, "Error on parsing command line arguments {:?}", args)?;
                 for err in attempts.iter() {
-                    write!(f, "\n  {}", err)?;
+                    write!(f, "\n  - {}", err)?;
                 }
                 Ok(())
             }
             Error::InvalidIssueNumberFormat => write!(f, "Issue number must start with '#' followed by numbers like #123"),
+            Error::LineSpecifiedForDir(path) => write!(f, "Directory cannot have line number: {:?}", path),
         }
     }
 }

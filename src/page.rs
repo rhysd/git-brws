@@ -125,6 +125,10 @@ impl<'a> BrowsePageParser<'a> {
         let (path, line) = self.parse_path_and_line();
         let path = fs::canonicalize(path)?;
 
+        if line.is_some() && path.is_dir() {
+            return Err(Error::LineSpecifiedForDir(path));
+        }
+
         let repo_root = self.git.root_dir()?;
         let relative_path = path
             .strip_prefix(&repo_root)
