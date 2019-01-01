@@ -3,6 +3,7 @@ name = "git-brws"
 version = "0.9.0"
 authors = ["rhysd <lin90162@yahoo.co.jp>"]
 description = "Command line tool to open a repository, file, commit or diff in your web browser from command line"
+categories = ["command-line-utilities", "development-tools"]
 repository = "https://github.com/rhysd/git-brws"
 readme = "README.md"
 include = ["src/**/*.rs", "Cargo.toml", "LICENSE.txt"]
