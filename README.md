@@ -1,6 +1,6 @@
 git brws
 ========
-[![Crate Badge][]][GitHub Project]
+[![crates.io][crate-badge]][crate]
 [![Linux and macOS CI][travis-badge]][travis-ci]
 [![Windows CI][appveyor-badge]][appveyor]
 
@@ -244,6 +244,8 @@ Please see [the project page](https://github.com/rhysd/git-brws/projects/1).
 
 ## Development
 
+Repository for `git-brws` is [hosted at GitHub][github-repo].
+
 To watch file changes and run linter/tests automatically:
 
 ```sh
@@ -275,8 +277,9 @@ gem install ronn
 ronn git-brws.1.ronn
 ```
 
-[GitHub Project]: https://github.com/rhysd/git-brws
-[Crate Badge]: https://img.shields.io/crates/v/git-brws.svg
+[github-repo]: https://github.com/rhysd/git-brws
+[crate-badge]: https://img.shields.io/crates/v/git-brws.svg
+[crate]: https://crates.io/crates/git-brws
 [travis-ci]: https://travis-ci.org/rhysd/git-brws
 [travis-badge]: https://travis-ci.org/rhysd/git-brws.svg?branch=master
 [appveyor-badge]: https://ci.appveyor.com/api/projects/status/q9gvpd30k1k5jsf0/branch/master?svg=true
