@@ -132,7 +132,7 @@ fn file_at_specific_commit() {
 
 #[test]
 fn parse_commit_ref() {
-    for &cm in &["HEAD", "HEAD~1", "HEAD^"] {
+    for &cm in &["HEAD", "HEAD~1", "HEAD^", "HEAD^^"] {
         let c = config("https://github.com/user/repo.git", None, vec![cm]);
         match parse_page(&c).unwrap() {
             Page::Commit { hash } => assert!(!hash.is_empty()),
@@ -164,6 +164,8 @@ fn parse_diff_ref_name() {
     for &(arg, expected_op) in &[
         ("HEAD^..HEAD", DiffOp::TwoDots),
         ("HEAD^...HEAD", DiffOp::ThreeDots),
+        ("master...HEAD", DiffOp::ThreeDots),
+        ("master@{1month}..master@{1day}", DiffOp::TwoDots),
     ] {
         let c = config("https://github.com/user/repo.git", None, vec![arg]);
         match parse_page(&c).unwrap() {
