@@ -135,8 +135,20 @@ fn parse_commit_ref() {
     for &cm in &["HEAD", "HEAD~1", "HEAD^", "HEAD^^"] {
         let c = config("https://github.com/user/repo.git", None, vec![cm]);
         match parse_page(&c).unwrap() {
-            Page::Commit { hash } => assert!(!hash.is_empty()),
-            p => assert!(false, "Unexpected result: {:?}", p),
+            Page::Commit { hash } => assert!(!hash.is_empty(), "{} for {}", hash, cm),
+            p => assert!(false, "Unexpected result: {:?} for {}", p, cm),
+        }
+    }
+}
+
+#[test]
+#[cfg_attr(feature = "on-ci", ignore)]
+fn parse_commit_branch_ref() {
+    for spec in &["master", "master@{1month}"] {
+        let c = config("https://github.com/user/repo.git", None, vec![spec]);
+        match parse_page(&c).unwrap() {
+            Page::Commit { hash } => assert!(!hash.is_empty(), "{} for {}", hash, spec),
+            p => assert!(false, "Unexpected result: {:?} for {}", p, spec),
         }
     }
 }
@@ -164,6 +176,23 @@ fn parse_diff_ref_name() {
     for &(arg, expected_op) in &[
         ("HEAD^..HEAD", DiffOp::TwoDots),
         ("HEAD^...HEAD", DiffOp::ThreeDots),
+    ] {
+        let c = config("https://github.com/user/repo.git", None, vec![arg]);
+        match parse_page(&c).unwrap() {
+            Page::Diff { lhs, rhs, op } => {
+                assert!(!lhs.is_empty());
+                assert!(!rhs.is_empty());
+                assert_eq!(op, expected_op, "arg is {}", arg);
+            }
+            p => assert!(false, "Unexpected result: {:?}", p),
+        }
+    }
+}
+
+#[test]
+#[cfg_attr(feature = "on-ci", ignore)]
+fn parse_diff_branch_spec() {
+    for &(arg, expected_op) in &[
         ("master...HEAD", DiffOp::ThreeDots),
         ("master@{1month}..master@{1day}", DiffOp::TwoDots),
     ] {
