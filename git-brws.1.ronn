@@ -5,7 +5,7 @@ git-brws(1) -- open a repository, file, commit, diff, pull request or issue in y
 
 `git brws`<br>
 `git brws` <file>...<br>
-`git brws` <file>#L<num>...<br>
+`git brws` <file>#<lnum>...<br>
 `git brws` <branch><br>
 `git brws` <commit>..<commit><br>
 `git brws` <commit>...<commit><br>
