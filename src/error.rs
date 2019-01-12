@@ -93,7 +93,7 @@ pub enum Error {
 impl fmt::Display for Error {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
         match self {
-            Error::BrokenRepoFormat {input} => write!(f, "Invalid repository format '{}'. Format must be one of 'user/repo', 'service/user/repo', remote name or Git URL", input),
+            Error::BrokenRepoFormat {input} => write!(f, "Invalid repository format '{}'. Format must be one of 'user/repo', 'host/user/repo', remote name or Git URL", input),
             Error::CliParseFail(e) => write!(f, "{}", e),
             Error::OpenUrlFailure {url, msg} => write!(f, "Cannot open URL {}: {}", url, msg),
             Error::GitLabDiffNotSupported => write!(f, "GitLab does not support '..' for comparing diff between commits. Please use '...'"),

@@ -48,7 +48,7 @@ arguments. All are optional.
 
   * `-r`, `--repo` <REPO>:
     Specify which repository should be open.
-    <REPO> is one of (1) shorthand format (user/repo, service/user/repo), (2) remote name
+    <REPO> is one of (1) shorthand format (user/repo, host/user/repo), (2) remote name
     (e.g. origin) or (3) Git URL you want to see.
 
   * `-b`, `--branch` <BRANCH>
@@ -83,7 +83,7 @@ Open 'origin' remote of 'develop' branch.
 
     $ git brws -r origin -b develop
 
-Open @rhysd's 'Shiba' repository.
+Open @rhysd's 'Shiba' repository on GitHub.
 
     $ git brws -r rhysd/Shiba
 

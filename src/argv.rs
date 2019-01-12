@@ -61,6 +61,10 @@ Examples:
 
     $ git brws
 
+  - Open specific GitHub repository:
+
+    $ git brws -r rhysd/git-brws
+
   - Open a file:
 
     $ git brws some/file.txt
@@ -96,7 +100,7 @@ Examples:
 pub fn parse_options<T: AsRef<str>>(argv: &[T]) -> Result<ParsedArgv> {
     let mut opts = Options::new();
 
-    opts.optopt("r", "repo", "Shorthand format (user/repo, service/user/repo) or remote name (e.g. origin) or Git URL you want to see", "REPO");
+    opts.optopt("r", "repo", "Shorthand format (user/repo, host/user/repo) or remote name (e.g. origin) or Git URL you want to see", "REPO");
     opts.optopt("b", "branch", "Branch name to browse", "BRANCH");
     opts.optopt("d", "dir", "Directory path to the repository", "PATH");
     opts.optflag(

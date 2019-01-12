@@ -61,7 +61,7 @@ Note: `git brws --help` only works when it is installed.
 Usage: git brws [Options] {Args}
 
 Options:
-    -r, --repo REPO     Shorthand format (user/repo, service/user/repo) or
+    -r, --repo REPO     Shorthand format (user/repo, host/user/repo) or
                         remote name (e.g. origin) or Git URL you want to see
     -b, --branch BRANCH Branch name to browse
     -d, --dir PATH      Directory path to the repository
