@@ -269,12 +269,12 @@ git checkout -b new-branch
 git push -u origin new-branch --no-verify
 ```
 
-To update manpage file `git-brws.1`, please edit `git-brws.1.ronn` and generate `git-brws.1`
-automatically with `ronn` command.
+To update manpage file `git-brws.1` and `docs/index.html`, please edit `git-brws.1.ronn` and generate
+`git-brws.1` automatically with `docs/gen.sh` script. [ronn][] is necessary as a dependency.
 
 ```sh
 gem install ronn
-ronn git-brws.1.ronn
+./docs/gen.sh
 ```
 
 [github-repo]: https://github.com/rhysd/git-brws
@@ -285,3 +285,4 @@ ronn git-brws.1.ronn
 [appveyor-badge]: https://ci.appveyor.com/api/projects/status/q9gvpd30k1k5jsf0/branch/master?svg=true
 [appveyor]: https://ci.appveyor.com/project/rhysd/git-brws/branch/master
 [release page]: https://github.com/rhysd/git-brws/releases
+[ronn]: https://github.com/rtomayko/ronn
