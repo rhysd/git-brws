@@ -54,7 +54,7 @@ impl<'a> Git<'a> {
         let out = match self.command(&["rev-parse", "--abbrev-ref", "--symbolic", rev.as_str()]) {
             Ok(stdout) => stdout,
             Err(Error::GitCommandError { ref stderr, .. })
-                if stderr.find("does not point to a branch").is_some() =>
+                if stderr.contains("does not point to a branch") =>
             {
                 return Ok(self.remote_url("origin")?)
             }

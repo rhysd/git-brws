@@ -95,7 +95,7 @@ impl fmt::Display for Error {
         match self {
             Error::BrokenRepoFormat {input} => write!(f, "Invalid repository format '{}'. Format must be one of 'user/repo', 'host/user/repo', remote name or Git URL", input),
             Error::CliParseFail(e) => write!(f, "{}", e),
-            Error::OpenUrlFailure {url, msg} => write!(f, "Cannot open URL {}: {}", url, msg),
+            Error::OpenUrlFailure {url, msg} => write!(f, "{}: Cannot open URL {}", msg, url),
             Error::GitLabDiffNotSupported => write!(f, "GitLab does not support '..' for comparing diff between commits. Please use '...'"),
             Error::BitbucketDiffNotSupported => write!(f, "BitBucket does not support diff between commits (see https://bitbucket.org/site/master/issues/4779/ability-to-diff-between-any-two-commits)"),
             Error::NoUserInPath{path} => write!(f, "Can't detect user name from path {}", path),
@@ -107,7 +107,17 @@ impl fmt::Display for Error {
             Error::GitHubStatusFailure {status, msg} => write!(f, "GitHub API response status {}: {}", status, msg),
             Error::HttpClientError(err) => write!(f, "{}", err),
             Error::IoError(err) => write!(f, "{}", err),
-            Error::GitCommandError{stderr, args} => write!(f, "Git command {:?} exited with non-zero status: {}", args, stderr),
+            Error::GitCommandError{stderr, args} => {
+                if stderr.is_empty() {
+                    write!(f, "`git")?;
+                } else {
+                    write!(f, "{}: `git", stderr)?;
+                }
+                for arg in args.iter() {
+                    write!(f, " '{}'", arg.to_string_lossy())?;
+                }
+                write!(f, "` exited with non-zero status")
+            }
             Error::GitRootDirNotFound{git_dir} => write!(f, "Cannot locate root directory from GIT_DIR {:?}", git_dir),
             Error::UnexpectedRemoteName(name) => write!(f, "Tracking name must be remote-url/branch-name: {}", name),
             Error::WrongNumberOfArgs{expected, actual, kind} => write!(f, "Invalid number of arguments for {}. {} is expected but given {}", kind, expected, actual),
