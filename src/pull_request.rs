@@ -70,7 +70,7 @@ pub fn find_url<U: AsRef<str>, B: AsRef<str>>(repo_url: U, branch: B, env: &Env)
                     _ => {
                         return Err(Error::PullReqNotSupported {
                             service: host.to_string(),
-                        })
+                        });
                     }
                 }
             };

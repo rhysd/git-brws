@@ -56,7 +56,7 @@ impl<'a> Git<'a> {
             Err(Error::GitCommandError { ref stderr, .. })
                 if stderr.contains("does not point to a branch") =>
             {
-                return Ok(self.remote_url("origin")?)
+                return Ok(self.remote_url("origin")?);
             }
             Err(err) => return Err(err),
         };

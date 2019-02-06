@@ -7,7 +7,8 @@ categories = ["command-line-utilities", "development-tools"]
 repository = "https://github.com/rhysd/git-brws"
 readme = "README.md"
 include = ["src/**/*.rs", "Cargo.toml", "LICENSE.txt"]
-license-file = "LICENSE.txt"
+edition = "2018"
+license = "MIT"
 
 [package.metadata.release]
 no-dev-version = true
