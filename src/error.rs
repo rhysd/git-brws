@@ -1,3 +1,4 @@
+extern crate envy;
 extern crate getopts;
 extern crate reqwest;
 extern crate url;
@@ -88,6 +89,7 @@ pub enum Error {
     },
     InvalidIssueNumberFormat,
     LineSpecifiedForDir(PathBuf),
+    EnvLoadError(envy::Error),
 }
 
 impl fmt::Display for Error {
@@ -133,6 +135,7 @@ impl fmt::Display for Error {
             }
             Error::InvalidIssueNumberFormat => write!(f, "Issue number must start with '#' followed by numbers like #123"),
             Error::LineSpecifiedForDir(path) => write!(f, "Directory cannot have line number: {:?}", path),
+            Error::EnvLoadError(err) => write!(f, "Cannot load environment variable: {}", err),
         }
     }
 }
@@ -152,6 +155,12 @@ impl From<reqwest::Error> for Error {
 impl From<getopts::Fail> for Error {
     fn from(f: getopts::Fail) -> Error {
         Error::CliParseFail(f)
+    }
+}
+
+impl From<envy::Error> for Error {
+    fn from(e: envy::Error) -> Error {
+        Error::EnvLoadError(e)
     }
 }
 

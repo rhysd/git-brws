@@ -1,8 +1,8 @@
-use crate::env::Env;
+use crate::env::EnvConfig;
 use std::env;
 
-pub fn empty_env() -> Env {
-    Env {
+pub fn empty_env() -> EnvConfig {
+    EnvConfig {
         git_command: "git".to_string(),
         ghe_ssh_port: None,
         ghe_url_host: None,

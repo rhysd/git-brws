@@ -1,11 +1,12 @@
 extern crate getopts;
 
 use crate::command;
-use crate::env::Env;
+use crate::env::EnvConfig;
 use crate::error::{Error, Result};
 use crate::git;
 use crate::git::Git;
 use getopts::Options;
+use std::env;
 
 fn convert_ssh_url(mut url: String) -> String {
     if url.starts_with("git@") {
@@ -128,7 +129,7 @@ pub fn parse_options<T: AsRef<str>>(argv: &[T]) -> Result<ParsedArgv> {
         ));
     }
 
-    let env = Env::new();
+    let env = EnvConfig::from_iter(env::vars())?;
     let git_dir = git::git_dir(matches.opt_str("d"), env.git_command.as_str())?;
     let branch = matches.opt_str("b");
     let repo = {

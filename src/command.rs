@@ -1,6 +1,6 @@
 extern crate open;
 
-use crate::env::Env;
+use crate::env::EnvConfig;
 use crate::error::{Error, Result};
 use crate::git::Git;
 use crate::page::parse_page;
@@ -16,7 +16,7 @@ pub struct Config {
     pub args: Vec<String>,
     pub stdout: bool,
     pub pull_request: bool,
-    pub env: Env,
+    pub env: EnvConfig,
 }
 
 pub fn url(cfg: &Config) -> Result<String> {

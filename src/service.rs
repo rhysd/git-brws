@@ -1,7 +1,7 @@
 extern crate path_slash;
 extern crate url;
 
-use crate::env::Env;
+use crate::env::EnvConfig;
 use crate::error::{Error, Result};
 use crate::page::{DiffOp, Line, Page};
 use url::Url;
@@ -92,11 +92,11 @@ fn build_custom_github_like_url(
     repo: &str,
     branch: &Option<String>,
     page: &Page,
-    ssh_port_env: &Option<String>,
+    ssh_port: &Option<u16>,
 ) -> String {
-    match ssh_port_env {
-        Some(ref v) if !v.is_empty() => build_github_like_url(
-            &format!("{}:{}", host, v).as_str(),
+    match ssh_port {
+        Some(ref p) => build_github_like_url(
+            &format!("{}:{}", host, p).as_str(),
             user,
             repo,
             branch,
@@ -209,7 +209,7 @@ pub fn build_page_url(
     repo: &str,
     page: &Page,
     branch: &Option<String>,
-    env: &Env,
+    env: &EnvConfig,
 ) -> Result<String> {
     let url = Url::parse(repo).map_err(|e| Error::BrokenUrl {
         url: repo.to_string(),
@@ -226,7 +226,7 @@ pub fn build_page_url(
         "gitlab.com" => build_gitlab_url(host, user, repo_name, branch, page),
         "bitbucket.org" => build_bitbucket_url(user, repo_name, branch, page),
         _ => {
-            let port_env = if host.starts_with("github.") {
+            let port = if host.starts_with("github.") {
                 &env.ghe_ssh_port
             } else if host.starts_with("gitlab.") {
                 &env.gitlab_ssh_port
@@ -241,7 +241,7 @@ pub fn build_page_url(
                 }
             };
             Ok(build_custom_github_like_url(
-                host, user, repo_name, branch, page, port_env,
+                host, user, repo_name, branch, page, port,
             ))
         }
     }

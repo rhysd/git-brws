@@ -1,6 +1,6 @@
 extern crate url;
 
-use crate::env::Env;
+use crate::env::EnvConfig;
 use crate::error::{Error, Result};
 use crate::github_api;
 use crate::service::slug_from_path;
@@ -41,7 +41,11 @@ fn find_github_pr_url(
     })
 }
 
-pub fn find_url<U: AsRef<str>, B: AsRef<str>>(repo_url: U, branch: B, env: &Env) -> Result<String> {
+pub fn find_url<U: AsRef<str>, B: AsRef<str>>(
+    repo_url: U,
+    branch: B,
+    env: &EnvConfig,
+) -> Result<String> {
     let url = Url::parse(repo_url.as_ref()).map_err(|e| Error::BrokenUrl {
         url: repo_url.as_ref().to_string(),
         msg: format!("{}", e),

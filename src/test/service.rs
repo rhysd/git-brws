@@ -294,8 +294,8 @@ fn invalid_repo_url() {
 #[test]
 fn customized_ssh_port() {
     let mut envs = empty_env();
-    envs.ghe_ssh_port = Some("10022".to_string());
-    envs.gitlab_ssh_port = Some("10022".to_string());
+    envs.ghe_ssh_port = Some(10022);
+    envs.gitlab_ssh_port = Some(10022);
 
     let p = Page::Open;
     for &(repo, expected) in &[
@@ -330,10 +330,7 @@ fn customized_ghe_host() {
 
     for (port, expected) in &[
         (None, "https://my-original-ghe.org/user/repo"),
-        (
-            Some("10022".to_string()),
-            "https://my-original-ghe.org:10022/user/repo",
-        ),
+        (Some(10022), "https://my-original-ghe.org:10022/user/repo"),
     ] {
         envs.ghe_ssh_port = port.clone();
         assert_eq!(
