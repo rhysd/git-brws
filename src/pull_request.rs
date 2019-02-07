@@ -1,10 +1,10 @@
 extern crate url;
 
-use self::url::Url;
 use crate::env::Env;
 use crate::error::{Error, Result};
 use crate::github_api;
 use crate::service::slug_from_path;
+use url::Url;
 
 fn find_github_pr_url(
     author: &str,

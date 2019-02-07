@@ -1,14 +1,14 @@
 extern crate path_slash;
 extern crate url;
 
-use self::url::Url;
 use crate::env::Env;
 use crate::error::{Error, Result};
 use crate::page::{DiffOp, Line, Page};
+use url::Url;
 
 #[cfg(target_os = "windows")]
 fn to_slash<S: AsRef<str>>(s: &S) -> String {
-    use self::path_slash::PathExt;
+    use path_slash::PathExt;
     use std::path::Path;
     Path::new(s.as_ref()).to_slash_lossy()
 }

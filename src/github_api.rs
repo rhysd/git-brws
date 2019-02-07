@@ -1,8 +1,8 @@
 extern crate reqwest;
 extern crate serde;
 
-use self::reqwest::{header, Proxy, StatusCode};
 use crate::error::{Error, Result};
+use reqwest::{header, Proxy, StatusCode};
 
 #[derive(Debug, Deserialize)]
 struct ParentRepoOwner {

@@ -1,11 +1,11 @@
 extern crate getopts;
 
-use self::getopts::Options;
 use crate::command;
 use crate::env::Env;
 use crate::error::{Error, Result};
 use crate::git;
 use crate::git::Git;
+use getopts::Options;
 
 fn convert_ssh_url(mut url: String) -> String {
     if url.starts_with("git@") {

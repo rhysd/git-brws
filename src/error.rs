@@ -149,8 +149,8 @@ impl From<reqwest::Error> for Error {
     }
 }
 
-impl From<self::getopts::Fail> for Error {
-    fn from(f: self::getopts::Fail) -> Error {
+impl From<getopts::Fail> for Error {
+    fn from(f: getopts::Fail) -> Error {
         Error::CliParseFail(f)
     }
 }
