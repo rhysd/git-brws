@@ -61,7 +61,7 @@ impl<'a> Git<'a> {
             Err(err) => return Err(err),
         };
 
-        // out is formatted as '{remote-url}/{branch-name}'
+        // out is formatted as '{remote-name}/{branch-name}'
         match out.splitn(2, '/').next() {
             Some(ref u) => self.remote_url(u),
             None => Err(Error::UnexpectedRemoteName(out.clone())),
