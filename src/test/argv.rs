@@ -6,16 +6,18 @@ use std::fs;
 fn no_option() {
     match parse_options(&["git-brws"]).unwrap() {
         ParsedArgv::Parsed(o) => {
-            println!("FOO! {:?}", o);
             assert!(vec![
                 "https://github.com/rhysd/git-brws.git",
                 "ssh://git@github.com:22/rhysd/git-brws.git",
                 "git@github.com:rhysd/git-brws.git",
             ]
             .iter()
-            .any(|u| o.repo == u.to_string()));
+            .any(|u| &o.repo == u));
             assert_eq!(o.branch, None);
-            assert!(o.git_dir.ends_with(".git"));
+            match o.git_dir {
+                Some(ref d) => assert!(d.ends_with(".git"), "{:?}", d),
+                None => assert!(false, ".git was not found"),
+            }
             assert!(o.args.is_empty());
             assert!(!o.stdout);
         }
@@ -40,7 +42,10 @@ fn with_options() {
         ParsedArgv::Parsed(o) => {
             assert_eq!(o.repo, "https://github.com/foo/bar.git");
             assert_eq!(o.branch, Some("dev".to_string()));
-            assert!(o.git_dir.ends_with(".git"));
+            match o.git_dir {
+                Some(ref d) => assert!(d.ends_with(".git"), "{:?}", d),
+                None => assert!(false, ".git was not found"),
+            }
             assert_eq!(o.args.len(), 2);
             assert!(o.stdout);
         }
@@ -106,8 +111,39 @@ fn detect_git_dir() {
     let p = current.join("src").join("test");
     match parse_options(&["git-brws", "-d", p.to_str().unwrap()]).unwrap() {
         ParsedArgv::Parsed(o) => {
-            let expected = current.join(".git");
+            let expected = Some(current.join(".git"));
             assert_eq!(o.git_dir, expected);
+        }
+        p => assert!(false, "{:?}", p),
+    }
+}
+
+// For checking #9
+#[test]
+fn no_git_dir() {
+    let mut root = fs::canonicalize(env::current_dir().unwrap())
+        .unwrap()
+        .clone();
+    loop {
+        let prev = root.clone();
+        root.pop();
+        if prev == root {
+            break;
+        }
+    }
+    let root = root;
+
+    let git_dir = root.join(".git");
+    assert!(
+        !git_dir.exists(),
+        "{:?} should not exist as precondition of this test case",
+        git_dir
+    );
+
+    match parse_options(&["git-brws", "-d", root.to_str().unwrap(), "-r", "foo/bar"]).unwrap() {
+        ParsedArgv::Parsed(o) => {
+            assert_eq!(o.git_dir, None);
+            assert_eq!(&o.repo, "https://github.com/foo/bar.git");
         }
         p => assert!(false, "{:?}", p),
     }

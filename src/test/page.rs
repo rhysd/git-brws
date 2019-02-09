@@ -17,7 +17,7 @@ fn config(repo: &str, branch: Option<&str>, args: Vec<&str>) -> Config {
     Config {
         repo: repo.to_string(),
         branch: branch.map(|s| s.to_string()),
-        git_dir: dir,
+        git_dir: Some(dir),
         args: a,
         stdout: false,
         pull_request: false,
@@ -27,7 +27,14 @@ fn config(repo: &str, branch: Option<&str>, args: Vec<&str>) -> Config {
 
 #[test]
 fn parse_empty_args() {
-    let c = config("https://github.com/user/repo.git", None, vec![]);
+    let mut c = config("https://github.com/user/repo.git", None, vec![]);
+    match parse_page(&c).unwrap() {
+        Page::Open => { /* OK */ }
+        _ => assert!(false),
+    }
+
+    // It still works even if .git was not found (#9)
+    c.git_dir = None;
     match parse_page(&c).unwrap() {
         Page::Open => { /* OK */ }
         _ => assert!(false),
