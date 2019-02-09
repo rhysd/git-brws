@@ -4,8 +4,8 @@ use std::fs;
 
 #[test]
 fn no_option() {
-    match parse_options(&["git-brws"]).unwrap() {
-        ParsedArgv::Parsed(o) => {
+    match Parsed::from_iter(&["git-brws"]).unwrap() {
+        Parsed::OpenPage(o) => {
             assert!(vec![
                 "https://github.com/rhysd/git-brws.git",
                 "ssh://git@github.com:22/rhysd/git-brws.git",
@@ -24,8 +24,8 @@ fn no_option() {
         r => assert!(false, "Failed to parse args with no option: {:?}", r),
     };
 
-    match parse_options(&["git-brws", "foo", "bar"]).unwrap() {
-        ParsedArgv::Parsed(o) => {
+    match Parsed::from_iter(&["git-brws", "foo", "bar"]).unwrap() {
+        Parsed::OpenPage(o) => {
             assert_eq!(o.args.len(), 2);
         }
         _ => assert!(false),
@@ -34,12 +34,12 @@ fn no_option() {
 
 #[test]
 fn with_options() {
-    match parse_options(&[
+    match Parsed::from_iter(&[
         "git-brws", "foo", "-u", "-r", "foo/bar", "--dir", ".", "bar", "-b", "dev",
     ])
     .unwrap()
     {
-        ParsedArgv::Parsed(o) => {
+        Parsed::OpenPage(o) => {
             assert_eq!(o.repo, "https://github.com/foo/bar.git");
             assert_eq!(o.branch, Some("dev".to_string()));
             match o.git_dir {
@@ -55,8 +55,8 @@ fn with_options() {
 
 #[test]
 fn ssh_conversion_with_option() {
-    match parse_options(&["git-brws", "-r", "git@github.com:user/repo.git"]).unwrap() {
-        ParsedArgv::Parsed(o) => {
+    match Parsed::from_iter(&["git-brws", "-r", "git@github.com:user/repo.git"]).unwrap() {
+        Parsed::OpenPage(o) => {
             assert_eq!(o.repo, "ssh://git@github.com:22/user/repo.git");
         }
         p => assert!(
@@ -69,21 +69,21 @@ fn ssh_conversion_with_option() {
 
 #[test]
 fn repo_formatting() {
-    let p = |r| parse_options(&["git-brws", "-r", r]).unwrap();
+    let p = |r| Parsed::from_iter(&["git-brws", "-r", r]).unwrap();
     match p("bitbucket.org/foo/bar") {
-        ParsedArgv::Parsed(o) => assert_eq!(o.repo, "https://bitbucket.org/foo/bar.git"),
+        Parsed::OpenPage(o) => assert_eq!(o.repo, "https://bitbucket.org/foo/bar.git"),
         _ => assert!(false),
     }
     match p("https://gitlab.com/foo/bar") {
-        ParsedArgv::Parsed(o) => assert_eq!(o.repo, "https://gitlab.com/foo/bar.git"),
+        Parsed::OpenPage(o) => assert_eq!(o.repo, "https://gitlab.com/foo/bar.git"),
         _ => assert!(false),
     }
 }
 
 #[test]
 fn help_option() {
-    match parse_options(&["git-brws", "-h"]).unwrap() {
-        ParsedArgv::Help(s) => {
+    match Parsed::from_iter(&["git-brws", "-h"]).unwrap() {
+        Parsed::Help(s) => {
             assert!(s.starts_with("Usage:"));
         }
         _ => assert!(false),
@@ -92,8 +92,8 @@ fn help_option() {
 
 #[test]
 fn version_option() {
-    match parse_options(&["git-brws", "-v"]).unwrap() {
-        ParsedArgv::Version(s) => {
+    match Parsed::from_iter(&["git-brws", "-v"]).unwrap() {
+        Parsed::Version(s) => {
             assert!(!s.is_empty());
         }
         _ => assert!(false),
@@ -102,15 +102,15 @@ fn version_option() {
 
 #[test]
 fn unknown_options() {
-    assert!(parse_options(&["git-brws", "--unknown"]).is_err());
+    assert!(Parsed::from_iter(&["git-brws", "--unknown"]).is_err());
 }
 
 #[test]
 fn detect_git_dir() {
     let current = fs::canonicalize(env::current_dir().unwrap()).unwrap();
     let p = current.join("src").join("test");
-    match parse_options(&["git-brws", "-d", p.to_str().unwrap()]).unwrap() {
-        ParsedArgv::Parsed(o) => {
+    match Parsed::from_iter(&["git-brws", "-d", p.to_str().unwrap()]).unwrap() {
+        Parsed::OpenPage(o) => {
             let expected = Some(current.join(".git"));
             assert_eq!(o.git_dir, expected);
         }
@@ -140,8 +140,8 @@ fn no_git_dir() {
         git_dir
     );
 
-    match parse_options(&["git-brws", "-d", root.to_str().unwrap(), "-r", "foo/bar"]).unwrap() {
-        ParsedArgv::Parsed(o) => {
+    match Parsed::from_iter(&["git-brws", "-d", root.to_str().unwrap(), "-r", "foo/bar"]).unwrap() {
+        Parsed::OpenPage(o) => {
             assert_eq!(o.git_dir, None);
             assert_eq!(&o.repo, "https://github.com/foo/bar.git");
         }

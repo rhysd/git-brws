@@ -14,16 +14,15 @@ mod service;
 #[cfg(test)]
 mod test;
 
-use crate::argv::{parse_options, ParsedArgv};
+use crate::argv::Parsed;
 use std::env::args;
 use std::process::exit;
 
 fn run() -> error::Result<()> {
-    let argv = args().collect::<Vec<_>>();
-    match parse_options(argv.as_slice())? {
-        ParsedArgv::Help(usage) => eprintln!("{}", usage),
-        ParsedArgv::Version(version) => println!("{}", version),
-        ParsedArgv::Parsed(opts) => command::browse(&opts)?,
+    match Parsed::from_iter(args())? {
+        Parsed::Help(usage) => eprintln!("{}", usage),
+        Parsed::Version(version) => println!("{}", version),
+        Parsed::OpenPage(opts) => command::browse(&opts)?,
     }
     Ok(())
 }

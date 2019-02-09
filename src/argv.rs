@@ -7,6 +7,7 @@ use crate::git;
 use crate::git::Git;
 use getopts::Options;
 use std::env;
+use std::ffi::OsStr;
 
 fn convert_ssh_url(mut url: String) -> String {
     if url.starts_with("git@") {
@@ -22,10 +23,10 @@ fn convert_ssh_url(mut url: String) -> String {
 
 #[cfg_attr(feature = "cargo-clippy", allow(clippy::large_enum_variant))]
 #[derive(Debug)]
-pub enum ParsedArgv {
+pub enum Parsed {
     Help(String),
     Version(&'static str),
-    Parsed(command::Config),
+    OpenPage(command::Config),
 }
 
 fn normalize_repo_format(mut slug: String, git: &Option<Git>) -> Result<String> {
@@ -100,69 +101,75 @@ Examples:
 
     $ git brws '#8'";
 
-pub fn parse_options<T: AsRef<str>>(argv: &[T]) -> Result<ParsedArgv> {
-    let mut opts = Options::new();
+impl Parsed {
+    pub fn from_iter<I>(argv: I) -> Result<Parsed>
+    where
+        I: IntoIterator,
+        I::Item: AsRef<OsStr>,
+    {
+        let mut opts = Options::new();
 
-    opts.optopt("r", "repo", "Shorthand format (user/repo, host/user/repo) or remote name (e.g. origin) or Git URL you want to see", "REPO");
-    opts.optopt("b", "branch", "Branch name to browse", "BRANCH");
-    opts.optopt("d", "dir", "Directory path to the repository", "PATH");
-    opts.optflag(
-        "u",
-        "url",
-        "Output URL to stdout instead of opening in browser",
-    );
-    opts.optflag(
-        "p",
-        "pr",
-        "Open pull request page instead of repository page",
-    );
-    opts.optflag("h", "help", "Print this help");
-    opts.optflag("v", "version", "Show version");
+        opts.optopt("r", "repo", "Shorthand format (user/repo, host/user/repo) or remote name (e.g. origin) or Git URL you want to see", "REPO");
+        opts.optopt("b", "branch", "Branch name to browse", "BRANCH");
+        opts.optopt("d", "dir", "Directory path to the repository", "PATH");
+        opts.optflag(
+            "u",
+            "url",
+            "Output URL to stdout instead of opening in browser",
+        );
+        opts.optflag(
+            "p",
+            "pr",
+            "Open pull request page instead of repository page",
+        );
+        opts.optflag("h", "help", "Print this help");
+        opts.optflag("v", "version", "Show version");
 
-    let matches = opts.parse(argv[1..].iter().map(|a| a.as_ref()))?;
+        let matches = opts.parse(argv.into_iter().skip(1))?;
 
-    if matches.opt_present("h") {
-        return Ok(ParsedArgv::Help(opts.usage(USAGE)));
-    }
-
-    if matches.opt_present("v") {
-        return Ok(ParsedArgv::Version(
-            option_env!("CARGO_PKG_VERSION").unwrap_or("unknown"),
-        ));
-    }
-
-    let env = EnvConfig::from_iter(env::vars())?;
-    let git_dir = git::git_dir(matches.opt_str("d"), env.git_command.as_str());
-    let branch = matches.opt_str("b");
-    let (repo, git_dir) = {
-        // Create scope for borrowing git_dir ref
-        match matches.opt_str("r") {
-            Some(r) => {
-                let git_dir = git_dir.ok();
-                let git = git_dir.as_ref().map(|d| Git::new(d, &env.git_command));
-                (normalize_repo_format(r, &git)?, git_dir)
-            }
-            None => {
-                // When --repo is not set, remote URL needs to know its URL in this case
-                let git_dir = git_dir?;
-                let git = Git::new(&git_dir, &env.git_command);
-                (git.tracking_remote(&branch)?, Some(git_dir))
-            }
+        if matches.opt_present("h") {
+            return Ok(Parsed::Help(opts.usage(USAGE)));
         }
-    };
 
-    let repo = convert_ssh_url(repo);
+        if matches.opt_present("v") {
+            return Ok(Parsed::Version(
+                option_env!("CARGO_PKG_VERSION").unwrap_or("unknown"),
+            ));
+        }
 
-    let stdout = matches.opt_present("u");
-    let pull_request = matches.opt_present("p");
+        let env = EnvConfig::from_iter(env::vars())?;
+        let git_dir = git::git_dir(matches.opt_str("d"), env.git_command.as_str());
+        let branch = matches.opt_str("b");
+        let (repo, git_dir) = {
+            // Create scope for borrowing git_dir ref
+            match matches.opt_str("r") {
+                Some(r) => {
+                    let git_dir = git_dir.ok();
+                    let git = git_dir.as_ref().map(|d| Git::new(d, &env.git_command));
+                    (normalize_repo_format(r, &git)?, git_dir)
+                }
+                None => {
+                    // When --repo is not set, remote URL needs to know its URL in this case
+                    let git_dir = git_dir?;
+                    let git = Git::new(&git_dir, &env.git_command);
+                    (git.tracking_remote(&branch)?, Some(git_dir))
+                }
+            }
+        };
 
-    Ok(ParsedArgv::Parsed(command::Config {
-        repo,
-        branch,
-        git_dir,
-        args: matches.free,
-        stdout,
-        pull_request,
-        env,
-    }))
+        let repo = convert_ssh_url(repo);
+
+        let stdout = matches.opt_present("u");
+        let pull_request = matches.opt_present("p");
+
+        Ok(Parsed::OpenPage(command::Config {
+            repo,
+            branch,
+            git_dir,
+            args: matches.free,
+            stdout,
+            pull_request,
+            env,
+        }))
+    }
 }
