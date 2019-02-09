@@ -90,12 +90,15 @@ pub enum Error {
     InvalidIssueNumberFormat,
     LineSpecifiedForDir(PathBuf),
     EnvLoadError(envy::Error),
+    NoLocalRepoFound {
+        operation: String,
+    },
 }
 
 impl fmt::Display for Error {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
         match self {
-            Error::BrokenRepoFormat {input} => write!(f, "Invalid repository format '{}'. Format must be one of 'user/repo', 'host/user/repo', remote name or Git URL", input),
+            Error::BrokenRepoFormat {input} => write!(f, "Invalid repository format '{}' or unknown remote. Note: Format must be one of 'user/repo', 'host/user/repo', remote name or Git URL", input),
             Error::CliParseFail(e) => write!(f, "{}", e),
             Error::OpenUrlFailure {url, msg} => write!(f, "{}: Cannot open URL {}", msg, url),
             Error::GitLabDiffNotSupported => write!(f, "GitLab does not support '..' for comparing diff between commits. Please use '...'"),
@@ -136,6 +139,7 @@ impl fmt::Display for Error {
             Error::InvalidIssueNumberFormat => write!(f, "Issue number must start with '#' followed by numbers like #123"),
             Error::LineSpecifiedForDir(path) => write!(f, "Directory cannot have line number: {:?}", path),
             Error::EnvLoadError(err) => write!(f, "Cannot load environment variable: {}", err),
+            Error::NoLocalRepoFound{operation} => write!(f, ".git directory was not found. For {}, local repository must be known", operation),
         }
     }
 }

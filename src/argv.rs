@@ -28,23 +28,25 @@ pub enum ParsedArgv {
     Parsed(command::Config),
 }
 
-fn normalize_repo_format(mut s: String, git: &Git) -> Result<String> {
-    if let Ok(url) = git.remote_url(&s) {
-        return Ok(url);
+fn normalize_repo_format(mut slug: String, git: &Option<Git>) -> Result<String> {
+    if let Some(git) = git {
+        if let Ok(url) = git.remote_url(&slug) {
+            return Ok(url);
+        }
     }
 
-    if !s.ends_with(".git") {
-        s.push_str(".git");
+    if !slug.ends_with(".git") {
+        slug.push_str(".git");
     }
 
-    if s.starts_with("git@") || s.starts_with("https://") || s.starts_with("http://") {
-        return Ok(s);
+    if slug.starts_with("git@") || slug.starts_with("https://") || slug.starts_with("http://") {
+        return Ok(slug);
     }
 
-    match s.chars().filter(|c| *c == '/').count() {
-        1 => Ok(format!("https://github.com/{}", s)),
-        2 => Ok(format!("https://{}", s)),
-        _ => Err(Error::BrokenRepoFormat { input: s }),
+    match slug.chars().filter(|c| *c == '/').count() {
+        1 => Ok(format!("https://github.com/{}", slug)),
+        2 => Ok(format!("https://{}", slug)),
+        _ => Err(Error::BrokenRepoFormat { input: slug }),
     }
 }
 
@@ -130,14 +132,22 @@ pub fn parse_options<T: AsRef<str>>(argv: &[T]) -> Result<ParsedArgv> {
     }
 
     let env = EnvConfig::from_iter(env::vars())?;
-    let git_dir = git::git_dir(matches.opt_str("d"), env.git_command.as_str())?;
+    let git_dir = git::git_dir(matches.opt_str("d"), env.git_command.as_str());
     let branch = matches.opt_str("b");
-    let repo = {
+    let (repo, git_dir) = {
         // Create scope for borrowing git_dir ref
-        let git = Git::new(&git_dir, env.git_command.as_str());
         match matches.opt_str("r") {
-            Some(r) => normalize_repo_format(r, &git)?,
-            None => git.tracking_remote(&branch)?,
+            Some(r) => {
+                let git_dir = git_dir.ok();
+                let git = git_dir.as_ref().map(|d| Git::new(d, &env.git_command));
+                (normalize_repo_format(r, &git)?, git_dir)
+            }
+            None => {
+                // When --repo is not set, remote URL needs to know its URL in this case
+                let git_dir = git_dir?;
+                let git = Git::new(&git_dir, &env.git_command);
+                (git.tracking_remote(&branch)?, Some(git_dir))
+            }
         }
     };
 

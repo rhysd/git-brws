@@ -204,14 +204,21 @@ impl<'a> BrowsePageParser<'a> {
 pub fn parse_page(cfg: &command::Config) -> Result<Page> {
     let mut attempts = Vec::with_capacity(4);
 
-    let parser = BrowsePageParser {
-        cfg,
-        git: Git::new(&cfg.git_dir, cfg.env.git_command.as_str()),
-    };
-
     if cfg.args.is_empty() {
         return Ok(Page::Open);
     }
+
+    let git_dir = cfg
+        .git_dir
+        .as_ref()
+        .ok_or_else(|| Error::NoLocalRepoFound {
+            operation: format!("opening URL with options {:?}", cfg.args),
+        })?;
+
+    let parser = BrowsePageParser {
+        cfg,
+        git: Git::new(&git_dir, cfg.env.git_command.as_str()),
+    };
 
     match parser.try_parse_issue_number() {
         Ok(p) => return Ok(p),

@@ -12,7 +12,7 @@ use std::path::PathBuf;
 pub struct Config {
     pub repo: String,
     pub branch: Option<String>,
-    pub git_dir: PathBuf,
+    pub git_dir: Option<PathBuf>,
     pub args: Vec<String>,
     pub stdout: bool,
     pub pull_request: bool,
@@ -24,8 +24,18 @@ pub fn url(cfg: &Config) -> Result<String> {
         match cfg.branch {
             Some(ref b) => pull_request::find_url(cfg.repo.as_str(), b.as_str(), &cfg.env),
             None => {
-                let git = Git::new(&cfg.git_dir, cfg.env.git_command.as_str());
-                pull_request::find_url(cfg.repo.as_str(), git.current_branch()?.as_str(), &cfg.env)
+                if let Some(ref git_dir) = &cfg.git_dir {
+                    let git = Git::new(git_dir, cfg.env.git_command.as_str());
+                    pull_request::find_url(
+                        cfg.repo.as_str(),
+                        git.current_branch()?.as_str(),
+                        &cfg.env,
+                    )
+                } else {
+                    Err(Error::NoLocalRepoFound {
+                        operation: "opening a pull request without specifying branch".to_string(),
+                    })
+                }
             }
         }
     } else {
