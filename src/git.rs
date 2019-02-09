@@ -19,16 +19,10 @@ impl<'a> Git<'a> {
             .args(args)
             .output()?;
         if out.status.success() {
-            let s = str::from_utf8(&out.stdout)
-                .expect("Failed to convert git command stdout from UTF8");
-            Ok(s.trim().to_string())
+            Ok(String::from_utf8_lossy(&out.stdout).trim().to_string())
         } else {
-            let stderr = str::from_utf8(&out.stderr)
-                .expect("Failed to convert git command stderr from UTF8")
-                .trim()
-                .to_string();
             Err(Error::GitCommandError {
-                stderr,
+                stderr: String::from_utf8_lossy(&out.stderr).trim().to_string(),
                 args: args.iter().map(|a| a.as_ref().to_owned()).collect(),
             })
         }
@@ -106,11 +100,8 @@ pub fn git_dir(dir: Option<String>, git_cmd: &str) -> Result<PathBuf> {
 
     let out = cmd.output()?;
     if !out.status.success() {
-        let stderr = str::from_utf8(&out.stderr)
-            .expect("Failed to convert git command stderr as UTF-8")
-            .to_string();
         return Err(Error::GitCommandError {
-            stderr,
+            stderr: String::from_utf8_lossy(&out.stderr).trim().to_string(),
             args: vec![
                 OsStr::new(git_cmd).to_os_string(),
                 OsStr::new("rev-parse").to_os_string(),
