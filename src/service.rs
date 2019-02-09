@@ -92,7 +92,7 @@ fn build_custom_github_like_url(
     repo: &str,
     branch: &Option<String>,
     page: &Page,
-    ssh_port: &Option<u16>,
+    ssh_port: Option<u16>,
 ) -> String {
     match ssh_port {
         Some(ref p) => build_github_like_url(
@@ -227,12 +227,12 @@ pub fn build_page_url(
         "bitbucket.org" => build_bitbucket_url(user, repo_name, branch, page),
         _ => {
             let port = if host.starts_with("github.") {
-                &env.ghe_ssh_port
+                env.ghe_ssh_port
             } else if host.starts_with("gitlab.") {
-                &env.gitlab_ssh_port
+                env.gitlab_ssh_port
             } else {
                 match env.ghe_url_host {
-                    Some(ref v) if v == host => &env.ghe_ssh_port,
+                    Some(ref v) if v == host => env.ghe_ssh_port,
                     _ => {
                         return Err(Error::UnknownHostingService {
                             url: repo.to_string(),
