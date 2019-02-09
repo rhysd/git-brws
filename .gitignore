@@ -1,3 +1,4 @@
 /target
 *.bk
 /env.sh
+/HomebrewFormula/*.zip
