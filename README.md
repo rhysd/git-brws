@@ -46,8 +46,8 @@ $ cargo install git-brws
 
 - As a single executable binary
 
-You can download a binary executable from [release page][] for macOS, Linux (x86\_64, i686) and Windows
-(64bit, 32bit). Unarchive downloaded file and put the executable in `$PATH`.
+Pre-built binary executables are available at [release page][] for macOS (64bit), Linux (64bit, 32bit)
+and Windows (64bit, 32bit). Download and unarchive the binary then put the executable in `$PATH`.
 
 Manpage for `man` command is available. Please find `git-brws.1` in the unarchived directory or download
 it from [here](https://raw.githubusercontent.com/rhysd/git-brws/master/git-brws.1) and copy it to the
@@ -214,7 +214,7 @@ And below can open editing file in your browser.
 
 ## Customization
 
-You can customize behavior of this command with environment variables.
+Some environment variables are available to customize behavior of `git-brws`.
 
 | Variable | Description |
 |----------|-------------|
@@ -275,6 +275,14 @@ To update manpage file `git-brws.1` and `docs/index.html`, please edit `git-brws
 ```sh
 gem install ronn
 ./docs/gen.sh
+```
+
+To update Homebrew formula file, please use `HomebrewFormula/update.sh`.
+
+For example, when updating to 0.9.2:
+
+```sh
+./HomebrewFormula/update.sh 0.9.2
 ```
 
 [github-repo]: https://github.com/rhysd/git-brws
