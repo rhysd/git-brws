@@ -83,6 +83,7 @@ fn build_github_like_url(
             end,
         ),
         Page::Issue { number } => format!("https://{}/{}/{}/issues/{}", host, user, repo, number),
+        Page::PullRequest { url } => url.clone(),
     }
 }
 
@@ -183,6 +184,7 @@ fn build_bitbucket_url(
             "https://bitbucket.org/{}/{}/issues/{}",
             user, repo, number,
         )),
+        Page::PullRequest { .. } => unreachable!(),
     }
 }
 

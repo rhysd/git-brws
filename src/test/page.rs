@@ -1,7 +1,7 @@
 use crate::command::Config;
 use crate::error::Error;
 use crate::page::{parse_page, DiffOp, Line, Page};
-use crate::test::helper::empty_env;
+use crate::test::helper::{empty_env, https_proxy};
 use std::env;
 use std::fs;
 use std::path::{Path, PathBuf};
@@ -22,6 +22,28 @@ fn config(repo: &str, branch: Option<&str>, args: Vec<&str>) -> Config {
         stdout: false,
         pull_request: false,
         env: empty_env(),
+    }
+}
+
+fn config_for_pr(
+    token: Option<String>,
+    repo: &str,
+    branch: Option<&str>,
+    git_dir: Option<PathBuf>,
+) -> Config {
+    let mut env = empty_env();
+    env.github_token = token;
+    env.https_proxy = https_proxy();
+    let env = env;
+
+    Config {
+        repo: repo.to_string(),
+        branch: branch.map(|b| b.to_string()),
+        git_dir,
+        args: vec![],
+        stdout: false,
+        pull_request: true,
+        env,
     }
 }
 
@@ -341,5 +363,74 @@ fn parse_file_line_range() {
             }
             p => assert!(false, "Unexpected result: {:?}, input: {:?}", p, file),
         }
+    }
+}
+
+#[test]
+fn fetch_pull_request_page_with_branch() {
+    let mut dir = env::current_dir().unwrap();
+    dir.push(Path::new(".git"));
+    let dir = fs::canonicalize(dir).unwrap();
+
+    let cfg = config_for_pr(
+        skip_if_no_token!(),
+        "https://github.com/rust-lang/rust.vim.git",
+        Some("async-contextual-keyword"),
+        Some(dir),
+    );
+
+    match parse_page(&cfg).unwrap() {
+        Page::PullRequest { url } => {
+            assert_eq!(&url, "https://github.com/rust-lang/rust.vim/pull/290");
+        }
+        page => assert!(false, "Unexpected page: {:?}", page),
+    }
+}
+
+#[test]
+fn fetch_pull_request_page_retrieving_branch_from_git_dir() {
+    let mut dir = env::current_dir().unwrap();
+    dir.push(Path::new(".git"));
+    let dir = fs::canonicalize(dir).unwrap();
+
+    let cfg = config_for_pr(
+        skip_if_no_token!(),
+        "https://github.com/rhysd/git-brws.git",
+        None,
+        Some(dir),
+    );
+
+    // Accept both error and page since current branch may be for pull request
+    match parse_page(&cfg) {
+        Ok(Page::PullRequest { url }) => {
+            assert!(
+                url.contains("git-brws"),
+                "URL is not for git-brws repo: {}",
+                url
+            );
+        }
+        Err(Error::GitHubPullReqNotFound { author, repo, .. }) => {
+            assert_eq!(&author, "rhysd");
+            assert_eq!(&repo, "git-brws");
+        }
+        result => assert!(false, "Unexpected result: {:?}", result),
+    }
+}
+
+#[test]
+fn fetch_pull_request_page_without_branch_outside_git_repo() {
+    let cfg = config_for_pr(
+        None,
+        "ssh://git@github.com:22/rhysd/git-brws.git",
+        None,
+        None,
+    );
+    match parse_page(&cfg).unwrap_err() {
+        Error::NoLocalRepoFound { operation } => assert!(
+            operation.contains("opening a pull request"),
+            "Unexpected operation: {}",
+            operation
+        ),
+        err => assert!(false, "Unexpected error: {}", err),
     }
 }

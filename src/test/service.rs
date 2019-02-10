@@ -387,3 +387,19 @@ fn parse_and_build_issue_number() {
         );
     }
 }
+
+#[test]
+fn pull_request_url() {
+    let expected = "https://github.com/rhysd/git-brws/pull/4";
+    let p = Page::PullRequest {
+        url: expected.to_string(),
+    };
+    let url = build_page_url(
+        "https://github.com/rhysd/git-brws.git",
+        &p,
+        &None,
+        &empty_env(),
+    )
+    .unwrap();
+    assert_eq!(&url, expected);
+}

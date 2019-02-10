@@ -22,7 +22,8 @@ fn run() -> error::Result<()> {
     match Parsed::from_iter(args())? {
         Parsed::Help(usage) => eprintln!("{}", usage),
         Parsed::Version(version) => println!("{}", version),
-        Parsed::OpenPage(opts) => command::browse(&opts)?,
+        Parsed::OpenPage(ref opts) if opts.stdout => println!("{}", command::url(opts)?),
+        Parsed::OpenPage(ref opts) => command::browse(&command::url(opts)?)?,
     }
     Ok(())
 }

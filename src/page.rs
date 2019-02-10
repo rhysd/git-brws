@@ -1,6 +1,7 @@
 use crate::command;
 use crate::error::{Error, ExpectedNumberOfArgs, Result};
 use crate::git::Git;
+use crate::pull_request;
 use std::fmt;
 use std::fs;
 
@@ -43,6 +44,9 @@ pub enum Page {
     },
     Issue {
         number: usize,
+    },
+    PullRequest {
+        url: String,
     },
 }
 
@@ -201,8 +205,30 @@ impl<'a> BrowsePageParser<'a> {
     }
 }
 
+fn fetch_pull_request_page(cfg: &command::Config) -> Result<Page> {
+    match cfg.branch {
+        Some(ref b) => pull_request::find_url(cfg.repo.as_str(), b.as_str(), &cfg.env)
+            .map(|url| Page::PullRequest { url }),
+        None => {
+            if let Some(ref git_dir) = &cfg.git_dir {
+                let git = Git::new(git_dir, cfg.env.git_command.as_str());
+                pull_request::find_url(cfg.repo.as_str(), git.current_branch()?.as_str(), &cfg.env)
+                    .map(|url| Page::PullRequest { url })
+            } else {
+                Err(Error::NoLocalRepoFound {
+                    operation: "opening a pull request without specifying branch".to_string(),
+                })
+            }
+        }
+    }
+}
+
 pub fn parse_page(cfg: &command::Config) -> Result<Page> {
     let mut attempts = Vec::with_capacity(4);
+
+    if cfg.pull_request {
+        return fetch_pull_request_page(cfg);
+    }
 
     if cfg.args.is_empty() {
         return Ok(Page::Open);
