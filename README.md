@@ -61,8 +61,10 @@ Note: `git brws --help` only works when it is installed.
 Usage: git brws [Options] {Args}
 
 Options:
-    -r, --repo REPO     Shorthand format (user/repo, host/user/repo) or
-                        remote name (e.g. origin) or Git URL you want to see
+    -r, --repo REPO     Shorthand format (repo, user/repo, host/user/repo) or
+                        remote name (e.g. origin) or Git URL you want to see.
+                        When only repo name is specified, most popular
+                        repository will be searched from GitHub
     -b, --branch BRANCH Branch name to browse
     -d, --dir PATH      Directory path to the repository
     -u, --url           Output URL to stdout instead of opening in browser
@@ -73,45 +75,56 @@ Options:
 
 ### Open a repository page
 
-- Open current repository page
+- Current repository page
 
 ```
 $ git brws
 ```
 
-- Open 'develop' branch
+- `develop` branch
 
 ```
 $ git brws -b develop
 ```
 
-- Open 'origin' remote of 'develop' branch
+- `origin` remote of `develop` branch
 
 ```
 $ git brws -r origin -b develop
 ```
 
-- Open @rhysd's 'Shiba' repository
+- @rhysd's 'Shiba' repository
 
 ```
 $ git brws -r rhysd/Shiba
 ```
 
-- Open a repository specified by directory
+- Most popular `react` repository on GitHub
+
+```
+$ git brws -r react
+```
+
+It will open https://github.com/facebook/react.
+
+Note: When only repository name is specified for `-r` option, `git-brws` searches GitHub with query
+`{repo} in:name` and opens the best-matched repository page.
+
+- Specify directory of repository
 
 ```
 $ git brws -d ~/.go/src/github.com/rhysd/dot-github
 ```
 
-### Open specific file
+### Open a file page
 
-- Open specific file of current branch of current remote
+- File of current branch of current remote
 
 ```
 $ git brws ./some/file.txt
 ```
 
-- Open specific line of the file
+- Line of the file
 
 ```
 $ git brws ./some/file.txt#L123
@@ -119,7 +132,7 @@ $ git brws ./some/file.txt#L123
 
 Note: The `L` can be omit.
 
-- Open region from line to line of the file
+- Range from line to line of the file
 
 ```
 $ git brws ./some/file.txt#L123-L126
@@ -127,33 +140,33 @@ $ git brws ./some/file.txt#L123-L126
 
 Note: The `L` can be omit.
 
-### Open a specific commit page
+### Open a commit page
 
-- Open `HEAD` page of current repository
+- `HEAD` page of current repository
 
 ```
 $ git brws HEAD
 ```
 
-### Show a diff page between commits
+### Open a diff page between commits
 
-- Show diff between `HEAD` and `HEAD~3`
+- Diff between `HEAD` and `HEAD~3`
 
 ```
 $ git brws HEAD~3..HEAD
 ```
 
-- Show diff between `113079b` and `60024ab`
+- Diff between `113079b` and `60024ab`
 
 ```
 $ git brws 60024ab..113079b
 ```
 
-### Show a diff page from specific commit and its merge base
+### Open a diff page from specific commit and its merge base
 
 In addition to `..`, diff with `...` is supported.
 
-- Show diff between `branchB` and the merge base commit from `branchB` into `branchA`
+- Diff between `branchB` and the merge base commit from `branchB` into `branchA`
 
 ```
 $ git brws branchA...branchB
@@ -165,13 +178,13 @@ Note: Only GitHub and GitHub Enterprise support `...`. For GitLab, only `...` is
 
 ### Open a pull request page
 
-- Show pull request page of current branch of current repository
+- Pull request page of current branch of current repository
 
 ```
 $ git brws --pr
 ```
 
-- Show pull request page of specific branch of specific repository
+- Pull request page of specific branch of specific repository
 
 ```
 # Specify my forked repository
@@ -188,7 +201,7 @@ the command may not open a pull request page you want.
 
 ### Open an issue page
 
-- Show issue #8
+- Issue #8
 
 ```
 $ git brws '#8'

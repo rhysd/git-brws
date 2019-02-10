@@ -1,7 +1,7 @@
 .\" generated with Ronn/v0.7.3
 .\" http://github.com/rtomayko/ronn/tree/0.7.3
 .
-.TH "GIT\-BRWS" "1" "January 2019" "" ""
+.TH "GIT\-BRWS" "1" "February 2019" "" ""
 .
 .SH "NAME"
 \fBgit\-brws\fR \- open a repository, file, commit, diff, pull request or issue in your web browser
@@ -82,7 +82,7 @@ Example of pages which \fBgit\-brws\fR can open are:
 In addition to arguments described in \fISERVICES\fR, following options are available as command line arguments\. All are optional\.
 .
 .IP "\(bu" 4
-\fB\-r\fR, \fB\-\-repo\fR \fIREPO\fR: Specify which repository should be open\. \fIREPO\fR is one of (1) shorthand format (user/repo, host/user/repo), (2) remote name (e\.g\. origin) or (3) Git URL you want to see\.
+\fB\-r\fR, \fB\-\-repo\fR \fIREPO\fR: Specify which repository should be open\. \fIREPO\fR is one of (1) shorthand format (repo, user/repo, host/user/repo), (2) remote name (e\.g\. origin) or (3) Git URL you want to see\. When only repository name is specified, \fBgit\-brws\fR searches GitHub with query \'{repo} in:name\' and opens the best\-matched repository page\.
 .
 .IP "\(bu" 4
 \fB\-b\fR, \fB\-\-branch\fR \fIBRANCH\fR Branch name to browse\.
@@ -105,7 +105,7 @@ In addition to arguments described in \fISERVICES\fR, following options are avai
 .IP "" 0
 .
 .SH "EXAMPLES"
-Open current repository page\.
+Current repository page\.
 .
 .IP "" 4
 .
@@ -118,7 +118,7 @@ $ git brws
 .IP "" 0
 .
 .P
-Open \'develop\' branch\.
+\'develop\' branch\.
 .
 .IP "" 4
 .
@@ -131,7 +131,7 @@ $ git brws \-b develop
 .IP "" 0
 .
 .P
-Open \'origin\' remote of \'develop\' branch\.
+\'origin\' remote of \'develop\' branch\.
 .
 .IP "" 4
 .
@@ -144,7 +144,7 @@ $ git brws \-r origin \-b develop
 .IP "" 0
 .
 .P
-Open @rhysd\'s \'Shiba\' repository on GitHub\.
+@rhysd\'s \'Shiba\' repository on GitHub\.
 .
 .IP "" 4
 .
@@ -157,7 +157,20 @@ $ git brws \-r rhysd/Shiba
 .IP "" 0
 .
 .P
-Open a repository specified by directory\.
+Most popular \fBreact\fR repository on GitHub
+.
+.IP "" 4
+.
+.nf
+
+$ git brws \-r react
+.
+.fi
+.
+.IP "" 0
+.
+.P
+Repository specified by directory\.
 .
 .IP "" 4
 .
@@ -170,7 +183,7 @@ $ git brws \-d ~/\.go/src/github\.com/rhysd/dot\-github
 .IP "" 0
 .
 .P
-Open specific file of current branch of current remote\.
+File of current branch of current remote\.
 .
 .IP "" 4
 .
@@ -183,7 +196,7 @@ $ git brws \./some/file\.txt
 .IP "" 0
 .
 .P
-Open specific line of the file\.
+Line of the file\.
 .
 .P
 \fINote:\fR The \'L\' can be omit\.
@@ -199,7 +212,7 @@ $ git brws \./some/file\.txt#L123
 .IP "" 0
 .
 .P
-Open range from line to line of the file\.
+Range from line to line of the file\.
 .
 .P
 \fINote:\fR The \'L\' can be omit\.
@@ -215,7 +228,7 @@ $ git brws \./some/file\.txt#L123\-L126
 .IP "" 0
 .
 .P
-Open \'HEAD\' page of current repository\.
+\'HEAD\' page of current repository\.
 .
 .IP "" 4
 .
@@ -228,7 +241,7 @@ $ git brws HEAD
 .IP "" 0
 .
 .P
-Show diff between \'HEAD\' and \'HEAD~3\'\.
+Diff between \'HEAD\' and \'HEAD~3\'\.
 .
 .IP "" 4
 .
@@ -241,7 +254,7 @@ $ git brws HEAD~3\.\.HEAD
 .IP "" 0
 .
 .P
-Show diff between \'113079b\' and \'60024ab\'\.
+Diff between \'113079b\' and \'60024ab\'\.
 .
 .IP "" 4
 .

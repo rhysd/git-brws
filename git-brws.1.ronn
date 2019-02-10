@@ -48,8 +48,10 @@ arguments. All are optional.
 
   * `-r`, `--repo` <REPO>:
     Specify which repository should be open.
-    <REPO> is one of (1) shorthand format (user/repo, host/user/repo), (2) remote name
+    <REPO> is one of (1) shorthand format (repo, user/repo, host/user/repo), (2) remote name
     (e.g. origin) or (3) Git URL you want to see.
+    When only repository name is specified, `git-brws` searches GitHub with query '{repo} in:name'
+    and opens the best-matched repository page.
 
   * `-b`, `--branch` <BRANCH>
     Branch name to browse.
@@ -71,51 +73,55 @@ arguments. All are optional.
 
 ## EXAMPLES
 
-Open current repository page.
+Current repository page.
 
     $ git brws
 
-Open 'develop' branch.
+'develop' branch.
 
     $ git brws -b develop
 
-Open 'origin' remote of 'develop' branch.
+'origin' remote of 'develop' branch.
 
     $ git brws -r origin -b develop
 
-Open @rhysd's 'Shiba' repository on GitHub.
+@rhysd's 'Shiba' repository on GitHub.
 
     $ git brws -r rhysd/Shiba
 
-Open a repository specified by directory.
+Most popular `react` repository on GitHub
+
+    $ git brws -r react
+
+Repository specified by directory.
 
     $ git brws -d ~/.go/src/github.com/rhysd/dot-github
 
-Open specific file of current branch of current remote.
+File of current branch of current remote.
 
     $ git brws ./some/file.txt
 
-Open specific line of the file.
+Line of the file.
 
 *Note:* The 'L' can be omit.
 
     $ git brws ./some/file.txt#L123
 
-Open range from line to line of the file.
+Range from line to line of the file.
 
 *Note:* The 'L' can be omit.
 
     $ git brws ./some/file.txt#L123-L126
 
-Open 'HEAD' page of current repository.
+'HEAD' page of current repository.
 
     $ git brws HEAD
 
-Show diff between 'HEAD' and 'HEAD~3'.
+Diff between 'HEAD' and 'HEAD~3'.
 
     $ git brws HEAD~3..HEAD
 
-Show diff between '113079b' and '60024ab'.
+Diff between '113079b' and '60024ab'.
 
     $ git brws 60024ab..113079b
 

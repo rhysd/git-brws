@@ -128,8 +128,10 @@ arguments. All are optional.</p>
 <ul>
 <li><p><code>-r</code>, <code>--repo</code> <var>REPO</var>:
 Specify which repository should be open.
-<var>REPO</var> is one of (1) shorthand format (user/repo, host/user/repo), (2) remote name
-(e.g. origin) or (3) Git URL you want to see.</p></li>
+<var>REPO</var> is one of (1) shorthand format (repo, user/repo, host/user/repo), (2) remote name
+(e.g. origin) or (3) Git URL you want to see.
+When only repository name is specified, <code>git-brws</code> searches GitHub with query '{repo} in:name'
+and opens the best-matched repository page.</p></li>
 <li><p><code>-b</code>, <code>--branch</code> <var>BRANCH</var>
 Branch name to browse.</p></li>
 <li><p><code>-d</code>, <code>--dir</code> <var>PATH</var>:
@@ -147,61 +149,66 @@ Show version.</p></li>
 
 <h2 id="EXAMPLES">EXAMPLES</h2>
 
-<p>Open current repository page.</p>
+<p>Current repository page.</p>
 
 <pre><code>$ git brws
 </code></pre>
 
-<p>Open 'develop' branch.</p>
+<p>'develop' branch.</p>
 
 <pre><code>$ git brws -b develop
 </code></pre>
 
-<p>Open 'origin' remote of 'develop' branch.</p>
+<p>'origin' remote of 'develop' branch.</p>
 
 <pre><code>$ git brws -r origin -b develop
 </code></pre>
 
-<p>Open @rhysd's 'Shiba' repository on GitHub.</p>
+<p>@rhysd's 'Shiba' repository on GitHub.</p>
 
 <pre><code>$ git brws -r rhysd/Shiba
 </code></pre>
 
-<p>Open a repository specified by directory.</p>
+<p>Most popular <code>react</code> repository on GitHub</p>
+
+<pre><code>$ git brws -r react
+</code></pre>
+
+<p>Repository specified by directory.</p>
 
 <pre><code>$ git brws -d ~/.go/src/github.com/rhysd/dot-github
 </code></pre>
 
-<p>Open specific file of current branch of current remote.</p>
+<p>File of current branch of current remote.</p>
 
 <pre><code>$ git brws ./some/file.txt
 </code></pre>
 
-<p>Open specific line of the file.</p>
+<p>Line of the file.</p>
 
 <p><em>Note:</em> The 'L' can be omit.</p>
 
 <pre><code>$ git brws ./some/file.txt#L123
 </code></pre>
 
-<p>Open range from line to line of the file.</p>
+<p>Range from line to line of the file.</p>
 
 <p><em>Note:</em> The 'L' can be omit.</p>
 
 <pre><code>$ git brws ./some/file.txt#L123-L126
 </code></pre>
 
-<p>Open 'HEAD' page of current repository.</p>
+<p>'HEAD' page of current repository.</p>
 
 <pre><code>$ git brws HEAD
 </code></pre>
 
-<p>Show diff between 'HEAD' and 'HEAD~3'.</p>
+<p>Diff between 'HEAD' and 'HEAD~3'.</p>
 
 <pre><code>$ git brws HEAD~3..HEAD
 </code></pre>
 
-<p>Show diff between '113079b' and '60024ab'.</p>
+<p>Diff between '113079b' and '60024ab'.</p>
 
 <pre><code>$ git brws 60024ab..113079b
 </code></pre>
@@ -293,7 +300,7 @@ proxy.</p></dd>
 
   <ol class='man-decor man-foot man foot'>
     <li class='tl'></li>
-    <li class='tc'>January 2019</li>
+    <li class='tc'>February 2019</li>
     <li class='tr'>git-brws(1)</li>
   </ol>
 

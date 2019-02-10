@@ -75,43 +75,47 @@ Usage: git brws [Options] {Args}
   https://github.com/rhysd/git-brws for more detail.
 
 Examples:
-  - Open current repository:
+  - Current repository:
 
     $ git brws
 
-  - Open specific GitHub repository:
+  - GitHub repository:
 
     $ git brws -r rhysd/git-brws
 
-  - Open a file:
+  - Most popular GitHub repository by name:
+
+    $ git brws -r git-brws
+
+  - File:
 
     $ git brws some/file.txt
 
-  - Open specific commit:
+  - Commit:
 
     $ git brws HEAD~3
 
-  - Open diff between commits:
+  - Diff between commits:
 
     $ git brws HEAD~3..HEAD
 
-  - Open diff between topic and topic's merge base commit:
+  - Diff between topic and topic's merge base commit:
 
     $ git brws master...topic
 
-  - Open line 123 of file:
+  - Line 123 of file:
 
     $ git brws some/file.txt#L123
 
-  - Open range from line 123 to line 126 of file:
+  - Range from line 123 to line 126 of file:
 
     $ git brws some/file.txt#L123-L126
 
-  - Open a pull request page (for GitHub and GitHub Enterprise):
+  - Pull request page (for GitHub and GitHub Enterprise):
 
     $ git brws --pr
 
-  - Open an issue page:
+  - Issue page:
 
     $ git brws '#8'";
 
@@ -123,7 +127,7 @@ impl Parsed {
     {
         let mut opts = Options::new();
 
-        opts.optopt("r", "repo", "Shorthand format (user/repo, host/user/repo) or remote name (e.g. origin) or Git URL you want to see", "REPO");
+        opts.optopt("r", "repo", "Shorthand format (repo, user/repo, host/user/repo) or remote name (e.g. origin) or Git URL you want to see. When only repo name is specified, most popular repository will be searched from GitHub", "REPO");
         opts.optopt("b", "branch", "Branch name to browse", "BRANCH");
         opts.optopt("d", "dir", "Directory path to the repository", "PATH");
         opts.optflag(
