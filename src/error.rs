@@ -93,6 +93,9 @@ pub enum Error {
     NoLocalRepoFound {
         operation: String,
     },
+    NoSearchResult {
+        query: String,
+    },
 }
 
 impl fmt::Display for Error {
@@ -140,6 +143,7 @@ impl fmt::Display for Error {
             Error::LineSpecifiedForDir(path) => write!(f, "Directory cannot have line number: {:?}", path),
             Error::EnvLoadError(err) => write!(f, "Cannot load environment variable: {}", err),
             Error::NoLocalRepoFound{operation} => write!(f, ".git directory was not found. For {}, local repository must be known", operation),
+            Error::NoSearchResult{query} => write!(f, "No repository was hit for query '{}'", query),
         }
     }
 }

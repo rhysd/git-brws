@@ -14,7 +14,7 @@ fn find_github_pr_url(
     token: &Option<String>,
     https_proxy: &Option<String>,
 ) -> Result<String> {
-    let client = github_api::Client::build(host, token.clone(), https_proxy)?;
+    let client = github_api::Client::build(host, token.as_ref(), https_proxy)?;
 
     // Note: Search pull request URL in the case where the repository is an original, not a fork.
     // Author should not be set since original repository's owner may be different from current

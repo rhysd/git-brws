@@ -3,6 +3,7 @@ extern crate serde;
 
 use crate::error::{Error, Result};
 use reqwest::{header, Proxy, StatusCode};
+use std::mem;
 
 #[derive(Debug, Deserialize)]
 struct ParentRepoOwner {
@@ -25,6 +26,15 @@ struct Issue {
 #[derive(Debug, Deserialize)]
 struct Issues {
     items: Vec<Issue>,
+}
+
+#[derive(Debug, Default, Deserialize)]
+pub struct SearchedRepo {
+    pub clone_url: String,
+}
+#[derive(Debug, Deserialize)]
+struct SearchResults {
+    items: Vec<SearchedRepo>,
 }
 
 pub struct Client {
@@ -91,12 +101,13 @@ impl Client {
         let url = format!("https://{}/search/issues", self.endpoint);
         let req = self.client.get(url.as_str()).query(&params);
         let mut res = self.send(req)?;
-        let issues: Issues = res.json()?;
+        let mut issues: Issues = res.json()?;
 
         if issues.items.is_empty() {
             Ok(None)
         } else {
-            Ok(Some(issues.items[0].html_url.clone()))
+            let html_url = mem::replace(&mut issues.items[0].html_url, String::new());
+            Ok(Some(html_url))
         }
     }
 
@@ -115,6 +126,23 @@ impl Client {
         match repo.parent {
             Some(p) => Ok(Some((p.owner.login, p.name))),
             None => Ok(None),
+        }
+    }
+
+    pub fn most_popular_repo<S: AsRef<str>>(&self, query: S) -> Result<SearchedRepo> {
+        let query = query.as_ref();
+        let params = [("q", query), ("per_page", "1")];
+        let url = format!("https://{}/search/repositories", self.endpoint);
+        let req = self.client.get(&url).query(&params);
+        let mut res = self.send(req)?;
+        let mut results: SearchResults = res.json()?;
+
+        if results.items.is_empty() {
+            Err(Error::NoSearchResult {
+                query: query.to_string(),
+            })
+        } else {
+            Ok(mem::replace(&mut results.items[0], SearchedRepo::default()))
         }
     }
 }

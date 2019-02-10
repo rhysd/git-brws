@@ -5,6 +5,7 @@ use crate::env::EnvConfig;
 use crate::error::{Error, Result};
 use crate::git;
 use crate::git::Git;
+use crate::github_api::Client;
 use getopts::Options;
 use std::env;
 use std::ffi::OsStr;
@@ -29,24 +30,35 @@ pub enum Parsed {
     OpenPage(command::Config),
 }
 
-fn normalize_repo_format(mut slug: String, git: &Option<Git>) -> Result<String> {
+fn normalize_repo_format(mut slug: String, git: &Option<Git>, env: &EnvConfig) -> Result<String> {
+    if slug.is_empty() {
+        return Err(Error::BrokenRepoFormat { input: slug });
+    }
+
     if let Some(git) = git {
         if let Ok(url) = git.remote_url(&slug) {
             return Ok(url);
         }
     }
 
-    if !slug.ends_with(".git") {
-        slug.push_str(".git");
-    }
-
     if slug.starts_with("git@") || slug.starts_with("https://") || slug.starts_with("http://") {
+        if !slug.ends_with(".git") {
+            slug.push_str(".git");
+        }
         return Ok(slug);
     }
 
     match slug.chars().filter(|c| *c == '/').count() {
-        1 => Ok(format!("https://github.com/{}", slug)),
-        2 => Ok(format!("https://{}", slug)),
+        1 => Ok(format!("https://github.com/{}.git", slug)),
+        2 => Ok(format!("https://{}.git", slug)),
+        0 => {
+            let client = Client::build(
+                "api.github.com",
+                env.github_token.as_ref(),
+                &env.https_proxy,
+            )?;
+            client.most_popular_repo(&slug).map(|repo| repo.clone_url)
+        }
         _ => Err(Error::BrokenRepoFormat { input: slug }),
     }
 }
@@ -146,7 +158,7 @@ impl Parsed {
                 Some(r) => {
                     let git_dir = git_dir.ok();
                     let git = git_dir.as_ref().map(|d| Git::new(d, &env.git_command));
-                    (normalize_repo_format(r, &git)?, git_dir)
+                    (normalize_repo_format(r, &git, &env)?, git_dir)
                 }
                 None => {
                     // When --repo is not set, remote URL needs to know its URL in this case
