@@ -30,15 +30,9 @@ pub enum Parsed {
     OpenPage(command::Config),
 }
 
-fn normalize_repo_format(mut slug: String, git: &Option<Git>, env: &EnvConfig) -> Result<String> {
+fn normalize_repo_format(mut slug: String, env: &EnvConfig) -> Result<String> {
     if slug.is_empty() {
         return Err(Error::BrokenRepoFormat { input: slug });
-    }
-
-    if let Some(git) = git {
-        if let Ok(url) = git.remote_url(&slug) {
-            return Ok(url);
-        }
     }
 
     if slug.starts_with("git@") || slug.starts_with("https://") || slug.starts_with("http://") {
@@ -127,9 +121,10 @@ impl Parsed {
     {
         let mut opts = Options::new();
 
-        opts.optopt("r", "repo", "Shorthand format (repo, user/repo, host/user/repo) or remote name (e.g. origin) or Git URL you want to see. When only repo name is specified, most popular repository will be searched from GitHub", "REPO");
+        opts.optopt("r", "repo", "Shorthand format (repo, user/repo, host/user/repo) or Git URL you want to see. When only repo name is specified, most popular repository will be searched from GitHub", "REPO");
         opts.optopt("b", "branch", "Branch name to browse", "BRANCH");
         opts.optopt("d", "dir", "Directory path to the repository", "PATH");
+        opts.optopt("R", "remote", "Remote name (e.g. origin)", "REMOTE");
         opts.optflag(
             "u",
             "url",
@@ -158,23 +153,29 @@ impl Parsed {
         let env = EnvConfig::from_iter(env::vars())?;
         let git_dir = git::git_dir(matches.opt_str("d"), env.git_command.as_str());
         let branch = matches.opt_str("b");
-        let (repo, git_dir) = {
-            // Create scope for borrowing git_dir ref
-            match matches.opt_str("r") {
-                Some(r) => {
-                    if !matches.free.is_empty() {
-                        return Err(Error::ArgsNotAllowed { args: matches.free });
-                    }
-                    let git_dir = git_dir.ok();
-                    let git = git_dir.as_ref().map(|d| Git::new(d, &env.git_command));
-                    (normalize_repo_format(r, &git, &env)?, git_dir)
+        let (repo, git_dir) = match (matches.opt_str("r"), matches.opt_str("R")) {
+            (Some(repo), _) => {
+                if !matches.free.is_empty() {
+                    return Err(Error::ArgsNotAllowed {
+                        flag: "--repo {repo}",
+                        args: matches.free,
+                    });
                 }
-                None => {
-                    // When --repo is not set, remote URL needs to know its URL in this case
-                    let git_dir = git_dir?;
-                    let git = Git::new(&git_dir, &env.git_command);
-                    (git.tracking_remote(&branch)?, Some(git_dir))
-                }
+                // In this case, `.git` directory is optional. So user can use this command
+                // outside Git repository
+                (normalize_repo_format(repo, &env)?, git_dir.ok())
+            }
+            (None, remote) => {
+                // In this case, `.git` directory is required because remote URL is retrieved
+                // from Git configuration.
+                let git_dir = git_dir?;
+                let git = Git::new(&git_dir, &env.git_command);
+                let url = if let Some(remote) = remote {
+                    git.remote_url(&remote)?
+                } else {
+                    git.tracking_remote(&branch)?
+                };
+                (url, Some(git_dir))
             }
         };
 

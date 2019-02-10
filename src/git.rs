@@ -38,7 +38,19 @@ impl<'a> Git<'a> {
         // XXX:
         // `git remote get-url {name}` is not available because it's added recently (at 2.6.1).
         // Note that git installed in Ubuntu 14.04 is 1.9.1.
-        self.command(&["config", "--get", &format!("remote.{}.url", name.as_ref())])
+        let name = name.as_ref();
+        self.command(&["config", "--get", &format!("remote.{}.url", name)])
+            .map_err(|mut err| {
+                if let Error::GitCommandError { ref mut stderr, .. } = err {
+                    // `git config --get` does not output any error message even if cofniguration
+                    // is not found (exit status is non-zero). Instead, reasonable error message is
+                    // set here.
+                    if stderr.is_empty() {
+                        *stderr = format!("Remote '{}' does not exist in Git config", name);
+                    }
+                }
+                err
+            })
     }
 
     pub fn tracking_remote<S: AsRef<str>>(&self, branch: &Option<S>) -> Result<String> {

@@ -48,16 +48,19 @@ arguments. All are optional.
 
   * `-r`, `--repo` <REPO>:
     Specify which repository should be open.
-    <REPO> is one of (1) shorthand format (repo, user/repo, host/user/repo), (2) remote name
-    (e.g. origin) or (3) Git URL you want to see.
-    When only repository name is specified, `git-brws` searches GitHub with query '{repo} in:name'
-    and opens the best-matched repository page.
+    <REPO> is one of (1) shorthand format (repo, user/repo, host/user/repo) or (2) Git URL you want
+    to see. When only repository name is specified, `git-brws` searches GitHub with query
+    '{repo} in:name' and opens the best-matched repository page.
 
-  * `-b`, `--branch` <BRANCH>
+  * `-b`, `--branch` <BRANCH>:
     Branch name to browse.
 
   * `-d`, `--dir` <PATH>:
     Directory path to the repository.
+
+  * `-R`, `--remote` <REMOTE>:
+    Remote name (e.g. origin). Default value is a remote the current branch is tracking. If current
+    branch tracks no branch, it falls back to 'origin'.
 
   * `-u`, `--url`:
     Output URL to stdout instead of opening in browser.

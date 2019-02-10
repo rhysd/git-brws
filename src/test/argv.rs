@@ -77,6 +77,42 @@ fn repo_formatting() {
         Parsed::OpenPage(o) => assert_eq!(o.repo, "https://gitlab.com/foo/bar.git"),
         p => assert!(false, "{:?}", p),
     }
+    match p("foo/bar") {
+        Parsed::OpenPage(o) => assert_eq!(o.repo, "https://github.com/foo/bar.git"),
+        p => assert!(false, "{:?}", p),
+    }
+}
+
+#[test]
+fn valid_remote_name() {
+    match Parsed::from_iter(&["git-brws", "-R", "origin"]).unwrap() {
+        Parsed::OpenPage(o) => assert!(
+            [
+                "https://github.com/rhysd/git-brws.git",
+                "ssh://git@github.com:22/rhysd/git-brws.git"
+            ]
+            .iter()
+            .find(|u| *u == &o.repo)
+            .is_some(),
+            "Unexpected remote URL for 'origin' remote: {}. For pull request, please ignore this test is failing",
+            o.repo
+        ),
+        p => assert!(false, "{:?}", p),
+    }
+}
+
+#[test]
+fn invalid_remote_name() {
+    match Parsed::from_iter(&["git-brws", "-R", "this-remote-is-never-existing"]).unwrap_err() {
+        Error::GitCommandError { stderr, .. } => {
+            assert!(
+                stderr.contains("Remote 'this-remote-is-never-existing' does not exist"),
+                "Unexpected error message: {}",
+                stderr
+            );
+        }
+        e => assert!(false, "Unexpected error: {}", e),
+    }
 }
 
 #[test]
@@ -167,7 +203,7 @@ fn search_repo_from_github_by_name() {
 fn repo_specified_but_argument_is_not_empty() {
     let err = Parsed::from_iter(&["git-brws", "-r", "foo", "HEAD"]).unwrap_err();
     match err {
-        Error::ArgsNotAllowed { ref args } => {
+        Error::ArgsNotAllowed { ref args, .. } => {
             assert!(format!("{}", err).contains("\"HEAD\""), "{:?}", args);
         }
         e => assert!(false, "Unexpected error: {}", e),

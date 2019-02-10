@@ -62,11 +62,12 @@ Usage: git brws [Options] {Args}
 
 Options:
     -r, --repo REPO     Shorthand format (repo, user/repo, host/user/repo) or
-                        remote name (e.g. origin) or Git URL you want to see.
-                        When only repo name is specified, most popular
-                        repository will be searched from GitHub
+                        Git URL you want to see. When only repo name is
+                        specified, most popular repository will be searched
+                        from GitHub
     -b, --branch BRANCH Branch name to browse
     -d, --dir PATH      Directory path to the repository
+    -R, --remote REMOTE Remote name (e.g. origin)
     -u, --url           Output URL to stdout instead of opening in browser
     -p, --pr            Open pull request page instead of repository page
     -h, --help          Print this help
@@ -75,7 +76,7 @@ Options:
 
 ### Open a repository page
 
-- Current repository page
+- Repository at current directory
 
 ```
 $ git brws

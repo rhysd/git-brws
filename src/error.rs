@@ -97,6 +97,7 @@ pub enum Error {
         query: String,
     },
     ArgsNotAllowed {
+        flag: &'static str,
         args: Vec<String>,
     },
 }
@@ -104,7 +105,7 @@ pub enum Error {
 impl fmt::Display for Error {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
         match self {
-            Error::BrokenRepoFormat {input} => write!(f, "Invalid repository format '{}' or unknown remote. Note: Format must be one of 'repo', 'user/repo', 'host/user/repo', remote name, Git URL", input),
+            Error::BrokenRepoFormat {input} => write!(f, "Invalid repository format '{}' or unknown remote. Note: Format must be one of 'repo', 'user/repo', 'host/user/repo', Git URL", input),
             Error::CliParseFail(e) => write!(f, "{}", e),
             Error::OpenUrlFailure {url, msg} => write!(f, "{}: Cannot open URL {}", msg, url),
             Error::GitLabDiffNotSupported => write!(f, "GitLab does not support '..' for comparing diff between commits. Please use '...'"),
@@ -147,7 +148,7 @@ impl fmt::Display for Error {
             Error::EnvLoadError(err) => write!(f, "Cannot load environment variable: {}", err),
             Error::NoLocalRepoFound{operation} => write!(f, ".git directory was not found. For {}, local repository must be known", operation),
             Error::NoSearchResult{query} => write!(f, "No repository was hit for query '{}'", query),
-            Error::ArgsNotAllowed{args} => write!(f, "-r {{repo}} option does not allow any command line argument. It opens page based on {{repo}}, but argument(s) {:?} retrives information from local directory.", args),
+            Error::ArgsNotAllowed{flag, args} => write!(f, "{} option does not allow any command line argument. It opens page based on {{repo}}, but argument(s) {:?} retrives information from local directory.", flag, args),
         }
     }
 }
