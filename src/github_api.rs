@@ -129,18 +129,18 @@ impl Client {
         }
     }
 
-    pub fn most_popular_repo<S: AsRef<str>>(&self, query: S) -> Result<SearchedRepo> {
-        let query = query.as_ref();
-        let params = [("q", query), ("per_page", "1")];
+    pub fn most_popular_repo_by_name<S: AsRef<str>>(&self, name: S) -> Result<SearchedRepo> {
+        // XXX: No query syntax for exact matching to repository name. Use `in:name` instead though
+        // it's matching to substrings.
+        let query = format!("{} in:name", name.as_ref());
+        let params = [("q", query.as_str()), ("per_page", "1")];
         let url = format!("https://{}/search/repositories", self.endpoint);
         let req = self.client.get(&url).query(&params);
         let mut res = self.send(req)?;
         let mut results: SearchResults = res.json()?;
 
         if results.items.is_empty() {
-            Err(Error::NoSearchResult {
-                query: query.to_string(),
-            })
+            Err(Error::NoSearchResult { query: query })
         } else {
             Ok(mem::replace(&mut results.items[0], SearchedRepo::default()))
         }

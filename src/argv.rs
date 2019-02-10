@@ -57,7 +57,9 @@ fn normalize_repo_format(mut slug: String, git: &Option<Git>, env: &EnvConfig) -
                 env.github_token.as_ref(),
                 &env.https_proxy,
             )?;
-            client.most_popular_repo(&slug).map(|repo| repo.clone_url)
+            client
+                .most_popular_repo_by_name(&slug)
+                .map(|repo| repo.clone_url)
         }
         _ => Err(Error::BrokenRepoFormat { input: slug }),
     }

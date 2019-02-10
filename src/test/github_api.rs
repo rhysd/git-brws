@@ -69,3 +69,24 @@ fn test_request_failure() {
         Err(e) => assert!(false, "unexpected error: {}", e),
     }
 }
+
+#[test]
+fn test_most_popular_repo_ok() {
+    let client = Client::build("api.github.com", skip_if_no_token!(), &https_proxy()).unwrap();
+    let repo = client
+        .most_popular_repo_by_name("user:rhysd vim.wasm")
+        .unwrap();
+    assert_eq!(&repo.clone_url, "https://github.com/rhysd/vim.wasm.git");
+}
+
+#[test]
+fn test_most_popular_repo_not_found() {
+    let client = Client::build("api.github.com", skip_if_no_token!(), &https_proxy()).unwrap();
+    let err = client
+        .most_popular_repo_by_name("user:rhysd this-repository-will-never-exist")
+        .unwrap_err();
+    match err {
+        Error::NoSearchResult { .. } => { /* ok */ }
+        err => assert!(false, "Unexpected error: {}", err),
+    }
+}

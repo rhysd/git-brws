@@ -3,7 +3,7 @@ use std::env;
 use std::fs;
 
 #[test]
-fn no_option() {
+fn args_with_no_option() {
     match Parsed::from_iter(&["git-brws"]).unwrap() {
         Parsed::OpenPage(o) => {
             assert!(vec![
@@ -28,16 +28,14 @@ fn no_option() {
         Parsed::OpenPage(o) => {
             assert_eq!(o.args.len(), 2);
         }
-        _ => assert!(false),
+        p => assert!(false, "{:?}", p),
     };
 }
 
 #[test]
-fn with_options() {
-    match Parsed::from_iter(&[
-        "git-brws", "foo", "-u", "-r", "foo/bar", "--dir", ".", "bar", "-b", "dev",
-    ])
-    .unwrap()
+fn multiple_options() {
+    match Parsed::from_iter(&["git-brws", "-u", "-r", "foo/bar", "--dir", ".", "-b", "dev"])
+        .unwrap()
     {
         Parsed::OpenPage(o) => {
             assert_eq!(o.repo, "https://github.com/foo/bar.git");
@@ -46,10 +44,10 @@ fn with_options() {
                 Some(ref d) => assert!(d.ends_with(".git"), "{:?}", d),
                 None => assert!(false, ".git was not found"),
             }
-            assert_eq!(o.args.len(), 2);
+            assert_eq!(o.args.len(), 0);
             assert!(o.stdout);
         }
-        _ => assert!(false),
+        p => assert!(false, "{:?}", p),
     };
 }
 
@@ -72,11 +70,11 @@ fn repo_formatting() {
     let p = |r| Parsed::from_iter(&["git-brws", "-r", r]).unwrap();
     match p("bitbucket.org/foo/bar") {
         Parsed::OpenPage(o) => assert_eq!(o.repo, "https://bitbucket.org/foo/bar.git"),
-        _ => assert!(false),
+        p => assert!(false, "{:?}", p),
     }
     match p("https://gitlab.com/foo/bar") {
         Parsed::OpenPage(o) => assert_eq!(o.repo, "https://gitlab.com/foo/bar.git"),
-        _ => assert!(false),
+        p => assert!(false, "{:?}", p),
     }
 }
 
@@ -86,7 +84,7 @@ fn help_option() {
         Parsed::Help(s) => {
             assert!(s.starts_with("Usage:"));
         }
-        _ => assert!(false),
+        p => assert!(false, "{:?}", p),
     }
 }
 
@@ -96,7 +94,7 @@ fn version_option() {
         Parsed::Version(s) => {
             assert!(!s.is_empty());
         }
-        _ => assert!(false),
+        p => assert!(false, "{:?}", p),
     }
 }
 
@@ -144,6 +142,21 @@ fn no_git_dir() {
         Parsed::OpenPage(o) => {
             assert_eq!(o.git_dir, None);
             assert_eq!(&o.repo, "https://github.com/foo/bar.git");
+        }
+        p => assert!(false, "{:?}", p),
+    }
+}
+
+#[test]
+fn search_repo_from_github_by_name() {
+    skip_if_no_token!();
+
+    // Add user:rhysd to ensure to get expected result. But actually repository name is usually
+    // passed like `-r react` as use case.
+    let parsed = Parsed::from_iter(&["git-brws", "-r", "user:rhysd vim.wasm"]).unwrap();
+    match parsed {
+        Parsed::OpenPage(o) => {
+            assert_eq!(&o.repo, "https://github.com/rhysd/vim.wasm.git");
         }
         p => assert!(false, "{:?}", p),
     }
