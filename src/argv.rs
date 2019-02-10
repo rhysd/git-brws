@@ -158,6 +158,9 @@ impl Parsed {
             // Create scope for borrowing git_dir ref
             match matches.opt_str("r") {
                 Some(r) => {
+                    if !matches.free.is_empty() {
+                        return Err(Error::ArgsNotAllowed { args: matches.free });
+                    }
                     let git_dir = git_dir.ok();
                     let git = git_dir.as_ref().map(|d| Git::new(d, &env.git_command));
                     (normalize_repo_format(r, &git, &env)?, git_dir)

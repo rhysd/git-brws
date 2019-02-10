@@ -96,6 +96,9 @@ pub enum Error {
     NoSearchResult {
         query: String,
     },
+    ArgsNotAllowed {
+        args: Vec<String>,
+    },
 }
 
 impl fmt::Display for Error {
@@ -144,6 +147,7 @@ impl fmt::Display for Error {
             Error::EnvLoadError(err) => write!(f, "Cannot load environment variable: {}", err),
             Error::NoLocalRepoFound{operation} => write!(f, ".git directory was not found. For {}, local repository must be known", operation),
             Error::NoSearchResult{query} => write!(f, "No repository was hit for query '{}'", query),
+            Error::ArgsNotAllowed{args} => write!(f, "-r {{repo}} option does not allow any command line argument. It opens page based on {{repo}}, but argument(s) {:?} retrives information from local directory.", args),
         }
     }
 }

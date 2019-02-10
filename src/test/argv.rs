@@ -1,4 +1,5 @@
 use crate::argv::*;
+use crate::error::Error;
 use std::env;
 use std::fs;
 
@@ -159,5 +160,16 @@ fn search_repo_from_github_by_name() {
             assert_eq!(&o.repo, "https://github.com/rhysd/vim.wasm.git");
         }
         p => assert!(false, "{:?}", p),
+    }
+}
+
+#[test]
+fn repo_specified_but_argument_is_not_empty() {
+    let err = Parsed::from_iter(&["git-brws", "-r", "foo", "HEAD"]).unwrap_err();
+    match err {
+        Error::ArgsNotAllowed { ref args } => {
+            assert!(format!("{}", err).contains("\"HEAD\""), "{:?}", args);
+        }
+        e => assert!(false, "Unexpected error: {}", e),
     }
 }
