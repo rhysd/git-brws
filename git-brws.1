@@ -81,28 +81,37 @@ Example of pages which \fBgit\-brws\fR can open are:
 .SH "OPTIONS"
 In addition to arguments described in \fISERVICES\fR, following options are available as command line arguments\. All are optional\.
 .
-.IP "\(bu" 4
-\fB\-r\fR, \fB\-\-repo\fR \fIREPO\fR: Specify which repository should be open\. \fIREPO\fR is one of (1) shorthand format (repo, user/repo, host/user/repo), (2) remote name (e\.g\. origin) or (3) Git URL you want to see\. When only repository name is specified, \fBgit\-brws\fR searches GitHub with query \'{repo} in:name\' and opens the best\-matched repository page\.
+.TP
+\fB\-r\fR, \fB\-\-repo\fR \fIREPO\fR
+Specify which repository should be open\. \fIREPO\fR is one of (1) shorthand format (repo, user/repo, host/user/repo) or (2) Git URL you want to see\. When only repository name is specified, \fBgit\-brws\fR searches GitHub with query \'{repo} in:name\' and opens the best\-matched repository page\.
 .
-.IP "\(bu" 4
-\fB\-b\fR, \fB\-\-branch\fR \fIBRANCH\fR Branch name to browse\.
+.TP
+\fB\-b\fR, \fB\-\-branch\fR \fIBRANCH\fR
+Branch name to browse\. Default value is current branch\.
 .
-.IP "\(bu" 4
-\fB\-d\fR, \fB\-\-dir\fR \fIPATH\fR: Directory path to the repository\.
+.TP
+\fB\-d\fR, \fB\-\-dir\fR \fIPATH\fR
+Directory path to the repository\. Default value is current working directory\.
 .
-.IP "\(bu" 4
-\fB\-u\fR, \fB\-\-url\fR: Output URL to stdout instead of opening in browser\.
+.TP
+\fB\-R\fR, \fB\-\-remote\fR \fIREMOTE\fR
+Remote name (e\.g\. origin)\. Default value is a remote the current branch is tracking\. If current branch tracks no branch, it falls back to \'origin\'\.
 .
-.IP "\(bu" 4
-\fB\-p\fR, \fB\-\-pr\fR: Open pull request page instead of repository page\.
+.TP
+\fB\-u\fR, \fB\-\-url\fR
+Output URL to stdout instead of opening in browser\.
 .
-.IP "\(bu" 4
-\fB\-h\fR, \fB\-\-help\fR: Print this help\.
+.TP
+\fB\-p\fR, \fB\-\-pr\fR
+Open pull request page instead of repository page\.
 .
-.IP "\(bu" 4
-\fB\-v\fR, \fB\-\-version\fR: Show version\.
+.TP
+\fB\-h\fR, \fB\-\-help\fR
+Print this help\.
 .
-.IP "" 0
+.TP
+\fB\-v\fR, \fB\-\-version\fR
+Show version\.
 .
 .SH "EXAMPLES"
 Current repository page\.

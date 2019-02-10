@@ -53,10 +53,10 @@ arguments. All are optional.
     '{repo} in:name' and opens the best-matched repository page.
 
   * `-b`, `--branch` <BRANCH>:
-    Branch name to browse.
+    Branch name to browse. Default value is current branch.
 
   * `-d`, `--dir` <PATH>:
-    Directory path to the repository.
+    Directory path to the repository. Default value is current working directory.
 
   * `-R`, `--remote` <REMOTE>:
     Remote name (e.g. origin). Default value is a remote the current branch is tracking. If current

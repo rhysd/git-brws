@@ -125,26 +125,20 @@ is pushed to the branch.</p>
 <p>In addition to arguments described in <var>SERVICES</var>, following options are available as command line
 arguments. All are optional.</p>
 
-<ul>
-<li><p><code>-r</code>, <code>--repo</code> <var>REPO</var>:
-Specify which repository should be open.
-<var>REPO</var> is one of (1) shorthand format (repo, user/repo, host/user/repo), (2) remote name
-(e.g. origin) or (3) Git URL you want to see.
-When only repository name is specified, <code>git-brws</code> searches GitHub with query '{repo} in:name'
-and opens the best-matched repository page.</p></li>
-<li><p><code>-b</code>, <code>--branch</code> <var>BRANCH</var>
-Branch name to browse.</p></li>
-<li><p><code>-d</code>, <code>--dir</code> <var>PATH</var>:
-Directory path to the repository.</p></li>
-<li><p><code>-u</code>, <code>--url</code>:
-Output URL to stdout instead of opening in browser.</p></li>
-<li><p><code>-p</code>, <code>--pr</code>:
-Open pull request page instead of repository page.</p></li>
-<li><p><code>-h</code>, <code>--help</code>:
-Print this help.</p></li>
-<li><p><code>-v</code>, <code>--version</code>:
-Show version.</p></li>
-</ul>
+<dl>
+<dt><code>-r</code>, <code>--repo</code> <var>REPO</var></dt><dd><p>Specify which repository should be open.
+<var>REPO</var> is one of (1) shorthand format (repo, user/repo, host/user/repo) or (2) Git URL you want
+to see. When only repository name is specified, <code>git-brws</code> searches GitHub with query
+'{repo} in:name' and opens the best-matched repository page.</p></dd>
+<dt><code>-b</code>, <code>--branch</code> <var>BRANCH</var></dt><dd><p>Branch name to browse. Default value is current branch.</p></dd>
+<dt><code>-d</code>, <code>--dir</code> <var>PATH</var></dt><dd><p>Directory path to the repository. Default value is current working directory.</p></dd>
+<dt><code>-R</code>, <code>--remote</code> <var>REMOTE</var></dt><dd><p>Remote name (e.g. origin). Default value is a remote the current branch is tracking. If current
+branch tracks no branch, it falls back to 'origin'.</p></dd>
+<dt><code>-u</code>, <code>--url</code></dt><dd><p>Output URL to stdout instead of opening in browser.</p></dd>
+<dt><code>-p</code>, <code>--pr</code></dt><dd><p>Open pull request page instead of repository page.</p></dd>
+<dt><code>-h</code>, <code>--help</code></dt><dd><p>Print this help.</p></dd>
+<dt><code>-v</code>, <code>--version</code></dt><dd><p>Show version.</p></dd>
+</dl>
 
 
 <h2 id="EXAMPLES">EXAMPLES</h2>
