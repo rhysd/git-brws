@@ -22,7 +22,9 @@ impl<'a> Git<'a> {
             Ok(String::from_utf8_lossy(&out.stdout).trim().to_string())
         } else {
             Err(Error::GitCommandError {
-                stderr: String::from_utf8_lossy(&out.stderr).trim().to_string(),
+                stderr: String::from_utf8_lossy(&out.stderr)
+                    .trim()
+                    .replace('\n', ""),
                 args: args.iter().map(|a| a.as_ref().to_owned()).collect(),
             })
         }
@@ -101,7 +103,9 @@ pub fn git_dir(dir: Option<String>, git_cmd: &str) -> Result<PathBuf> {
     let out = cmd.output()?;
     if !out.status.success() {
         return Err(Error::GitCommandError {
-            stderr: String::from_utf8_lossy(&out.stderr).trim().to_string(),
+            stderr: String::from_utf8_lossy(&out.stderr)
+                .trim()
+                .replace('\n', ""),
             args: vec![
                 OsStr::new(git_cmd).to_os_string(),
                 OsStr::new("rev-parse").to_os_string(),
