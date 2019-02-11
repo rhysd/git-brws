@@ -145,7 +145,7 @@ impl Client {
         let mut results: SearchResults = res.json()?;
 
         if results.items.is_empty() {
-            Err(Error::NoSearchResult { query: query })
+            Err(Error::NoSearchResult { query })
         } else {
             Ok(mem::replace(&mut results.items[0], SearchedRepo::default()))
         }

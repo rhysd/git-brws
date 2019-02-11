@@ -1,3 +1,5 @@
+#![allow(clippy::too_many_arguments)]
+
 extern crate path_slash;
 extern crate reqwest;
 extern crate url;
@@ -65,6 +67,7 @@ where
     T: ToString,
     U: AsRef<str>,
 {
+    #[allow(clippy::unneeded_field_pattern)]
     match page {
         Page::Open { website } if *website => {
             match host {
@@ -184,6 +187,7 @@ fn build_bitbucket_url<T: AsRef<str>>(
     page: &Page,
     https_proxy: Option<T>,
 ) -> Result<String> {
+    #[allow(clippy::unneeded_field_pattern)]
     match page {
         Page::Open { website } if *website => {
             // Build bitbucket cloud URL:
