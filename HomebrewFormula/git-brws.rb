@@ -1,14 +1,14 @@
 class GitBrws < Formula
-  version '0.9.2'
+  version '0.10.0'
   desc 'Command line tool to open repository, file, commit, diff, pull request or issue in browser'
   homepage 'https://github.com/rhysd/git-brws'
 
   if OS.mac?
     url "https://github.com/rhysd/git-brws/releases/download/#{version}/git-brws-#{version}-x86_64-apple-darwin.zip"
-    sha256 '31e552c7fdd254c6c04487c87c958c6530354de4eb78e45dc078baea5630b7bc' # mac
+    sha256 '4b85aec6a555b5a9dec7c227fe151f83797543041ff386b066f23b5a9476b92a' # mac
   elsif OS.linux?
     url "https://github.com/rhysd/git-brws/releases/download/#{version}/git-brws-#{version}-x86_64-unknown-linux-gnu.zip"
-    sha256 '1c368373d56b3bb74b92a1b01572e0662aec5e6f97f68c7e2fc971f5db3188cb' # linux
+    sha256 '868f84d7fe4ff5b8249d150167239973d50d06c1e48c34ccc8ed783ebaedcd64' # linux
   end
 
   def install
