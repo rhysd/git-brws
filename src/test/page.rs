@@ -10,15 +10,11 @@ fn config(repo: &str, branch: Option<&str>, args: Vec<&str>) -> Config {
     let mut dir = env::current_dir().unwrap();
     dir.push(Path::new(".git"));
     let dir = fs::canonicalize(dir).unwrap();
-    let mut a = Vec::new();
-    for arg in args {
-        a.push(arg.to_string());
-    }
     Config {
         repo: repo.to_string(),
         branch: branch.map(|s| s.to_string()),
         git_dir: Some(dir),
-        args: a,
+        args: args.into_iter().map(String::from).collect(),
         stdout: false,
         pull_request: false,
         website: false,
@@ -449,5 +445,17 @@ fn fetch_pull_request_page_without_branch_outside_git_repo() {
             operation
         ),
         err => assert!(false, "Unexpected error: {}", err),
+    }
+}
+
+#[test]
+fn setting_website_returns_open_always() {
+    for args in &[vec![], vec!["HEAD"], vec!["-r", "foo/bar"]] {
+        let mut c = config("https://github.com/user/repo.git", None, args.clone());
+        c.website = true;
+        match parse_page(&c).unwrap() {
+            Page::Open { website: true } => { /* OK */ }
+            page => assert!(false, "Unexpected parse result: {:?}", page),
+        }
     }
 }

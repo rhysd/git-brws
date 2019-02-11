@@ -3,7 +3,7 @@ use crate::github_api::Client;
 use crate::test::helper::https_proxy;
 
 #[test]
-fn test_find_pr_url() {
+fn find_pr_url() {
     let token = skip_if_no_token!();
     let client = Client::build("api.github.com", token, &https_proxy()).unwrap();
     let url = client
@@ -28,7 +28,7 @@ fn test_find_pr_url() {
 }
 
 #[test]
-fn test_no_pr_found() {
+fn no_pr_found() {
     let token = skip_if_no_token!();
     let client = Client::build("api.github.com", token, &https_proxy()).unwrap();
     let url = client
@@ -43,7 +43,7 @@ fn test_no_pr_found() {
 }
 
 #[test]
-fn test_find_parent() {
+fn find_parent() {
     let client = Client::build("api.github.com", skip_if_no_token!(), &https_proxy()).unwrap();
     let parent = client.parent_repo("rhysd", "rust.vim").unwrap();
     assert_eq!(
@@ -53,14 +53,14 @@ fn test_find_parent() {
 }
 
 #[test]
-fn test_parent_not_found() {
+fn parent_not_found() {
     let client = Client::build("api.github.com", skip_if_no_token!(), &https_proxy()).unwrap();
     let parent = client.parent_repo("rhysd", "git-brws").unwrap();
     assert_eq!(parent, None);
 }
 
 #[test]
-fn test_request_failure() {
+fn request_failure() {
     let client =
         Client::build("unknown.endpoint.example.com", None::<&str>, &None::<&str>).unwrap();
     match client.parent_repo("rhysd", "git-brws") {
@@ -71,7 +71,7 @@ fn test_request_failure() {
 }
 
 #[test]
-fn test_most_popular_repo_ok() {
+fn most_popular_repo_ok() {
     let client = Client::build("api.github.com", skip_if_no_token!(), &https_proxy()).unwrap();
     let repo = client
         .most_popular_repo_by_name("user:rhysd vim.wasm")
@@ -80,7 +80,7 @@ fn test_most_popular_repo_ok() {
 }
 
 #[test]
-fn test_most_popular_repo_not_found() {
+fn most_popular_repo_not_found() {
     let client = Client::build("api.github.com", skip_if_no_token!(), &https_proxy()).unwrap();
     let err = client
         .most_popular_repo_by_name("user:rhysd this-repository-will-never-exist")
@@ -89,4 +89,32 @@ fn test_most_popular_repo_not_found() {
         Error::NoSearchResult { .. } => { /* ok */ }
         err => assert!(false, "Unexpected error: {}", err),
     }
+}
+
+#[test]
+fn homepage() {
+    let client = Client::build("api.github.com", skip_if_no_token!(), &https_proxy()).unwrap();
+    let url = client.repo_homepage("rhysd", "git-brws").unwrap();
+    match url {
+        Some(url) => assert_eq!(&url, "https://rhysd.github.io/git-brws/"),
+        url => assert!(false, "Unexpected url: {:?}", url),
+    }
+}
+
+#[test]
+fn homepage_not_found() {
+    let client = Client::build("api.github.com", skip_if_no_token!(), &https_proxy()).unwrap();
+    let url = client.repo_homepage("rhysd", "filter-with-state").unwrap();
+    match url {
+        None => { /* OK */ }
+        url => assert!(false, "Unexpected url: {:?}", url),
+    }
+}
+
+#[test]
+fn homepage_error_response() {
+    let client = Client::build("api.github.com", skip_if_no_token!(), &https_proxy()).unwrap();
+    client
+        .repo_homepage("rhysd", "this-repository-will-never-exist")
+        .unwrap_err();
 }

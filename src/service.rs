@@ -84,6 +84,10 @@ where
                     let host = &host[0..host.len() - 4];
                     format!("https://{}.{}.io/{}", user, host, repo)
                 }
+                "gitlab.com" => format!("https://{}.gitlab.io/{}", user, repo),
+                host if host.starts_with("gitlab.") => {
+                    format!("https://{}.{}/{}", user, host, repo)
+                }
                 // For GitHub Enterprise:
                 //   https://help.github.com/enterprise/user/articles/user-organization-and-project-pages/
                 host => {

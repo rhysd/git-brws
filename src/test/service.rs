@@ -1,7 +1,7 @@
 use crate::error::Error;
 use crate::page::{DiffOp, Line, Page};
 use crate::service::build_page_url;
-use crate::test::helper::empty_env;
+use crate::test::helper::{empty_env, https_proxy};
 use std::path::Path;
 
 // Note:
@@ -402,4 +402,92 @@ fn pull_request_url() {
     )
     .unwrap();
     assert_eq!(&url, expected);
+}
+
+#[test]
+fn website_github_pages() {
+    let mut env = empty_env();
+    env.github_token = skip_if_no_token!();
+    env.https_proxy = https_proxy();
+    let env = env;
+    let testcases = &[
+        (
+            "https://github.com/rhysd/git-brws.git", // With gh-pages
+            "https://rhysd.github.io/git-brws/",
+        ),
+        (
+            "https://github.com/rhysd/dogfiles", // Without gh-pages, but with homepage
+            "https://rhysd.github.io",
+        ),
+        (
+            "https://github.com/rhysd/filter-with-state", // Without homepage
+            "https://rhysd.github.io/filter-with-state",
+        ),
+    ];
+    for (url, expected) in testcases {
+        let actual = build_page_url(url, &Page::Open { website: true }, &None, &env).unwrap();
+        assert_eq!(*expected, &actual);
+    }
+}
+
+#[test]
+fn website_github_enterprise_pages() {
+    let mut env = empty_env();
+    env.ghe_url_host = Some("yourcompany-github.com".to_string());
+    let env = env;
+
+    // TODO: Tests for the case where domain isolation is enabled are missing
+    // TODO: Tests with actual GitHub Enterprise instance
+    let testcases = &[
+        (
+            "https://github.yourcompany.com/foo/bar.git",
+            "https://github.yourcompany.com/pages/foo/bar",
+        ),
+        (
+            "https://yourcompany-github.com/foo/bar.git",
+            "https://yourcompany-github.com/pages/foo/bar",
+        ),
+    ];
+    for (url, expected) in testcases {
+        let actual = build_page_url(url, &Page::Open { website: true }, &None, &env).unwrap();
+        assert_eq!(*expected, &actual);
+    }
+}
+
+#[test]
+fn website_gitlab_pages() {
+    let env = empty_env();
+    let testcases = &[
+        (
+            "https://gitlab.com/foo/bar.git",
+            "https://foo.gitlab.io/bar",
+        ),
+        (
+            "https://gitlab.example.com/foo/bar.git",
+            "https://foo.gitlab.example.com/bar",
+        ),
+    ];
+    for (url, expected) in testcases {
+        let actual = build_page_url(url, &Page::Open { website: true }, &None, &env).unwrap();
+        assert_eq!(*expected, &actual);
+    }
+}
+
+#[test]
+fn website_bitbucket_cloud() {
+    let env = empty_env();
+    let testcases = &[
+        (
+            "https://bitbucket.org/rhysd/bar.git", // Fall back to user page
+            "https://rhysd.bitbucket.io",
+        ),
+        (
+            "https://bitbucket.org/rhysd/bb-cloud-test.git",
+            "https://rhysd.bitbucket.io/bb-cloud-test",
+        ),
+    ];
+    for (url, expected) in testcases {
+        let actual = build_page_url(url, &Page::Open { website: true }, &None, &env).unwrap();
+        assert_eq!(*expected, &actual);
+    }
 }
