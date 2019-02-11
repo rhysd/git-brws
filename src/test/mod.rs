@@ -2,9 +2,9 @@
 mod helper;
 
 mod argv;
-mod command;
-mod env;
+mod config;
 mod github_api;
 mod page;
 mod pull_request;
 mod service;
+mod url;

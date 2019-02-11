@@ -1,10 +1,8 @@
-#![allow(clippy::too_many_arguments)]
-
 extern crate path_slash;
 extern crate reqwest;
 extern crate url;
 
-use crate::env::EnvConfig;
+use crate::config::Config;
 use crate::error::{Error, Result};
 use crate::github_api::Client;
 use crate::page::{DiffOp, Line, Page};
@@ -28,7 +26,7 @@ fn to_slash<S: AsRef<str>>(s: &S) -> &str {
 fn first_available_url<T: AsRef<str>>(
     candidates: &mut [String],
     fallback: String,
-    https_proxy: Option<T>,
+    https_proxy: &Option<T>,
 ) -> String {
     let mut builder = reqwest::Client::builder();
     if let Some(ref p) = https_proxy {
@@ -52,30 +50,24 @@ fn first_available_url<T: AsRef<str>>(
     fallback
 }
 
-fn build_github_like_url<S, T, U>(
+fn build_github_like_url<S: AsRef<str>>(
     host: &str,
     user: &str,
     repo: &str,
-    branch: &Option<String>,
     api_endpoint: Option<S>,
-    api_token: Option<T>,
-    https_proxy: Option<U>,
+    cfg: &Config,
     page: &Page,
-) -> String
-where
-    S: AsRef<str>,
-    T: ToString,
-    U: AsRef<str>,
-{
-    #[allow(clippy::unneeded_field_pattern)]
+) -> String {
     match page {
         Page::Open { website } if *website => {
             match host {
                 "github.com" => {
                     if let Some(endpoint) = api_endpoint {
-                        if let Ok(client) =
-                            Client::build(endpoint.as_ref(), api_token, &https_proxy)
-                        {
+                        if let Ok(client) = Client::build(
+                            endpoint.as_ref(),
+                            cfg.env.github_token.as_ref(),
+                            &cfg.env.https_proxy,
+                        ) {
                             if let Ok(Some(homepage)) = client.repo_homepage(user, repo) {
                                 return homepage;
                             }
@@ -92,9 +84,11 @@ where
                 //   https://help.github.com/enterprise/user/articles/user-organization-and-project-pages/
                 host => {
                     // Token is always required for GitHub Enterprise
-                    if let (Some(endpoint), Some(token)) = (api_endpoint, api_token) {
+                    if let (Some(ref endpoint), Some(ref token)) =
+                        (api_endpoint, &cfg.env.ghe_token)
+                    {
                         if let Ok(client) =
-                            Client::build(endpoint.as_ref(), Some(token), &https_proxy)
+                            Client::build(endpoint.as_ref(), Some(token), &cfg.env.https_proxy)
                         {
                             if let Ok(Some(homepage)) = client.repo_homepage(user, repo) {
                                 return homepage;
@@ -103,12 +97,16 @@ where
                     }
                     let with_subdomain = format!("https://pages.{}/{}/{}", host, user, repo);
                     let without_subdomain = format!("https://{}/pages/{}/{}", host, user, repo);
-                    first_available_url(&mut [with_subdomain], without_subdomain, https_proxy)
+                    first_available_url(
+                        &mut [with_subdomain],
+                        without_subdomain,
+                        &cfg.env.https_proxy,
+                    )
                 }
             }
         }
         Page::Open { website: _ } => {
-            if let Some(ref b) = branch {
+            if let Some(ref b) = cfg.branch {
                 format!("https://{}/{}/{}/tree/{}", host, user, repo, b)
             } else {
                 format!("https://{}/{}/{}", host, user, repo)
@@ -171,7 +169,7 @@ fn build_gitlab_url(
     host: &str,
     user: &str,
     repo: &str,
-    branch: &Option<String>,
+    cfg: &Config,
     page: &Page,
 ) -> Result<String> {
     if let Page::Diff { op, .. } = page {
@@ -179,19 +177,12 @@ fn build_gitlab_url(
             return Err(Error::GitLabDiffNotSupported);
         }
     }
-    Ok(build_github_like_url::<&str, &str, &str>(
-        host, user, repo, branch, None, None, None, page,
+    Ok(build_github_like_url::<&str>(
+        host, user, repo, None, cfg, page,
     ))
 }
 
-fn build_bitbucket_url<T: AsRef<str>>(
-    user: &str,
-    repo: &str,
-    branch: &Option<String>,
-    page: &Page,
-    https_proxy: Option<T>,
-) -> Result<String> {
-    #[allow(clippy::unneeded_field_pattern)]
+fn build_bitbucket_url(user: &str, repo: &str, cfg: &Config, page: &Page) -> Result<String> {
     match page {
         Page::Open { website } if *website => {
             // Build bitbucket cloud URL:
@@ -201,11 +192,11 @@ fn build_bitbucket_url<T: AsRef<str>>(
             Ok(first_available_url(
                 &mut [with_user],
                 without_user,
-                https_proxy,
+                &cfg.env.https_proxy,
             ))
         }
         Page::Open { website: _ } => {
-            if let Some(ref b) = branch {
+            if let Some(ref b) = cfg.branch {
                 Ok(format!(
                     "https://bitbucket.org/{}/{}/branch/{}",
                     user, repo, b,
@@ -282,37 +273,32 @@ pub fn slug_from_path<'a>(path: &'a str) -> Result<(&'a str, &'a str)> {
 // Known URL formats
 //  1. https://hosting_service.com/user/repo.git
 //  2. git@hosting_service.com:user/repo.git (-> ssh://git@hosting_service.com:22/user/repo.git)
-pub fn build_page_url(
-    repo: &str,
-    page: &Page,
-    branch: &Option<String>,
-    env: &EnvConfig,
-) -> Result<String> {
-    let url = Url::parse(repo).map_err(|e| Error::BrokenUrl {
-        url: repo.to_string(),
+pub fn build_page_url(page: &Page, cfg: &Config) -> Result<String> {
+    let repo_url = &cfg.repo;
+    let env = &cfg.env;
+
+    let url = Url::parse(repo_url).map_err(|e| Error::BrokenUrl {
+        url: repo_url.to_string(),
         msg: format!("{}", e),
     })?;
     let path = url.path();
     let (user, repo_name) = slug_from_path(path)?;
     let host = url.host_str().ok_or_else(|| Error::BrokenUrl {
-        url: repo.to_string(),
+        url: repo_url.to_string(),
         msg: "No host in URL".to_string(),
     })?;
+
     match host {
         "github.com" => Ok(build_github_like_url(
             host,
             user,
             repo_name,
-            branch,
             Some("api.github.com"),
-            env.github_token.as_ref(),
-            env.https_proxy.as_ref(),
+            cfg,
             page,
         )),
-        "gitlab.com" => build_gitlab_url(host, user, repo_name, branch, page),
-        "bitbucket.org" => {
-            build_bitbucket_url(user, repo_name, branch, page, env.https_proxy.as_ref())
-        }
+        "gitlab.com" => build_gitlab_url(host, user, repo_name, cfg, page),
+        "bitbucket.org" => build_bitbucket_url(user, repo_name, cfg, page),
         _ => {
             let is_gitlab = host.starts_with("gitlab.");
             let port = if host.starts_with("github.") {
@@ -324,7 +310,7 @@ pub fn build_page_url(
                     Some(ref v) if v == host => env.ghe_ssh_port,
                     _ => {
                         return Err(Error::UnknownHostingService {
-                            url: repo.to_string(),
+                            url: repo_url.to_string(),
                         });
                     }
                 }
@@ -336,16 +322,14 @@ pub fn build_page_url(
             };
 
             if is_gitlab {
-                build_gitlab_url(&host, user, repo_name, branch, page)
+                build_gitlab_url(&host, user, repo_name, cfg, page)
             } else {
                 Ok(build_github_like_url(
                     &host,
                     user,
                     repo_name,
-                    branch,
                     Some(format!("{}/api/v3", host)),
-                    env.ghe_token.as_ref(),
-                    env.https_proxy.as_ref(),
+                    cfg,
                     page,
                 ))
             }

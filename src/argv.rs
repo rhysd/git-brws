@@ -1,7 +1,6 @@
 extern crate getopts;
 
-use crate::command;
-use crate::env::EnvConfig;
+use crate::config::{Config, EnvConfig};
 use crate::error::{Error, Result};
 use crate::git;
 use crate::git::Git;
@@ -27,7 +26,7 @@ fn convert_ssh_url(mut url: String) -> String {
 pub enum Parsed {
     Help(String),
     Version(&'static str),
-    OpenPage(command::Config),
+    OpenPage(Config),
 }
 
 fn normalize_repo_format(mut slug: String, env: &EnvConfig) -> Result<String> {
@@ -205,7 +204,7 @@ impl Parsed {
 
         let repo = convert_ssh_url(repo);
 
-        Ok(Parsed::OpenPage(command::Config {
+        Ok(Parsed::OpenPage(Config {
             repo,
             branch,
             git_dir,

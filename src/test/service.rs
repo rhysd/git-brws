@@ -1,8 +1,26 @@
+use crate::config::{Config, EnvConfig};
 use crate::error::Error;
 use crate::page::{DiffOp, Line, Page};
 use crate::service::build_page_url;
 use crate::test::helper::{empty_env, https_proxy};
+use std::fs;
 use std::path::Path;
+
+fn config(repo: &str, branch: Option<&str>, env: Option<EnvConfig>) -> Config {
+    let mut dir = std::env::current_dir().unwrap();
+    dir.push(Path::new(".git"));
+    let dir = fs::canonicalize(dir).unwrap();
+    Config {
+        repo: repo.to_string(),
+        branch: branch.map(|s| s.to_string()),
+        git_dir: Some(dir),
+        args: vec![],
+        stdout: false,
+        pull_request: false,
+        website: false,
+        env: env.unwrap_or_else(empty_env),
+    }
+}
 
 // Note:
 // git@ -> ssh://git@ conversion is done in git.rs.
@@ -19,10 +37,8 @@ fn convert_ssh_url() {
             "https://bitbucket.org/user/repo",
         ),
     ] {
-        assert_eq!(
-            build_page_url(&repo.to_string(), &p, &None, &empty_env()).unwrap(),
-            expected
-        );
+        let c = config(repo, None, None);
+        assert_eq!(build_page_url(&p, &c).unwrap(), expected);
     }
 }
 
@@ -47,10 +63,8 @@ fn parse_and_build_open_page() {
             "https://gitlab.com/user/repo",
         ),
     ] {
-        assert_eq!(
-            build_page_url(&repo.to_string(), &p, &None, &empty_env()).unwrap(),
-            expected
-        );
+        let c = config(repo, None, None);
+        assert_eq!(build_page_url(&p, &c).unwrap(), expected);
     }
 }
 
@@ -79,16 +93,8 @@ fn parse_and_build_open_branch_page() {
             "https://gitlab.somewhere.com/user/repo/tree/dev",
         ),
     ] {
-        assert_eq!(
-            build_page_url(
-                &repo.to_string(),
-                &p,
-                &Some("dev".to_string()),
-                &empty_env()
-            )
-            .unwrap(),
-            expected
-        );
+        let c = config(repo, Some("dev"), None);
+        assert_eq!(build_page_url(&p, &c).unwrap(), expected);
     }
 }
 
@@ -115,7 +121,8 @@ fn parse_and_build_commit_page() {
             "https://gitlab.com/user/repo/commit/90601f1037142605a32426f9ece0c07d479b9cc5",
         ),
     ] {
-        assert_eq!(build_page_url(repo, &p, &None, &empty_env()).unwrap(), expected);
+        let c = config(repo, None, None);
+        assert_eq!(build_page_url(&p, &c).unwrap(), expected);
     }
 }
 
@@ -139,7 +146,8 @@ fn parse_and_build_diff_page() {
                 format!("https://github.somewhere.com/user/repo/compare/561848bad7164d7568658456088b107ec9efd9f3{}90601f1037142605a32426f9ece0c07d479b9cc5", opstr).as_str(),
             ),
         ] {
-            assert_eq!(build_page_url(&repo, &p, &None, &empty_env()).unwrap(), expected, "for {:?}", op);
+            let c = config(repo, None, None);
+            assert_eq!(build_page_url(&p, &c).unwrap(), expected, "for {:?}", op);
         }
     }
 }
@@ -155,14 +163,18 @@ fn parse_and_build_diff_page_for_gitlab() {
     }
 
     let p = page(DiffOp::TwoDots);
+    let u = "https://gitlab.com/user/repo.git";
+    let c = config(u, None, None);
     assert!(
-        build_page_url("https://gitlab.com/user/repo.git", &p, &None, &empty_env()).is_err(),
+        build_page_url(&p, &c).is_err(),
         "GitLab does not support '..' but error did not occur"
     );
 
     let p = page(DiffOp::ThreeDots);
+    let u = "https://gitlab.com/user/repo.git";
+    let c = config(u, None, None);
     assert_eq!(
-        build_page_url("https://gitlab.com/user/repo.git", &p, &None, &empty_env()).unwrap(),
+        build_page_url(&p, &c).unwrap(),
         "https://gitlab.com/user/repo/compare/561848bad7164d7568658456088b107ec9efd9f3...90601f1037142605a32426f9ece0c07d479b9cc5",
     );
 }
@@ -174,8 +186,9 @@ fn parse_and_build_diff_page_for_bitbucket() {
         rhs: "90601f1037142605a32426f9ece0c07d479b9cc5".to_string(),
         op: DiffOp::ThreeDots,
     };
+    let c = config("https://bitbucket.org/user/repo", None, None);
     assert!(
-        build_page_url("https://bitbucket.org/user/repo", &p, &None, &empty_env()).is_err(),
+        build_page_url(&p, &c).is_err(),
         "bitbucket does not support diff page"
     );
 }
@@ -208,7 +221,8 @@ fn parse_and_build_file_page() {
             "https://gitlab.com/user/repo/blob/561848bad7164d7568658456088b107ec9efd9f3/src/main.rs",
         ),
     ] {
-        assert_eq!(build_page_url(&repo, &p, &None, &empty_env()).unwrap(), expected);
+        let c = config(repo, None, None);
+        assert_eq!(build_page_url(&p, &c).unwrap(), expected);
     }
 }
 
@@ -240,7 +254,8 @@ fn parse_and_build_file_page_with_line_number() {
             "https://gitlab.com/user/repo/blob/561848bad7164d7568658456088b107ec9efd9f3/src/main.rs#L12",
         ),
     ] {
-        assert_eq!(build_page_url(&repo, &p, &None, &empty_env()).unwrap(), expected);
+        let c = config(repo, None, None);
+        assert_eq!(build_page_url(&p, &c).unwrap(), expected);
     }
 }
 
@@ -272,7 +287,8 @@ fn parse_and_build_file_page_with_line_range() {
             "https://gitlab.com/user/repo/blob/561848bad7164d7568658456088b107ec9efd9f3/src/main.rs#L1-L2",
         ),
     ] {
-        assert_eq!(build_page_url(&repo, &p, &None, &empty_env()).unwrap(), expected);
+        let c = config(repo, None, None);
+        assert_eq!(build_page_url(&p, &c).unwrap(), expected);
     }
 }
 
@@ -283,8 +299,9 @@ fn invalid_repo_url() {
         "https://github.com/user.git",
         "https://unknown.hosting_service.com/user/repo.git",
     ] {
+        let c = config(repo, None, None);
         assert!(
-            build_page_url(&repo, &Page::Open { website: false }, &None, &empty_env()).is_err(),
+            build_page_url(&Page::Open { website: false }, &c).is_err(),
             "{} must be invalid",
             repo
         );
@@ -293,9 +310,9 @@ fn invalid_repo_url() {
 
 #[test]
 fn customized_ssh_port() {
-    let mut envs = empty_env();
-    envs.ghe_ssh_port = Some(10022);
-    envs.gitlab_ssh_port = Some(10022);
+    let mut env = empty_env();
+    env.ghe_ssh_port = Some(10022);
+    env.gitlab_ssh_port = Some(10022);
 
     let p = Page::Open { website: false };
     for &(repo, expected) in &[
@@ -316,31 +333,28 @@ fn customized_ssh_port() {
             "https://gitlab.somewhere.com:10022/user/repo",
         ),
     ] {
-        assert_eq!(
-            build_page_url(&repo, &p, &None, &envs).unwrap(),
-            expected.to_string(),
-        );
+        let c = config(repo, None, Some(env.clone()));
+        assert_eq!(build_page_url(&p, &c).unwrap(), expected.to_string(),);
     }
 }
 
 #[test]
 fn customized_ghe_host() {
-    let mut envs = empty_env();
-    envs.ghe_url_host = Some("my-original-ghe.org".to_string());
+    let mut env = empty_env();
+    env.ghe_url_host = Some("my-original-ghe.org".to_string());
 
     for (port, expected) in &[
         (None, "https://my-original-ghe.org/user/repo"),
         (Some(10022), "https://my-original-ghe.org:10022/user/repo"),
     ] {
-        envs.ghe_ssh_port = port.clone();
+        env.ghe_ssh_port = port.clone();
+        let c = config(
+            "https://my-original-ghe.org/user/repo.git",
+            None,
+            Some(env.clone()),
+        );
         assert_eq!(
-            build_page_url(
-                "https://my-original-ghe.org/user/repo.git",
-                &Page::Open { website: false },
-                &None,
-                &envs,
-            )
-            .unwrap(),
+            build_page_url(&Page::Open { website: false }, &c).unwrap(),
             expected.to_string(),
         );
     }
@@ -353,7 +367,8 @@ fn broken_repo_url() {
         "https://foo@/foo.bar", // empty host
         "https://foo bar",      // invalid domain character
     ] {
-        match build_page_url(&url, &Page::Open { website: false }, &None, env) {
+        let c = config(url, None, Some(env.clone()));
+        match build_page_url(&Page::Open { website: false }, &c) {
             Err(Error::BrokenUrl { .. }) => { /* ok */ }
             v => assert!(false, "Unexpected error or success: {:?}", v),
         }
@@ -381,10 +396,8 @@ fn parse_and_build_issue_number() {
             "https://gitlab.com/user/repo/issues/123",
         ),
     ] {
-        assert_eq!(
-            build_page_url(&repo, &p, &None, &empty_env()).unwrap(),
-            expected
-        );
+        let c = config(repo, None, None);
+        assert_eq!(build_page_url(&p, &c).unwrap(), expected);
     }
 }
 
@@ -394,13 +407,8 @@ fn pull_request_url() {
     let p = Page::PullRequest {
         url: expected.to_string(),
     };
-    let url = build_page_url(
-        "https://github.com/rhysd/git-brws.git",
-        &p,
-        &None,
-        &empty_env(),
-    )
-    .unwrap();
+    let c = config("https://github.com/rhysd/git-brws.git", None, None);
+    let url = build_page_url(&p, &c).unwrap();
     assert_eq!(&url, expected);
 }
 
@@ -425,7 +433,8 @@ fn website_github_pages() {
         ),
     ];
     for (url, expected) in testcases {
-        let actual = build_page_url(url, &Page::Open { website: true }, &None, &env).unwrap();
+        let c = config(url, None, Some(env.clone()));
+        let actual = build_page_url(&Page::Open { website: true }, &c).unwrap();
         assert_eq!(*expected, &actual);
     }
 }
@@ -449,7 +458,8 @@ fn website_github_enterprise_pages() {
         ),
     ];
     for (url, expected) in testcases {
-        let actual = build_page_url(url, &Page::Open { website: true }, &None, &env).unwrap();
+        let c = config(url, None, Some(env.clone()));
+        let actual = build_page_url(&Page::Open { website: true }, &c).unwrap();
         assert_eq!(*expected, &actual);
     }
 }
@@ -468,7 +478,8 @@ fn website_gitlab_pages() {
         ),
     ];
     for (url, expected) in testcases {
-        let actual = build_page_url(url, &Page::Open { website: true }, &None, &env).unwrap();
+        let c = config(url, None, Some(env.clone()));
+        let actual = build_page_url(&Page::Open { website: true }, &c).unwrap();
         assert_eq!(*expected, &actual);
     }
 }
@@ -487,7 +498,8 @@ fn website_bitbucket_cloud() {
         ),
     ];
     for (url, expected) in testcases {
-        let actual = build_page_url(url, &Page::Open { website: true }, &None, &env).unwrap();
+        let c = config(url, None, Some(env.clone()));
+        let actual = build_page_url(&Page::Open { website: true }, &c).unwrap();
         assert_eq!(*expected, &actual);
     }
 }

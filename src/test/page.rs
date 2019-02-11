@@ -1,4 +1,4 @@
-use crate::command::Config;
+use crate::config::Config;
 use crate::error::Error;
 use crate::page::{parse_page, DiffOp, Line, Page};
 use crate::test::helper::{empty_env, https_proxy};

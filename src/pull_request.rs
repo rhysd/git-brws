@@ -1,6 +1,6 @@
 extern crate url;
 
-use crate::env::EnvConfig;
+use crate::config::EnvConfig;
 use crate::error::{Error, Result};
 use crate::github_api;
 use crate::service::slug_from_path;

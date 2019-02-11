@@ -1,4 +1,4 @@
-use crate::env::EnvConfig;
+use crate::config::EnvConfig;
 use std::env;
 
 pub fn empty_env() -> EnvConfig {

@@ -1,4 +1,4 @@
-use crate::command;
+use crate::config::Config;
 use crate::error::{Error, ExpectedNumberOfArgs, Result};
 use crate::git::Git;
 use crate::pull_request;
@@ -53,7 +53,7 @@ pub enum Page {
 }
 
 struct BrowsePageParser<'a> {
-    cfg: &'a command::Config,
+    cfg: &'a Config,
     git: Git<'a>,
 }
 
@@ -207,13 +207,12 @@ impl<'a> BrowsePageParser<'a> {
     }
 }
 
-fn fetch_pull_request_page(cfg: &command::Config) -> Result<Page> {
+fn fetch_pull_request_page(cfg: &Config) -> Result<Page> {
     match cfg.branch {
         Some(ref b) => pull_request::find_url(cfg.repo.as_str(), b.as_str(), &cfg.env)
             .map(|url| Page::PullRequest { url }),
         None => {
-            if let Some(ref git_dir) = &cfg.git_dir {
-                let git = Git::new(git_dir, cfg.env.git_command.as_str());
+            if let Some(git) = cfg.git() {
                 pull_request::find_url(cfg.repo.as_str(), git.current_branch()?.as_str(), &cfg.env)
                     .map(|url| Page::PullRequest { url })
             } else {
@@ -225,7 +224,7 @@ fn fetch_pull_request_page(cfg: &command::Config) -> Result<Page> {
     }
 }
 
-pub fn parse_page(cfg: &command::Config) -> Result<Page> {
+pub fn parse_page(cfg: &Config) -> Result<Page> {
     let mut attempts = Vec::with_capacity(4);
 
     if cfg.pull_request {
@@ -239,17 +238,11 @@ pub fn parse_page(cfg: &command::Config) -> Result<Page> {
         });
     }
 
-    let git_dir = cfg
-        .git_dir
-        .as_ref()
-        .ok_or_else(|| Error::NoLocalRepoFound {
-            operation: format!("opening URL with options {:?}", cfg.args),
-        })?;
+    let git = cfg.git().ok_or_else(|| Error::NoLocalRepoFound {
+        operation: format!("opening URL with options {:?}", cfg.args),
+    })?;
 
-    let parser = BrowsePageParser {
-        cfg,
-        git: Git::new(&git_dir, cfg.env.git_command.as_str()),
-    };
+    let parser = BrowsePageParser { cfg, git };
 
     match parser.try_parse_issue_number() {
         Ok(p) => return Ok(p),

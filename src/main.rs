@@ -2,14 +2,14 @@
 extern crate serde_derive;
 
 mod argv;
-mod command;
-mod env;
+mod config;
 mod error;
 mod git;
 mod github_api;
 mod page;
 mod pull_request;
 mod service;
+mod url;
 
 #[cfg(test)]
 mod test;
@@ -22,8 +22,8 @@ fn run() -> error::Result<()> {
     match Parsed::from_iter(args())? {
         Parsed::Help(usage) => eprintln!("{}", usage),
         Parsed::Version(version) => println!("{}", version),
-        Parsed::OpenPage(ref opts) if opts.stdout => println!("{}", command::url(opts)?),
-        Parsed::OpenPage(ref opts) => command::browse(&command::url(opts)?)?,
+        Parsed::OpenPage(ref opts) if opts.stdout => println!("{}", url::build_url(opts)?),
+        Parsed::OpenPage(ref opts) => url::browse(&url::build_url(opts)?)?,
     }
     Ok(())
 }

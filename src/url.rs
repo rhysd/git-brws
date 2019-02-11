@@ -1,26 +1,13 @@
 extern crate open;
 
-use crate::env::EnvConfig;
+use crate::config::Config;
 use crate::error::{Error, Result};
 use crate::page::parse_page;
 use crate::service;
-use std::path::PathBuf;
 
-#[derive(Debug)]
-pub struct Config {
-    pub repo: String,
-    pub branch: Option<String>,
-    pub git_dir: Option<PathBuf>,
-    pub args: Vec<String>,
-    pub stdout: bool,
-    pub pull_request: bool,
-    pub website: bool,
-    pub env: EnvConfig,
-}
-
-pub fn url(cfg: &Config) -> Result<String> {
+pub fn build_url(cfg: &Config) -> Result<String> {
     let page = parse_page(&cfg)?;
-    service::build_page_url(&cfg.repo, &page, &cfg.branch, &cfg.env)
+    service::build_page_url(&page, &cfg)
 }
 
 pub fn browse(url: &str) -> Result<()> {
