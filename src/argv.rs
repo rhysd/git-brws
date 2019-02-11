@@ -109,6 +109,14 @@ Examples:
 
     $ git brws --pr
 
+  - Website of repository at current directory
+
+    $ git brws --website
+
+  - Website of other repository
+
+    $ git brws --website --repo react
+
   - Issue page:
 
     $ git brws '#8'";
@@ -149,7 +157,7 @@ impl Parsed {
         opts.optflag(
             "w",
             "website",
-            "Open website page instead of repository page (e.g. gh-pages for GitHub)",
+            "Open website page instead of repository page (homepage URL for GitHub, GitLab pages, Bitbucket Cloud)",
         );
         opts.optflag("h", "help", "Print this help");
         opts.optflag("v", "version", "Show version");

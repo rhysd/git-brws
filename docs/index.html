@@ -136,6 +136,8 @@ to see. When only repository name is specified, <code>git-brws</code> searches G
 branch tracks no branch, it falls back to 'origin'.</p></dd>
 <dt><code>-u</code>, <code>--url</code></dt><dd><p>Output URL to stdout instead of opening in browser.</p></dd>
 <dt><code>-p</code>, <code>--pr</code></dt><dd><p>Open pull request page instead of repository page.</p></dd>
+<dt><code>-w</code>, <code>--website</code></dt><dd><p>Open website page instead of repository page (homepage URL for GitHub, GitLab pages, Bitbucket
+Cloud)</p></dd>
 <dt><code>-h</code>, <code>--help</code></dt><dd><p>Print this help.</p></dd>
 <dt><code>-v</code>, <code>--version</code></dt><dd><p>Show version.</p></dd>
 </dl>
@@ -143,90 +145,86 @@ branch tracks no branch, it falls back to 'origin'.</p></dd>
 
 <h2 id="EXAMPLES">EXAMPLES</h2>
 
-<p>Current repository page.</p>
+<h3 id="Current-repository-page-">Current repository page.</h3>
 
 <pre><code>$ git brws
 </code></pre>
 
-<p>'develop' branch.</p>
+<h3 id="-develop-branch-">'develop' branch.</h3>
 
 <pre><code>$ git brws -b develop
 </code></pre>
 
-<p>'origin' remote of 'develop' branch.</p>
+<h3 id="-origin-remote-of-develop-branch-">'origin' remote of 'develop' branch.</h3>
 
 <pre><code>$ git brws -r origin -b develop
 </code></pre>
 
-<p>@rhysd's 'Shiba' repository on GitHub.</p>
+<h3 id="-rhysd-s-Shiba-repository-on-GitHub-">@rhysd's 'Shiba' repository on GitHub.</h3>
 
 <pre><code>$ git brws -r rhysd/Shiba
 </code></pre>
 
-<p>Most popular <code>react</code> repository on GitHub</p>
+<h3 id="Most-popular-react-repository-on-GitHub">Most popular <code>react</code> repository on GitHub</h3>
 
 <pre><code>$ git brws -r react
 </code></pre>
 
-<p>Repository specified by directory.</p>
+<h3 id="Repository-specified-by-directory-">Repository specified by directory.</h3>
 
 <pre><code>$ git brws -d ~/.go/src/github.com/rhysd/dot-github
 </code></pre>
 
-<p>File of current branch of current remote.</p>
+<h3 id="File-of-current-branch-of-current-remote-">File of current branch of current remote.</h3>
 
 <pre><code>$ git brws ./some/file.txt
 </code></pre>
 
-<p>Line of the file.</p>
-
-<p><em>Note:</em> The 'L' can be omit.</p>
+<h3 id="Line-of-the-file-">Line of the file.</h3>
 
 <pre><code>$ git brws ./some/file.txt#L123
 </code></pre>
 
-<p>Range from line to line of the file.</p>
-
 <p><em>Note:</em> The 'L' can be omit.</p>
+
+<h3 id="Range-from-line-to-line-of-the-file-">Range from line to line of the file.</h3>
 
 <pre><code>$ git brws ./some/file.txt#L123-L126
 </code></pre>
 
-<p>'HEAD' page of current repository.</p>
+<p><em>Note:</em> The 'L' can be omit.</p>
+
+<h3 id="-HEAD-page-of-current-repository-">'HEAD' page of current repository.</h3>
 
 <pre><code>$ git brws HEAD
 </code></pre>
 
-<p>Diff between 'HEAD' and 'HEAD~3'.</p>
+<h3 id="Diff-between-HEAD-and-HEAD-3-">Diff between 'HEAD' and 'HEAD~3'.</h3>
 
 <pre><code>$ git brws HEAD~3..HEAD
 </code></pre>
 
-<p>Diff between '113079b' and '60024ab'.</p>
+<h3 id="Diff-between-113079b-and-60024ab-">Diff between '113079b' and '60024ab'.</h3>
 
 <pre><code>$ git brws 60024ab..113079b
 </code></pre>
 
-<p>In addition to '..', diff with '...' is supported.
-Show diff between 'branchB' and the merge base commit from 'branchB' into 'branchA'
-If you don't know the difference between '..' and '...', please read 'git diff --help'.</p>
+<p>In addition to '..', diff with '...' is supported.</p>
 
-<p><em>Note:</em> Only GitHub and GitHub Enterprise support '...'. For GitLab, only '...' is available.</p>
+<h3 id="Diff-between-branchB-and-the-merge-base-commit-from-branchB-into-branchA-">Diff between 'branchB' and the merge base commit from 'branchB' into 'branchA'</h3>
 
 <pre><code>$ git brws branchA...branchB
 </code></pre>
 
-<p>Show pull request page of current branch of current repository.</p>
+<p><em>Note:</em> If you don't know the difference between '..' and '...', please read 'git diff --help'.
+<em>Note:</em> Only GitHub and GitHub Enterprise support '...'. For GitLab, only '...' is available.</p>
+
+<h3 id="Pull-request-page-of-current-branch-of-current-repository-">Pull request page of current branch of current repository.</h3>
 
 <pre><code>$ git brws --pr
 </code></pre>
 
-<p>Show pull request page of specific branch of specific repository.</p>
-
-<p><em>Note:</em> Currently only GitHub and GitHub Enterprise are supported.</p>
-
-<p><em>Note:</em> If you have created multiple pull requests at the same repository with the same branch name,
-the command may not open a pull request page you want.</p>
+<h3 id="Pull-request-page-of-specific-branch-of-specific-repository-">Pull request page of specific branch of specific repository.</h3>
 
 <pre><code># Specify my forked repository
 $ git brws --pr --repo rhysd/rust.vim -b async-contextual-keyword
@@ -235,12 +233,37 @@ $ git brws --pr --repo rhysd/rust.vim -b async-contextual-keyword
 $ git brws --pr --repo rust-lang/rust.vim -b async-contextual-keyword
 </code></pre>
 
-<p>Open an issue page.</p>
+<p><em>Note:</em> Currently only GitHub and GitHub Enterprise are supported.</p>
 
-<p><em>Note:</em> '#' is usually used for a line comment in major shells. Please quote the argument</p>
+<p><em>Note:</em> If you have created multiple pull requests at the same repository with the same branch name,
+the command may not open a pull request page you want.</p>
+
+<h3 id="Website-for-the-repository">Website for the repository</h3>
+
+<pre><code># Website for current repository
+$ git brws --website
+# Website of other repository
+$ git brws --website --repo git-brws
+</code></pre>
+
+<p><em>Note:</em> It opens a website for the repository.</p>
+
+<ul>
+<li>For GitHub, URL for 'homepage' configuration of the repository if it's set. Otherwise
+'https://{user}.github.io/{repo}'</li>
+<li>For GitHub Enterprise, 'https://pages.{host}/{user}/{repo}' or 'https://{host}/pages/{user}/{repo}'
+depending on your GitHub Enterprise configuration of subdomain isolation</li>
+<li>For GitLab, GitLab Pages</li>
+<li>For Bitbucket, Bitbucket Cloud</li>
+</ul>
+
+
+<h3 id="An-issue-page-">An issue page.</h3>
 
 <pre><code>$ git brws '#8'
 </code></pre>
+
+<p><em>Note:</em> '#' is usually used for a line comment in major shells. Please quote the argument</p>
 
 <h2 id="ENVIRONMENT">ENVIRONMENT</h2>
 

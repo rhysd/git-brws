@@ -26,6 +26,7 @@ Example of pages which **git-brws** can open are:
 - **Diff**: https://github.com/rhysd/git-brws/compare/e3c18d0..60024ab
 - **Pull request**: https://github.com/rust-lang/rust.vim/pull/290
 - **Issue**: https://github.com/rhysd/git-brws/issues/8
+- **Website**: https://rhysd.github.io/git-brws
 
 **git-brws** prefers permlink to the latest page since the latest page will change when new commit
 is pushed to the branch.
@@ -68,6 +69,10 @@ arguments. All are optional.
   * `-p`, `--pr`:
     Open pull request page instead of repository page.
 
+  * `-w`, `--website`:
+    Open website page instead of repository page (homepage URL for GitHub, GitLab pages, Bitbucket
+    Cloud)
+
   * `-h`, `--help`:
     Print this help.
 
@@ -76,76 +81,72 @@ arguments. All are optional.
 
 ## EXAMPLES
 
-Current repository page.
+### Current repository page.
 
     $ git brws
 
-'develop' branch.
+### 'develop' branch.
 
     $ git brws -b develop
 
-'origin' remote of 'develop' branch.
+### 'origin' remote of 'develop' branch.
 
     $ git brws -r origin -b develop
 
-@rhysd's 'Shiba' repository on GitHub.
+### @rhysd's 'Shiba' repository on GitHub.
 
     $ git brws -r rhysd/Shiba
 
-Most popular `react` repository on GitHub
+### Most popular `react` repository on GitHub
 
     $ git brws -r react
 
-Repository specified by directory.
+### Repository specified by directory.
 
     $ git brws -d ~/.go/src/github.com/rhysd/dot-github
 
-File of current branch of current remote.
+### File of current branch of current remote.
 
     $ git brws ./some/file.txt
 
-Line of the file.
-
-*Note:* The 'L' can be omit.
+### Line of the file.
 
     $ git brws ./some/file.txt#L123
 
-Range from line to line of the file.
-
 *Note:* The 'L' can be omit.
+
+### Range from line to line of the file.
 
     $ git brws ./some/file.txt#L123-L126
 
-'HEAD' page of current repository.
+*Note:* The 'L' can be omit.
+
+### 'HEAD' page of current repository.
 
     $ git brws HEAD
 
-Diff between 'HEAD' and 'HEAD~3'.
+### Diff between 'HEAD' and 'HEAD~3'.
 
     $ git brws HEAD~3..HEAD
 
-Diff between '113079b' and '60024ab'.
+### Diff between '113079b' and '60024ab'.
 
     $ git brws 60024ab..113079b
 
 In addition to '..', diff with '...' is supported.
-Show diff between 'branchB' and the merge base commit from 'branchB' into 'branchA'
-If you don't know the difference between '..' and '...', please read 'git diff --help'.
 
-*Note:* Only GitHub and GitHub Enterprise support '...'. For GitLab, only '...' is available.
+### Diff between 'branchB' and the merge base commit from 'branchB' into 'branchA'
 
     $ git brws branchA...branchB
 
-Show pull request page of current branch of current repository.
+*Note:* If you don't know the difference between '..' and '...', please read 'git diff --help'.
+*Note:* Only GitHub and GitHub Enterprise support '...'. For GitLab, only '...' is available.
+
+### Pull request page of current branch of current repository.
 
     $ git brws --pr
 
-Show pull request page of specific branch of specific repository.
-
-*Note:* Currently only GitHub and GitHub Enterprise are supported.
-
-*Note:* If you have created multiple pull requests at the same repository with the same branch name,
-the command may not open a pull request page you want.
+### Pull request page of specific branch of specific repository.
 
     # Specify my forked repository
     $ git brws --pr --repo rhysd/rust.vim -b async-contextual-keyword
@@ -153,11 +154,32 @@ the command may not open a pull request page you want.
     # Or specify original repository
     $ git brws --pr --repo rust-lang/rust.vim -b async-contextual-keyword
 
-Open an issue page.
+*Note:* Currently only GitHub and GitHub Enterprise are supported.
 
-*Note:* '#' is usually used for a line comment in major shells. Please quote the argument
+*Note:* If you have created multiple pull requests at the same repository with the same branch name,
+the command may not open a pull request page you want.
+
+### Website for the repository
+
+    # Website for current repository
+    $ git brws --website
+    # Website of other repository
+    $ git brws --website --repo git-brws
+
+*Note:* It opens a website for the repository.
+
+- For GitHub, URL for 'homepage' configuration of the repository if it's set. Otherwise
+  'https://{user}.github.io/{repo}'
+- For GitHub Enterprise, 'https://pages.{host}/{user}/{repo}' or 'https://{host}/pages/{user}/{repo}'
+  depending on your GitHub Enterprise configuration of subdomain isolation
+- For GitLab, GitLab Pages
+- For Bitbucket, Bitbucket Cloud
+
+### An issue page.
 
     $ git brws '#8'
+
+*Note:* '#' is usually used for a line comment in major shells. Please quote the argument
 
 ## ENVIRONMENT
 

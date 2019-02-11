@@ -106,6 +106,10 @@ Output URL to stdout instead of opening in browser\.
 Open pull request page instead of repository page\.
 .
 .TP
+\fB\-w\fR, \fB\-\-website\fR
+Open website page instead of repository page (homepage URL for GitHub, GitLab pages, Bitbucket Cloud)
+.
+.TP
 \fB\-h\fR, \fB\-\-help\fR
 Print this help\.
 .
@@ -114,9 +118,8 @@ Print this help\.
 Show version\.
 .
 .SH "EXAMPLES"
-Current repository page\.
 .
-.IP "" 4
+.SS "Current repository page\."
 .
 .nf
 
@@ -124,12 +127,7 @@ $ git brws
 .
 .fi
 .
-.IP "" 0
-.
-.P
-\'develop\' branch\.
-.
-.IP "" 4
+.SS "\'develop\' branch\."
 .
 .nf
 
@@ -137,12 +135,7 @@ $ git brws \-b develop
 .
 .fi
 .
-.IP "" 0
-.
-.P
-\'origin\' remote of \'develop\' branch\.
-.
-.IP "" 4
+.SS "\'origin\' remote of \'develop\' branch\."
 .
 .nf
 
@@ -150,12 +143,7 @@ $ git brws \-r origin \-b develop
 .
 .fi
 .
-.IP "" 0
-.
-.P
-@rhysd\'s \'Shiba\' repository on GitHub\.
-.
-.IP "" 4
+.SS "@rhysd\'s \'Shiba\' repository on GitHub\."
 .
 .nf
 
@@ -163,12 +151,7 @@ $ git brws \-r rhysd/Shiba
 .
 .fi
 .
-.IP "" 0
-.
-.P
-Most popular \fBreact\fR repository on GitHub
-.
-.IP "" 4
+.SS "Most popular <code>react</code> repository on GitHub"
 .
 .nf
 
@@ -176,12 +159,7 @@ $ git brws \-r react
 .
 .fi
 .
-.IP "" 0
-.
-.P
-Repository specified by directory\.
-.
-.IP "" 4
+.SS "Repository specified by directory\."
 .
 .nf
 
@@ -189,12 +167,7 @@ $ git brws \-d ~/\.go/src/github\.com/rhysd/dot\-github
 .
 .fi
 .
-.IP "" 0
-.
-.P
-File of current branch of current remote\.
-.
-.IP "" 4
+.SS "File of current branch of current remote\."
 .
 .nf
 
@@ -202,15 +175,7 @@ $ git brws \./some/file\.txt
 .
 .fi
 .
-.IP "" 0
-.
-.P
-Line of the file\.
-.
-.P
-\fINote:\fR The \'L\' can be omit\.
-.
-.IP "" 4
+.SS "Line of the file\."
 .
 .nf
 
@@ -218,15 +183,10 @@ $ git brws \./some/file\.txt#L123
 .
 .fi
 .
-.IP "" 0
-.
-.P
-Range from line to line of the file\.
-.
 .P
 \fINote:\fR The \'L\' can be omit\.
 .
-.IP "" 4
+.SS "Range from line to line of the file\."
 .
 .nf
 
@@ -234,12 +194,10 @@ $ git brws \./some/file\.txt#L123\-L126
 .
 .fi
 .
-.IP "" 0
-.
 .P
-\'HEAD\' page of current repository\.
+\fINote:\fR The \'L\' can be omit\.
 .
-.IP "" 4
+.SS "\'HEAD\' page of current repository\."
 .
 .nf
 
@@ -247,12 +205,7 @@ $ git brws HEAD
 .
 .fi
 .
-.IP "" 0
-.
-.P
-Diff between \'HEAD\' and \'HEAD~3\'\.
-.
-.IP "" 4
+.SS "Diff between \'HEAD\' and \'HEAD~3\'\."
 .
 .nf
 
@@ -260,12 +213,7 @@ $ git brws HEAD~3\.\.HEAD
 .
 .fi
 .
-.IP "" 0
-.
-.P
-Diff between \'113079b\' and \'60024ab\'\.
-.
-.IP "" 4
+.SS "Diff between \'113079b\' and \'60024ab\'\."
 .
 .nf
 
@@ -273,15 +221,10 @@ $ git brws 60024ab\.\.113079b
 .
 .fi
 .
-.IP "" 0
-.
 .P
-In addition to \'\.\.\', diff with \'\.\.\.\' is supported\. Show diff between \'branchB\' and the merge base commit from \'branchB\' into \'branchA\' If you don\'t know the difference between \'\.\.\' and \'\.\.\.\', please read \'git diff \-\-help\'\.
+In addition to \'\.\.\', diff with \'\.\.\.\' is supported\.
 .
-.P
-\fINote:\fR Only GitHub and GitHub Enterprise support \'\.\.\.\'\. For GitLab, only \'\.\.\.\' is available\.
-.
-.IP "" 4
+.SS "Diff between \'branchB\' and the merge base commit from \'branchB\' into \'branchA\'"
 .
 .nf
 
@@ -289,12 +232,10 @@ $ git brws branchA\.\.\.branchB
 .
 .fi
 .
-.IP "" 0
-.
 .P
-Show pull request page of current branch of current repository\.
+\fINote:\fR If you don\'t know the difference between \'\.\.\' and \'\.\.\.\', please read \'git diff \-\-help\'\. \fINote:\fR Only GitHub and GitHub Enterprise support \'\.\.\.\'\. For GitLab, only \'\.\.\.\' is available\.
 .
-.IP "" 4
+.SS "Pull request page of current branch of current repository\."
 .
 .nf
 
@@ -302,18 +243,7 @@ $ git brws \-\-pr
 .
 .fi
 .
-.IP "" 0
-.
-.P
-Show pull request page of specific branch of specific repository\.
-.
-.P
-\fINote:\fR Currently only GitHub and GitHub Enterprise are supported\.
-.
-.P
-\fINote:\fR If you have created multiple pull requests at the same repository with the same branch name, the command may not open a pull request page you want\.
-.
-.IP "" 4
+.SS "Pull request page of specific branch of specific repository\."
 .
 .nf
 
@@ -325,15 +255,41 @@ $ git brws \-\-pr \-\-repo rust\-lang/rust\.vim \-b async\-contextual\-keyword
 .
 .fi
 .
+.P
+\fINote:\fR Currently only GitHub and GitHub Enterprise are supported\.
+.
+.P
+\fINote:\fR If you have created multiple pull requests at the same repository with the same branch name, the command may not open a pull request page you want\.
+.
+.SS "Website for the repository"
+.
+.nf
+
+# Website for current repository
+$ git brws \-\-website
+# Website of other repository
+$ git brws \-\-website \-\-repo git\-brws
+.
+.fi
+.
+.P
+\fINote:\fR It opens a website for the repository\.
+.
+.IP "\(bu" 4
+For GitHub, URL for \'homepage\' configuration of the repository if it\'s set\. Otherwise \'https://{user}\.github\.io/{repo}\'
+.
+.IP "\(bu" 4
+For GitHub Enterprise, \'https://pages\.{host}/{user}/{repo}\' or \'https://{host}/pages/{user}/{repo}\' depending on your GitHub Enterprise configuration of subdomain isolation
+.
+.IP "\(bu" 4
+For GitLab, GitLab Pages
+.
+.IP "\(bu" 4
+For Bitbucket, Bitbucket Cloud
+.
 .IP "" 0
 .
-.P
-Open an issue page\.
-.
-.P
-\fINote:\fR \'#\' is usually used for a line comment in major shells\. Please quote the argument
-.
-.IP "" 4
+.SS "An issue page\."
 .
 .nf
 
@@ -341,7 +297,8 @@ $ git brws \'#8\'
 .
 .fi
 .
-.IP "" 0
+.P
+\fINote:\fR \'#\' is usually used for a line comment in major shells\. Please quote the argument
 .
 .SH "ENVIRONMENT"
 .

@@ -16,6 +16,8 @@ Features:
   - Diff ([e.g.](https://github.com/rhysd/git-brws/compare/e3c18d0d50252112d37bde97061370204b3cdab7..60024ab1280f9f10423b22bc708f3f6ef97db6b5), [e.g.](https://github.com/rhysd/git-brws/compare/e3c18d0d50252112d37bde97061370204b3cdab7...60024ab1280f9f10423b22bc708f3f6ef97db6b5))
   - Pull request (only for GitHub and GitHub Enterprise) ([e.g.](https://github.com/rust-lang/rust.vim/pull/290))
   - Issue ([e.g.](https://github.com/rhysd/git-brws/issues/8))
+  - Website ([e.g.](https://rhysd.github.io/git-brws/))
+    - Homepage of the repository for GitHub or GitHub Enterprise, [GitLab pages][gitlab-pages], [Bitbucket Cloud][bitbucket-cloud]
 - Supports following services
   - [GitHub](https://github.com)
   - [Bitbucket](https://bitbucket.org)
@@ -73,6 +75,8 @@ Options:
                         branch tracks no branch, it falls back to 'origin'.
     -u, --url           Output URL to stdout instead of opening in browser
     -p, --pr            Open pull request page instead of repository page
+    -w, --website       Open website page instead of repository page (homepage
+                        URL for GitHub, GitLab pages, Bitbucket Cloud)
     -h, --help          Print this help
     -v, --version       Show version
 ```
@@ -203,6 +207,29 @@ Note: Currently only GitHub and GitHub Enterprise are supported.
 Note: If you have created multiple pull requests at the same repository with the same branch name,
 the command may not open a pull request page you want.
 
+### Open a website for the repository
+
+```
+# Website for current repository
+$ git brws --website
+```
+
+With `--repo` option, arbitrary repository's website can be opened.
+
+```
+# Opens https://reactjs.org
+$ git brws --website --repo react
+```
+
+It opens a website for the repository.
+
+- For GitHub, URL for 'homepage' configuration of the repository if it's set. Otherwise
+  `https://{user}.github.io/{repo}`
+- For GitHub Enterprise, `https://pages.{host}/{user}/{repo}` or `https://{host}/pages/{user}/{repo}`
+  depending on your GitHub Enterprise configuration of subdomain isolation
+- For GitLab, [GitLab Pages][gitlab-pages]
+- For Bitbucket, [Bitbucket Cloud][bitbucket-cloud]
+
 ### Open an issue page
 
 - Issue #8
@@ -311,3 +338,5 @@ For example, when updating to 0.9.2:
 [appveyor]: https://ci.appveyor.com/project/rhysd/git-brws/branch/master
 [release page]: https://github.com/rhysd/git-brws/releases
 [ronn]: https://github.com/rtomayko/ronn
+[gitlab-pages]: https://docs.gitlab.com/ee/user/project/pages/getting_started_part_one.html#project-websites
+[bitbucket-cloud]: https://confluence.atlassian.com/bitbucket/publishing-a-website-on-bitbucket-cloud-221449776.html
