@@ -15,7 +15,7 @@ struct ParentRepo {
     owner: ParentRepoOwner,
 }
 #[derive(Debug, Deserialize)]
-struct Repo {
+struct RepoForParent {
     parent: Option<ParentRepo>,
 }
 
@@ -35,6 +35,11 @@ pub struct SearchedRepo {
 #[derive(Debug, Deserialize)]
 struct SearchResults {
     items: Vec<SearchedRepo>,
+}
+
+#[derive(Debug, Deserialize)]
+struct RepoForHomepage {
+    homepage: Option<String>,
 }
 
 pub struct Client {
@@ -121,7 +126,7 @@ impl Client {
         let url = format!("https://{}/repos/{}/{}", self.endpoint, author, repo);
         let req = self.client.get(url.as_str());
         let mut res = self.send(req)?;
-        let repo: Repo = res.json()?;
+        let repo: RepoForParent = res.json()?;
 
         match repo.parent {
             Some(p) => Ok(Some((p.owner.login, p.name))),
@@ -144,5 +149,19 @@ impl Client {
         } else {
             Ok(mem::replace(&mut results.items[0], SearchedRepo::default()))
         }
+    }
+
+    pub fn repo_homepage<S: AsRef<str>, U: AsRef<str>>(
+        &self,
+        owner: S,
+        repo: U,
+    ) -> Result<Option<String>> {
+        let owner = owner.as_ref();
+        let repo = repo.as_ref();
+        let url = format!("https://{}/repos/{}/{}", self.endpoint, owner, repo);
+        let req = self.client.get(url.as_str());
+        let mut res = self.send(req)?;
+        let repo: RepoForHomepage = res.json()?;
+        Ok(repo.homepage)
     }
 }

@@ -14,6 +14,7 @@ fn smoke() {
         args: vec![],
         stdout: false,
         pull_request: false,
+        website: false,
         env: empty_env(),
     };
     match url(&c) {

@@ -28,7 +28,9 @@ pub enum Line {
 
 #[derive(Debug, PartialEq)]
 pub enum Page {
-    Open,
+    Open {
+        website: bool,
+    },
     Diff {
         lhs: String,
         rhs: String,
@@ -230,8 +232,11 @@ pub fn parse_page(cfg: &command::Config) -> Result<Page> {
         return fetch_pull_request_page(cfg);
     }
 
-    if cfg.args.is_empty() {
-        return Ok(Page::Open);
+    // Note: Ignore any arguments when opening a website
+    if cfg.args.is_empty() || cfg.website {
+        return Ok(Page::Open {
+            website: cfg.website,
+        });
     }
 
     let git_dir = cfg

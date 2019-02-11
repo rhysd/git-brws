@@ -21,6 +21,7 @@ fn config(repo: &str, branch: Option<&str>, args: Vec<&str>) -> Config {
         args: a,
         stdout: false,
         pull_request: false,
+        website: false,
         env: empty_env(),
     }
 }
@@ -43,6 +44,7 @@ fn config_for_pr(
         args: vec![],
         stdout: false,
         pull_request: true,
+        website: false,
         env,
     }
 }
@@ -51,15 +53,30 @@ fn config_for_pr(
 fn parse_empty_args() {
     let mut c = config("https://github.com/user/repo.git", None, vec![]);
     match parse_page(&c).unwrap() {
-        Page::Open => { /* OK */ }
-        _ => assert!(false),
+        Page::Open { website: false } => { /* OK */ }
+        p => assert!(false, "{:?}", p),
     }
 
     // It still works even if .git was not found (#9)
     c.git_dir = None;
     match parse_page(&c).unwrap() {
-        Page::Open => { /* OK */ }
-        _ => assert!(false),
+        Page::Open { website: false } => { /* OK */ }
+        p => assert!(false, "{:?}", p),
+    }
+}
+
+#[test]
+fn parse_args_for_website() {
+    for args in &[
+        vec![],
+        vec!["HEAD"], // Ignores arguments
+    ] {
+        let mut c = config("https://github.com/user/repo.git", None, args.clone());
+        c.website = true;
+        match parse_page(&c).unwrap() {
+            Page::Open { website: true } => { /* OK */ }
+            p => assert!(false, "{:?}", p),
+        }
     }
 }
 

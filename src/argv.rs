@@ -146,6 +146,11 @@ impl Parsed {
             "pr",
             "Open pull request page instead of repository page",
         );
+        opts.optflag(
+            "w",
+            "website",
+            "Open website page instead of repository page (e.g. gh-pages for GitHub)",
+        );
         opts.optflag("h", "help", "Print this help");
         opts.optflag("v", "version", "Show version");
 
@@ -192,16 +197,14 @@ impl Parsed {
 
         let repo = convert_ssh_url(repo);
 
-        let stdout = matches.opt_present("u");
-        let pull_request = matches.opt_present("p");
-
         Ok(Parsed::OpenPage(command::Config {
             repo,
             branch,
             git_dir,
+            stdout: matches.opt_present("u"),
+            pull_request: matches.opt_present("p"),
+            website: matches.opt_present("w"),
             args: matches.free,
-            stdout,
-            pull_request,
             env,
         }))
     }

@@ -8,7 +8,7 @@ use std::path::Path;
 // git@ -> ssh://git@ conversion is done in git.rs.
 #[test]
 fn convert_ssh_url() {
-    let p = Page::Open;
+    let p = Page::Open { website: false };
     for &(repo, expected) in &[
         (
             "ssh://git@github.com:22/user/repo.git",
@@ -28,7 +28,7 @@ fn convert_ssh_url() {
 
 #[test]
 fn parse_and_build_open_page() {
-    let p = Page::Open;
+    let p = Page::Open { website: false };
     for &(repo, expected) in &[
         (
             "https://github.com/user/repo.git",
@@ -56,7 +56,7 @@ fn parse_and_build_open_page() {
 
 #[test]
 fn parse_and_build_open_branch_page() {
-    let p = Page::Open;
+    let p = Page::Open { website: false };
     for &(repo, expected) in &[
         (
             "https://github.com/user/repo.git",
@@ -284,7 +284,7 @@ fn invalid_repo_url() {
         "https://unknown.hosting_service.com/user/repo.git",
     ] {
         assert!(
-            build_page_url(&repo, &Page::Open, &None, &empty_env()).is_err(),
+            build_page_url(&repo, &Page::Open { website: false }, &None, &empty_env()).is_err(),
             "{} must be invalid",
             repo
         );
@@ -297,7 +297,7 @@ fn customized_ssh_port() {
     envs.ghe_ssh_port = Some(10022);
     envs.gitlab_ssh_port = Some(10022);
 
-    let p = Page::Open;
+    let p = Page::Open { website: false };
     for &(repo, expected) in &[
         (
             "https://github.com/user/repo.git",
@@ -336,7 +336,7 @@ fn customized_ghe_host() {
         assert_eq!(
             build_page_url(
                 "https://my-original-ghe.org/user/repo.git",
-                &Page::Open,
+                &Page::Open { website: false },
                 &None,
                 &envs,
             )
@@ -353,7 +353,7 @@ fn broken_repo_url() {
         "https://foo@/foo.bar", // empty host
         "https://foo bar",      // invalid domain character
     ] {
-        match build_page_url(&url, &Page::Open, &None, env) {
+        match build_page_url(&url, &Page::Open { website: false }, &None, env) {
             Err(Error::BrokenUrl { .. }) => { /* ok */ }
             v => assert!(false, "Unexpected error or success: {:?}", v),
         }

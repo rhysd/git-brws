@@ -14,6 +14,7 @@ pub struct Config {
     pub args: Vec<String>,
     pub stdout: bool,
     pub pull_request: bool,
+    pub website: bool,
     pub env: EnvConfig,
 }
 
