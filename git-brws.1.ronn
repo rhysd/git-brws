@@ -9,7 +9,9 @@ git-brws(1) -- open a repository, file, commit, diff, pull request or issue in y
 `git brws` <branch><br>
 `git brws` <commit>..<commit><br>
 `git brws` <commit>...<commit><br>
+`git brws` --repo <repo><br>
 `git brws` --pr<br>
+`git brws` --website<br>
 
 
 ## DESCRIPTION
