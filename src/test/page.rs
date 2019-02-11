@@ -1,13 +1,12 @@
 use crate::config::Config;
 use crate::error::Error;
 use crate::page::{parse_page, DiffOp, Line, Page};
-use crate::test::helper::{empty_env, https_proxy};
-use std::env;
+use crate::test::helper::empty_env;
 use std::fs;
 use std::path::{Path, PathBuf};
 
 fn config(repo: &str, branch: Option<&str>, args: Vec<&str>) -> Config {
-    let mut dir = env::current_dir().unwrap();
+    let mut dir = std::env::current_dir().unwrap();
     dir.push(Path::new(".git"));
     let dir = fs::canonicalize(dir).unwrap();
     Config {
@@ -22,57 +21,25 @@ fn config(repo: &str, branch: Option<&str>, args: Vec<&str>) -> Config {
     }
 }
 
-fn config_for_pr(
-    token: Option<String>,
-    repo: &str,
-    branch: Option<&str>,
-    git_dir: Option<PathBuf>,
-) -> Config {
-    let mut env = empty_env();
-    env.github_token = token;
-    env.https_proxy = https_proxy();
-    let env = env;
-
-    Config {
-        repo: repo.to_string(),
-        branch: branch.map(|b| b.to_string()),
-        git_dir,
-        args: vec![],
-        stdout: false,
-        pull_request: true,
-        website: false,
-        env,
-    }
-}
-
 #[test]
 fn parse_empty_args() {
     let mut c = config("https://github.com/user/repo.git", None, vec![]);
     match parse_page(&c).unwrap() {
-        Page::Open { website: false } => { /* OK */ }
+        Page::Open {
+            website: false,
+            pull_request: false,
+        } => { /* OK */ }
         p => assert!(false, "{:?}", p),
     }
 
     // It still works even if .git was not found (#9)
     c.git_dir = None;
     match parse_page(&c).unwrap() {
-        Page::Open { website: false } => { /* OK */ }
+        Page::Open {
+            website: false,
+            pull_request: false,
+        } => { /* OK */ }
         p => assert!(false, "{:?}", p),
-    }
-}
-
-#[test]
-fn parse_args_for_website() {
-    for args in &[
-        vec![],
-        vec!["HEAD"], // Ignores arguments
-    ] {
-        let mut c = config("https://github.com/user/repo.git", None, args.clone());
-        c.website = true;
-        match parse_page(&c).unwrap() {
-            Page::Open { website: true } => { /* OK */ }
-            p => assert!(false, "{:?}", p),
-        }
     }
 }
 
@@ -380,81 +347,30 @@ fn parse_file_line_range() {
 }
 
 #[test]
-fn fetch_pull_request_page_with_branch() {
-    let mut dir = env::current_dir().unwrap();
-    dir.push(Path::new(".git"));
-    let dir = fs::canonicalize(dir).unwrap();
-
-    let cfg = config_for_pr(
-        skip_if_no_token!(),
-        "https://github.com/rust-lang/rust.vim.git",
-        Some("async-contextual-keyword"),
-        Some(dir),
-    );
-
-    match parse_page(&cfg).unwrap() {
-        Page::PullRequest { url } => {
-            assert_eq!(&url, "https://github.com/rust-lang/rust.vim/pull/290");
-        }
-        page => assert!(false, "Unexpected page: {:?}", page),
-    }
-}
-
-#[test]
-fn fetch_pull_request_page_retrieving_branch_from_git_dir() {
-    let mut dir = env::current_dir().unwrap();
-    dir.push(Path::new(".git"));
-    let dir = fs::canonicalize(dir).unwrap();
-
-    let cfg = config_for_pr(
-        skip_if_no_token!(),
-        "https://github.com/rhysd/git-brws.git",
-        None,
-        Some(dir),
-    );
-
-    // Accept both error and page since current branch may be for pull request
-    match parse_page(&cfg) {
-        Ok(Page::PullRequest { url }) => {
-            assert!(
-                url.contains("git-brws"),
-                "URL is not for git-brws repo: {}",
-                url
-            );
-        }
-        Err(Error::GitHubPullReqNotFound { author, repo, .. }) => {
-            assert_eq!(&author, "rhysd");
-            assert_eq!(&repo, "git-brws");
-        }
-        result => assert!(false, "Unexpected result: {:?}", result),
-    }
-}
-
-#[test]
-fn fetch_pull_request_page_without_branch_outside_git_repo() {
-    let cfg = config_for_pr(
-        None,
-        "ssh://git@github.com:22/rhysd/git-brws.git",
-        None,
-        None,
-    );
-    match parse_page(&cfg).unwrap_err() {
-        Error::NoLocalRepoFound { operation } => assert!(
-            operation.contains("opening a pull request"),
-            "Unexpected operation: {}",
-            operation
-        ),
-        err => assert!(false, "Unexpected error: {}", err),
-    }
-}
-
-#[test]
 fn setting_website_returns_open_always() {
     for args in &[vec![], vec!["HEAD"], vec!["-r", "foo/bar"]] {
         let mut c = config("https://github.com/user/repo.git", None, args.clone());
         c.website = true;
         match parse_page(&c).unwrap() {
-            Page::Open { website: true } => { /* OK */ }
+            Page::Open {
+                website: true,
+                pull_request: false,
+            } => { /* OK */ }
+            page => assert!(false, "Unexpected parse result: {:?}", page),
+        }
+    }
+}
+
+#[test]
+fn setting_pull_request_returns_open_always() {
+    for args in &[vec![], vec!["HEAD"], vec!["-r", "foo/bar"]] {
+        let mut c = config("https://github.com/user/repo.git", None, args.clone());
+        c.pull_request = true;
+        match parse_page(&c).unwrap() {
+            Page::Open {
+                website: false,
+                pull_request: true,
+            } => { /* OK */ }
             page => assert!(false, "Unexpected parse result: {:?}", page),
         }
     }

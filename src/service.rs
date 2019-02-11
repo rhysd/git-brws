@@ -6,6 +6,7 @@ use crate::config::Config;
 use crate::error::{Error, Result};
 use crate::github_api::Client;
 use crate::page::{DiffOp, Line, Page};
+use crate::pull_request;
 use std::borrow::Cow;
 use std::mem;
 use url::Url;
@@ -23,6 +24,7 @@ fn to_slash<S: AsRef<str>>(s: &S) -> &str {
     s.as_ref()
 }
 
+// TODO: Omit fallback and return Result<String>
 fn first_available_url<T: AsRef<str>>(
     candidates: &mut [String],
     fallback: String,
@@ -57,9 +59,9 @@ fn build_github_like_url<S: AsRef<str>>(
     api_endpoint: Option<S>,
     cfg: &Config,
     page: &Page,
-) -> String {
+) -> Result<String> {
     match page {
-        Page::Open { website } if *website => {
+        Page::Open { website: true, .. } => {
             match host {
                 "github.com" => {
                     if let Some(endpoint) = api_endpoint {
@@ -69,16 +71,16 @@ fn build_github_like_url<S: AsRef<str>>(
                             &cfg.env.https_proxy,
                         ) {
                             if let Ok(Some(homepage)) = client.repo_homepage(user, repo) {
-                                return homepage;
+                                return Ok(homepage);
                             }
                         }
                     }
                     let host = &host[0..host.len() - 4];
-                    format!("https://{}.{}.io/{}", user, host, repo)
+                    Ok(format!("https://{}.{}.io/{}", user, host, repo))
                 }
-                "gitlab.com" => format!("https://{}.gitlab.io/{}", user, repo),
+                "gitlab.com" => Ok(format!("https://{}.gitlab.io/{}", user, repo)),
                 host if host.starts_with("gitlab.") => {
-                    format!("https://{}.{}/{}", user, host, repo)
+                    Ok(format!("https://{}.{}/{}", user, host, repo))
                 }
                 // For GitHub Enterprise:
                 //   https://help.github.com/enterprise/user/articles/user-organization-and-project-pages/
@@ -91,53 +93,67 @@ fn build_github_like_url<S: AsRef<str>>(
                             Client::build(endpoint.as_ref(), Some(token), &cfg.env.https_proxy)
                         {
                             if let Ok(Some(homepage)) = client.repo_homepage(user, repo) {
-                                return homepage;
+                                return Ok(homepage);
                             }
                         }
                     }
                     let with_subdomain = format!("https://pages.{}/{}/{}", host, user, repo);
                     let without_subdomain = format!("https://{}/pages/{}/{}", host, user, repo);
-                    first_available_url(
+                    Ok(first_available_url(
                         &mut [with_subdomain],
                         without_subdomain,
                         &cfg.env.https_proxy,
-                    )
+                    ))
                 }
             }
         }
-        Page::Open { website: _ } => {
-            if let Some(ref b) = cfg.branch {
-                format!("https://{}/{}/{}/tree/{}", host, user, repo, b)
+        Page::Open {
+            pull_request: true, ..
+        } => {
+            if let Some(endpoint) = api_endpoint {
+                pull_request::find_url(endpoint.as_ref(), user, repo, cfg)
             } else {
-                format!("https://{}/{}/{}", host, user, repo)
+                Err(Error::PullReqNotSupported {
+                    service: host.to_string(),
+                })
+            }
+        }
+        Page::Open { .. } => {
+            if let Some(ref b) = cfg.branch {
+                Ok(format!("https://{}/{}/{}/tree/{}", host, user, repo, b))
+            } else {
+                Ok(format!("https://{}/{}/{}", host, user, repo))
             }
         }
         Page::Diff {
             ref lhs,
             ref rhs,
             ref op,
-        } => format!(
+        } => Ok(format!(
             "https://{}/{}/{}/compare/{}{}{}",
             host, user, repo, lhs, op, rhs,
-        ),
-        Page::Commit { ref hash } => format!("https://{}/{}/{}/commit/{}", host, user, repo, hash),
+        )),
+        Page::Commit { ref hash } => Ok(format!(
+            "https://{}/{}/{}/commit/{}",
+            host, user, repo, hash
+        )),
         Page::FileOrDir {
             ref relative_path,
             ref hash,
             line: None,
-        } => format!(
+        } => Ok(format!(
             "https://{}/{}/{}/blob/{}/{}",
             host,
             user,
             repo,
             hash,
             to_slash(relative_path),
-        ),
+        )),
         Page::FileOrDir {
             ref relative_path,
             ref hash,
             line: Some(Line::At(line)),
-        } => format!(
+        } => Ok(format!(
             "https://{}/{}/{}/blob/{}/{}#L{}",
             host,
             user,
@@ -145,12 +161,12 @@ fn build_github_like_url<S: AsRef<str>>(
             hash,
             to_slash(relative_path),
             line,
-        ),
+        )),
         Page::FileOrDir {
             ref relative_path,
             ref hash,
             line: Some(Line::Range(start, end)),
-        } => format!(
+        } => Ok(format!(
             "https://{}/{}/{}/blob/{}/{}#L{}-L{}",
             host,
             user,
@@ -159,9 +175,11 @@ fn build_github_like_url<S: AsRef<str>>(
             to_slash(relative_path),
             start,
             end,
-        ),
-        Page::Issue { number } => format!("https://{}/{}/{}/issues/{}", host, user, repo, number),
-        Page::PullRequest { url } => url.clone(),
+        )),
+        Page::Issue { number } => Ok(format!(
+            "https://{}/{}/{}/issues/{}",
+            host, user, repo, number
+        )),
     }
 }
 
@@ -177,14 +195,12 @@ fn build_gitlab_url(
             return Err(Error::GitLabDiffNotSupported);
         }
     }
-    Ok(build_github_like_url::<&str>(
-        host, user, repo, None, cfg, page,
-    ))
+    build_github_like_url::<&str>(host, user, repo, None, cfg, page)
 }
 
 fn build_bitbucket_url(user: &str, repo: &str, cfg: &Config, page: &Page) -> Result<String> {
     match page {
-        Page::Open { website } if *website => {
+        Page::Open { website: true, .. } => {
             // Build bitbucket cloud URL:
             //   https://confluence.atlassian.com/bitbucket/publishing-a-website-on-bitbucket-cloud-221449776.html
             let with_user = format!("https://{}.bitbucket.io/{}", user, repo);
@@ -195,7 +211,12 @@ fn build_bitbucket_url(user: &str, repo: &str, cfg: &Config, page: &Page) -> Res
                 &cfg.env.https_proxy,
             ))
         }
-        Page::Open { website: _ } => {
+        Page::Open {
+            pull_request: true, ..
+        } => Err(Error::PullReqNotSupported {
+            service: "bitbucket.org".to_string(),
+        }),
+        Page::Open { .. } => {
             if let Some(ref b) = cfg.branch {
                 Ok(format!(
                     "https://bitbucket.org/{}/{}/branch/{}",
@@ -250,7 +271,6 @@ fn build_bitbucket_url(user: &str, repo: &str, cfg: &Config, page: &Page) -> Res
             "https://bitbucket.org/{}/{}/issues/{}",
             user, repo, number,
         )),
-        Page::PullRequest { .. } => unreachable!(),
     }
 }
 
@@ -289,14 +309,9 @@ pub fn build_page_url(page: &Page, cfg: &Config) -> Result<String> {
     })?;
 
     match host {
-        "github.com" => Ok(build_github_like_url(
-            host,
-            user,
-            repo_name,
-            Some("api.github.com"),
-            cfg,
-            page,
-        )),
+        "github.com" => {
+            build_github_like_url(host, user, repo_name, Some("api.github.com"), cfg, page)
+        }
         "gitlab.com" => build_gitlab_url(host, user, repo_name, cfg, page),
         "bitbucket.org" => build_bitbucket_url(user, repo_name, cfg, page),
         _ => {
@@ -324,14 +339,14 @@ pub fn build_page_url(page: &Page, cfg: &Config) -> Result<String> {
             if is_gitlab {
                 build_gitlab_url(&host, user, repo_name, cfg, page)
             } else {
-                Ok(build_github_like_url(
+                build_github_like_url(
                     &host,
                     user,
                     repo_name,
                     Some(format!("{}/api/v3", host)),
                     cfg,
                     page,
-                ))
+                )
             }
         }
     }

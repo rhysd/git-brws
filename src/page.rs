@@ -1,7 +1,6 @@
 use crate::config::Config;
 use crate::error::{Error, ExpectedNumberOfArgs, Result};
 use crate::git::Git;
-use crate::pull_request;
 use std::fmt;
 use std::fs;
 
@@ -30,6 +29,7 @@ pub enum Line {
 pub enum Page {
     Open {
         website: bool,
+        pull_request: bool,
     },
     Diff {
         lhs: String,
@@ -46,9 +46,6 @@ pub enum Page {
     },
     Issue {
         number: usize,
-    },
-    PullRequest {
-        url: String,
     },
 }
 
@@ -207,34 +204,14 @@ impl<'a> BrowsePageParser<'a> {
     }
 }
 
-fn fetch_pull_request_page(cfg: &Config) -> Result<Page> {
-    match cfg.branch {
-        Some(ref b) => pull_request::find_url(cfg.repo.as_str(), b.as_str(), &cfg.env)
-            .map(|url| Page::PullRequest { url }),
-        None => {
-            if let Some(git) = cfg.git() {
-                pull_request::find_url(cfg.repo.as_str(), git.current_branch()?.as_str(), &cfg.env)
-                    .map(|url| Page::PullRequest { url })
-            } else {
-                Err(Error::NoLocalRepoFound {
-                    operation: "opening a pull request without specifying branch".to_string(),
-                })
-            }
-        }
-    }
-}
-
 pub fn parse_page(cfg: &Config) -> Result<Page> {
     let mut attempts = Vec::with_capacity(4);
 
-    if cfg.pull_request {
-        return fetch_pull_request_page(cfg);
-    }
-
     // Note: Ignore any arguments when opening a website
-    if cfg.args.is_empty() || cfg.website {
+    if cfg.args.is_empty() || cfg.website || cfg.pull_request {
         return Ok(Page::Open {
             website: cfg.website,
+            pull_request: cfg.pull_request,
         });
     }
 

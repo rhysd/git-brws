@@ -1,20 +1,26 @@
 extern crate url;
 
-use crate::config::EnvConfig;
+use crate::config::{Config, EnvConfig};
 use crate::error::{Error, Result};
 use crate::github_api;
-use crate::service::slug_from_path;
-use url::Url;
 
-fn find_github_pr_url(
+fn find_github_pr_url_for_branch<B: AsRef<str>>(
+    branch: B,
+    endpoint: &str,
     author: &str,
     repo: &str,
-    branch: &str,
-    host: &str,
-    token: &Option<String>,
-    https_proxy: &Option<String>,
+    env: &EnvConfig,
 ) -> Result<String> {
-    let client = github_api::Client::build(host, token.as_ref(), https_proxy)?;
+    let branch = branch.as_ref();
+    let token = if endpoint == "api.github.com" {
+        &env.github_token
+    } else {
+        if env.ghe_token.is_none() {
+            return Err(Error::GheTokenRequired);
+        }
+        &env.ghe_token
+    };
+    let client = github_api::Client::build(endpoint, token.as_ref(), &env.https_proxy)?;
 
     // Note: Search pull request URL in the case where the repository is an original, not a fork.
     // Author should not be set since original repository's owner may be different from current
@@ -41,58 +47,23 @@ fn find_github_pr_url(
     })
 }
 
-pub fn find_url<U: AsRef<str>, B: AsRef<str>>(
-    repo_url: U,
-    branch: B,
-    env: &EnvConfig,
-) -> Result<String> {
-    let url = Url::parse(repo_url.as_ref()).map_err(|e| Error::BrokenUrl {
-        url: repo_url.as_ref().to_string(),
-        msg: format!("{}", e),
-    })?;
-    // .map_err(|e| format!("Failed to parse URL '{}': {}", repo_url.as_ref(), e))?;
-    let path = url.path();
-    let (author, repo) = slug_from_path(path)?;
-    match url.host_str().ok_or_else(|| Error::BrokenUrl {
-        url: repo_url.as_ref().to_string(),
-        msg: "No host in URL".to_string(),
-    })? {
-        "github.com" => find_github_pr_url(
-            author,
-            repo,
-            branch.as_ref(),
-            "api.github.com",
-            &env.github_token,
-            &env.https_proxy,
-        ),
-        host => {
-            let port = if host.starts_with("github.") {
-                &env.ghe_ssh_port
+pub fn find_url(endpoint: &str, author: &str, repo: &str, cfg: &Config) -> Result<String> {
+    match cfg.branch {
+        Some(ref b) => find_github_pr_url_for_branch(b, endpoint, author, repo, &cfg.env),
+        None => {
+            if let Some(git) = cfg.git() {
+                find_github_pr_url_for_branch(
+                    git.current_branch()?,
+                    endpoint,
+                    author,
+                    repo,
+                    &cfg.env,
+                )
             } else {
-                match env.ghe_url_host {
-                    Some(ref h) if host == h => &env.ghe_ssh_port,
-                    _ => {
-                        return Err(Error::PullReqNotSupported {
-                            service: host.to_string(),
-                        });
-                    }
-                }
-            };
-
-            let host = if let Some(ref p) = port {
-                format!("{}:{}/api/v3", host, p)
-            } else {
-                format!("{}/api/v3", host)
-            };
-
-            find_github_pr_url(
-                author,
-                repo,
-                branch.as_ref(),
-                host.as_str(),
-                &env.ghe_token,
-                &env.https_proxy,
-            )
+                Err(Error::NoLocalRepoFound {
+                    operation: "opening a pull request without specifying branch".to_string(),
+                })
+            }
         }
     }
 }

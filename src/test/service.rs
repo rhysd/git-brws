@@ -6,6 +6,19 @@ use crate::test::helper::{empty_env, https_proxy};
 use std::fs;
 use std::path::Path;
 
+const OPEN: Page = Page::Open {
+    website: false,
+    pull_request: false,
+};
+const OPEN_WEBSITE: Page = Page::Open {
+    website: true,
+    pull_request: true,
+};
+const OPEN_PR: Page = Page::Open {
+    website: false,
+    pull_request: true,
+};
+
 fn config(repo: &str, branch: Option<&str>, env: Option<EnvConfig>) -> Config {
     let mut dir = std::env::current_dir().unwrap();
     dir.push(Path::new(".git"));
@@ -22,11 +35,32 @@ fn config(repo: &str, branch: Option<&str>, env: Option<EnvConfig>) -> Config {
     }
 }
 
+fn config_for_pr(token: Option<String>, repo: &str, branch: Option<&str>) -> Config {
+    let mut dir = std::env::current_dir().unwrap();
+    dir.push(Path::new(".git"));
+    let dir = fs::canonicalize(dir).unwrap();
+
+    let mut env = empty_env();
+    env.github_token = token;
+    env.https_proxy = https_proxy();
+    let env = env;
+
+    Config {
+        repo: repo.to_string(),
+        branch: branch.map(|b| b.to_string()),
+        git_dir: Some(dir),
+        args: vec![],
+        stdout: false,
+        pull_request: true,
+        website: false,
+        env,
+    }
+}
+
 // Note:
 // git@ -> ssh://git@ conversion is done in git.rs.
 #[test]
 fn convert_ssh_url() {
-    let p = Page::Open { website: false };
     for &(repo, expected) in &[
         (
             "ssh://git@github.com:22/user/repo.git",
@@ -38,13 +72,12 @@ fn convert_ssh_url() {
         ),
     ] {
         let c = config(repo, None, None);
-        assert_eq!(build_page_url(&p, &c).unwrap(), expected);
+        assert_eq!(build_page_url(&OPEN, &c).unwrap(), expected);
     }
 }
 
 #[test]
 fn parse_and_build_open_page() {
-    let p = Page::Open { website: false };
     for &(repo, expected) in &[
         (
             "https://github.com/user/repo.git",
@@ -64,13 +97,12 @@ fn parse_and_build_open_page() {
         ),
     ] {
         let c = config(repo, None, None);
-        assert_eq!(build_page_url(&p, &c).unwrap(), expected);
+        assert_eq!(build_page_url(&OPEN, &c).unwrap(), expected);
     }
 }
 
 #[test]
 fn parse_and_build_open_branch_page() {
-    let p = Page::Open { website: false };
     for &(repo, expected) in &[
         (
             "https://github.com/user/repo.git",
@@ -94,7 +126,7 @@ fn parse_and_build_open_branch_page() {
         ),
     ] {
         let c = config(repo, Some("dev"), None);
-        assert_eq!(build_page_url(&p, &c).unwrap(), expected);
+        assert_eq!(build_page_url(&OPEN, &c).unwrap(), expected);
     }
 }
 
@@ -301,7 +333,7 @@ fn invalid_repo_url() {
     ] {
         let c = config(repo, None, None);
         assert!(
-            build_page_url(&Page::Open { website: false }, &c).is_err(),
+            build_page_url(&OPEN, &c).is_err(),
             "{} must be invalid",
             repo
         );
@@ -314,7 +346,6 @@ fn customized_ssh_port() {
     env.ghe_ssh_port = Some(10022);
     env.gitlab_ssh_port = Some(10022);
 
-    let p = Page::Open { website: false };
     for &(repo, expected) in &[
         (
             "https://github.com/user/repo.git",
@@ -334,7 +365,7 @@ fn customized_ssh_port() {
         ),
     ] {
         let c = config(repo, None, Some(env.clone()));
-        assert_eq!(build_page_url(&p, &c).unwrap(), expected.to_string(),);
+        assert_eq!(build_page_url(&OPEN, &c).unwrap(), expected.to_string(),);
     }
 }
 
@@ -353,10 +384,7 @@ fn customized_ghe_host() {
             None,
             Some(env.clone()),
         );
-        assert_eq!(
-            build_page_url(&Page::Open { website: false }, &c).unwrap(),
-            expected.to_string(),
-        );
+        assert_eq!(build_page_url(&OPEN, &c).unwrap(), expected.to_string(),);
     }
 }
 
@@ -368,7 +396,7 @@ fn broken_repo_url() {
         "https://foo bar",      // invalid domain character
     ] {
         let c = config(url, None, Some(env.clone()));
-        match build_page_url(&Page::Open { website: false }, &c) {
+        match build_page_url(&OPEN, &c) {
             Err(Error::BrokenUrl { .. }) => { /* ok */ }
             v => assert!(false, "Unexpected error or success: {:?}", v),
         }
@@ -402,14 +430,25 @@ fn parse_and_build_issue_number() {
 }
 
 #[test]
-fn pull_request_url() {
-    let expected = "https://github.com/rhysd/git-brws/pull/4";
-    let p = Page::PullRequest {
-        url: expected.to_string(),
-    };
-    let c = config("https://github.com/rhysd/git-brws.git", None, None);
-    let url = build_page_url(&p, &c).unwrap();
-    assert_eq!(&url, expected);
+fn unknown_github_enterprise_url() {
+    let mut env = empty_env();
+    env.ghe_url_host = Some("github-yourcompany.com".to_string());
+    let c = config(
+        "https://github-othercompany.com/foo/bar.git",
+        None,
+        Some(env),
+    );
+    match build_page_url(&OPEN, &c).unwrap_err() {
+        Error::UnknownHostingService { .. } => { /* OK */ }
+        err => assert!(false, "Unexpected error: {}", err),
+    }
+
+    let mut c = config_for_pr(None, "https://github-othercompany.com/foo/bar.git", None);
+    c.env.ghe_url_host = Some("github-yourcompany.com".to_string());
+    match build_page_url(&OPEN_PR, &c).unwrap_err() {
+        Error::UnknownHostingService { .. } => { /* OK */ }
+        err => assert!(false, "Unexpected error: {}", err),
+    }
 }
 
 #[test]
@@ -434,7 +473,7 @@ fn website_github_pages() {
     ];
     for (url, expected) in testcases {
         let c = config(url, None, Some(env.clone()));
-        let actual = build_page_url(&Page::Open { website: true }, &c).unwrap();
+        let actual = build_page_url(&OPEN_WEBSITE, &c).unwrap();
         assert_eq!(*expected, &actual);
     }
 }
@@ -459,7 +498,7 @@ fn website_github_enterprise_pages() {
     ];
     for (url, expected) in testcases {
         let c = config(url, None, Some(env.clone()));
-        let actual = build_page_url(&Page::Open { website: true }, &c).unwrap();
+        let actual = build_page_url(&OPEN_WEBSITE, &c).unwrap();
         assert_eq!(*expected, &actual);
     }
 }
@@ -479,7 +518,7 @@ fn website_gitlab_pages() {
     ];
     for (url, expected) in testcases {
         let c = config(url, None, Some(env.clone()));
-        let actual = build_page_url(&Page::Open { website: true }, &c).unwrap();
+        let actual = build_page_url(&OPEN_WEBSITE, &c).unwrap();
         assert_eq!(*expected, &actual);
     }
 }
@@ -499,7 +538,86 @@ fn website_bitbucket_cloud() {
     ];
     for (url, expected) in testcases {
         let c = config(url, None, Some(env.clone()));
-        let actual = build_page_url(&Page::Open { website: true }, &c).unwrap();
+        let actual = build_page_url(&OPEN_WEBSITE, &c).unwrap();
         assert_eq!(*expected, &actual);
+    }
+}
+
+#[test]
+fn pull_request_page_url_with_branch() {
+    let cfg = config_for_pr(
+        skip_if_no_token!(),
+        "https://github.com/rust-lang/rust.vim.git",
+        Some("async-contextual-keyword"),
+    );
+
+    let url = build_page_url(&OPEN_PR, &cfg).unwrap();
+    assert_eq!(&url, "https://github.com/rust-lang/rust.vim/pull/290");
+}
+
+#[test]
+fn pull_request_page_url_retrieving_branch_from_git_dir() {
+    let cfg = config_for_pr(
+        skip_if_no_token!(),
+        "https://github.com/rhysd/git-brws.git",
+        None,
+    );
+
+    // Accept both error and page since current branch may be for pull request
+    match build_page_url(&OPEN_PR, &cfg) {
+        Ok(url) => {
+            assert!(
+                url.contains("git-brws"),
+                "URL is not for git-brws repo: {}",
+                url
+            );
+        }
+        Err(Error::GitHubPullReqNotFound { author, repo, .. }) => {
+            assert_eq!(&author, "rhysd");
+            assert_eq!(&repo, "git-brws");
+        }
+        result => assert!(false, "Unexpected result: {:?}", result),
+    }
+}
+
+#[test]
+fn pull_request_page_url_without_branch_outside_git_repo() {
+    let mut cfg = config_for_pr(None, "ssh://git@github.com:22/rhysd/git-brws.git", None);
+    cfg.git_dir = None;
+    match build_page_url(&OPEN_PR, &cfg).unwrap_err() {
+        Error::NoLocalRepoFound { operation } => assert!(
+            operation.contains("opening a pull request"),
+            "Unexpected operation: {}",
+            operation
+        ),
+        err => assert!(false, "Unexpected error: {}", err),
+    }
+}
+
+#[test]
+fn pull_request_unsupported_services() {
+    let urls = &[
+        "https://gitlab.com/foo/bar.git",
+        "https://gitlab.yourcompany.com/foo/bar.git",
+        "https://bitbucket.org/foo/bar.git",
+        "ssh://git@gitlab.com:22/foo/bar.git",
+        "ssh://git@gitlab.yourcompany.com:22/foo/bar.git",
+        "ssh://git@bitbucket.org:22/foo/bar.git",
+    ];
+    for url in urls {
+        let cfg = config_for_pr(None, url, None);
+        match build_page_url(&OPEN_PR, &cfg).unwrap_err() {
+            Error::PullReqNotSupported { .. } => { /* OK */ }
+            err => assert!(false, "Unexpected error: {}", err),
+        }
+    }
+}
+
+#[test]
+fn pull_request_github_enterprise_with_no_token() {
+    let cfg = config_for_pr(None, "https://github.yourcompany.com/foo/bar.git", None);
+    match build_page_url(&OPEN_PR, &cfg).unwrap_err() {
+        Error::GheTokenRequired => { /* OK */ }
+        err => assert!(false, "Unexpected error: {}", err),
     }
 }
