@@ -1,6 +1,6 @@
 [package]
 name = "git-brws"
-version = "0.9.2"
+version = "0.10.0"
 authors = ["rhysd <lin90162@yahoo.co.jp>"]
 description = "Command line tool to open a repository, file, commit or diff in your web browser from command line"
 categories = ["command-line-utilities", "development-tools"]
