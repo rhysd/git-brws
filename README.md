@@ -338,6 +338,14 @@ For example, when updating to 0.9.2:
 ./HomebrewFormula/update.sh 0.9.2
 ```
 
+To update changelog, please run [changelog-from-release][] after describing release note at GitHub
+repository. It regenerates `CHANGELOG.md` from releases on GitHub.
+
+```sh
+go get github.com/rhysd/changelog-from-release
+changelog-from-release
+```
+
 [github-repo]: https://github.com/rhysd/git-brws
 [crate-badge]: https://img.shields.io/crates/v/git-brws.svg
 [crate]: https://crates.io/crates/git-brws
@@ -349,3 +357,4 @@ For example, when updating to 0.9.2:
 [ronn]: https://github.com/rtomayko/ronn
 [gitlab-pages]: https://docs.gitlab.com/ee/user/project/pages/getting_started_part_one.html#project-websites
 [bitbucket-cloud]: https://confluence.atlassian.com/bitbucket/publishing-a-website-on-bitbucket-cloud-221449776.html
+[changelog-from-release]: https://github.com/rhysd/changelog-from-release
