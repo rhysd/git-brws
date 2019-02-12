@@ -90,7 +90,7 @@ pub enum Error {
     },
     PageParseError {
         args: Vec<String>,
-        attempts: Vec<Error>,
+        attempts: Vec<(&'static str, Error)>,
     },
     InvalidIssueNumberFormat,
     LineSpecifiedForDir(PathBuf),
@@ -145,9 +145,9 @@ impl fmt::Display for Error {
             Error::DiffHandIsEmpty{input} => write!(f, "Not a diff format since LHS and/or RHS is empty {}", input),
             Error::FileDirNotInRepo{repo_root, path} => write!(f, "Given path '{:?}' is not in repository '{:?}'", path, repo_root),
             Error::PageParseError{args, attempts} => {
-                write!(f, "Error on parsing command line arguments {:?}", args)?;
-                for err in attempts.iter() {
-                    write!(f, "\n  - {}", err)?;
+                write!(f, "Cannot parse command line arguments {:?}\nAttempts:", args)?;
+                for (what, err) in attempts.iter() {
+                    write!(f, "\n  - {}: {}", what, err)?;
                 }
                 Ok(())
             }

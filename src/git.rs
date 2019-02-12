@@ -24,7 +24,7 @@ impl<'a> Git<'a> {
             Err(Error::GitCommandError {
                 stderr: String::from_utf8_lossy(&out.stderr)
                     .trim()
-                    .replace('\n', ""),
+                    .replace('\n', " "),
                 args: args.iter().map(|a| a.as_ref().to_owned()).collect(),
             })
         }
@@ -129,7 +129,7 @@ pub fn git_dir(dir: Option<String>, git_cmd: &str) -> Result<PathBuf> {
         return Err(Error::GitCommandError {
             stderr: String::from_utf8_lossy(&out.stderr)
                 .trim()
-                .replace('\n', ""),
+                .replace('\n', " "),
             args: vec![
                 OsStr::new(git_cmd).to_os_string(),
                 OsStr::new("rev-parse").to_os_string(),

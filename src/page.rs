@@ -215,7 +215,7 @@ impl<'a> BrowsePageParser<'a> {
 }
 
 pub fn parse_page(cfg: &Config) -> Result<Page> {
-    let mut attempts = Vec::with_capacity(4);
+    let mut attempts = Vec::with_capacity(5);
 
     // Note: Ignore any arguments when opening a website
     if cfg.args.is_empty() || cfg.website || cfg.pull_request {
@@ -233,27 +233,27 @@ pub fn parse_page(cfg: &Config) -> Result<Page> {
 
     match parser.try_parse_issue_number() {
         Ok(p) => return Ok(p),
-        Err(msg) => attempts.push(msg),
+        Err(msg) => attempts.push(("Issue number", msg)),
     }
 
     match parser.try_parse_file_or_dir() {
         Ok(p) => return Ok(p),
-        Err(msg) => attempts.push(msg),
+        Err(msg) => attempts.push(("File or dir", msg)),
     }
 
     match parser.try_parse_diff() {
         Ok(p) => return Ok(p),
-        Err(msg) => attempts.push(msg),
+        Err(msg) => attempts.push(("Diff", msg)),
     }
 
     match parser.try_parse_tag() {
         Ok(p) => return Ok(p),
-        Err(msg) => attempts.push(msg),
+        Err(msg) => attempts.push(("Tag", msg)),
     }
 
     match parser.try_parse_commit() {
         Ok(p) => return Ok(p),
-        Err(msg) => attempts.push(msg),
+        Err(msg) => attempts.push(("Commit", msg)),
     }
 
     Err(Error::PageParseError {

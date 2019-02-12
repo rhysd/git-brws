@@ -246,7 +246,7 @@ fn wrong_num_of_args() {
     match parse_page(&c) {
         Err(Error::PageParseError { attempts, .. }) => {
             assert!(!attempts.is_empty());
-            for err in attempts {
+            for (_, err) in attempts {
                 match err {
                     Error::WrongNumberOfArgs { actual, .. } => assert_eq!(actual, 4),
                     err => assert!(false, "Unexpected error: {}", err),
@@ -311,7 +311,7 @@ fn line_cannot_be_set_to_dir() {
         let c = config("https://github.com/user/repo.git", None, vec![arg]);
         match parse_page(&c) {
             Err(Error::PageParseError { attempts, .. }) => assert!(
-                attempts.iter().any(|err| match err {
+                attempts.iter().any(|(_, err)| match err {
                     Error::LineSpecifiedForDir(path) => format!("{:?}", path).contains("src"),
                     _ => false,
                 }),
