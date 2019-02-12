@@ -88,6 +88,10 @@ Examples:
 
     $ git brws HEAD~3
 
+  - Tag:
+
+    $ git brws 0.10.0
+
   - Diff between commits:
 
     $ git brws HEAD~3..HEAD
@@ -173,7 +177,7 @@ impl Parsed {
             ));
         }
 
-        let env = EnvConfig::from_iter(env::vars())?;
+        let env = EnvConfig::from_iter(env::vars())?.with_global_env();
         let git_dir = git::git_dir(matches.opt_str("d"), env.git_command.as_str());
         let branch = matches.opt_str("b");
         let (repo, git_dir) = match (matches.opt_str("r"), matches.opt_str("R")) {

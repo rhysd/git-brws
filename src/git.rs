@@ -32,6 +32,24 @@ impl<'a> Git<'a> {
 
     pub fn hash<S: AsRef<str>>(&self, commit: S) -> Result<String> {
         self.command(&["rev-parse", commit.as_ref()])
+            .map_err(|err| Error::GitObjectNotFound {
+                kind: "commit",
+                object: commit.as_ref().to_string(),
+                msg: format!("{}", err),
+            })
+    }
+
+    pub fn tag_hash<S: AsRef<str>>(&self, tagname: S) -> Result<String> {
+        let tagname = tagname.as_ref();
+        let stdout = self
+            .command(&["show-ref", "--tags", tagname])
+            .map_err(|err| Error::GitObjectNotFound {
+                kind: "tag name",
+                object: tagname.to_string(),
+                msg: format!("{}", err),
+            })?;
+        // Output must be in format '{rev} {ref name}'
+        Ok(stdout.splitn(2, ' ').next().unwrap().to_string())
     }
 
     pub fn remote_url<S: AsRef<str>>(&self, name: S) -> Result<String> {
@@ -40,16 +58,10 @@ impl<'a> Git<'a> {
         // Note that git installed in Ubuntu 14.04 is 1.9.1.
         let name = name.as_ref();
         self.command(&["config", "--get", &format!("remote.{}.url", name)])
-            .map_err(|mut err| {
-                if let Error::GitCommandError { ref mut stderr, .. } = err {
-                    // `git config --get` does not output any error message even if cofniguration
-                    // is not found (exit status is non-zero). Instead, reasonable error message is
-                    // set here.
-                    if stderr.is_empty() {
-                        *stderr = format!("Remote '{}' does not exist in Git config", name);
-                    }
-                }
-                err
+            .map_err(|err| Error::GitObjectNotFound {
+                kind: "remote",
+                object: name.to_string(),
+                msg: format!("{}", err),
             })
     }
 

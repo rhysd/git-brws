@@ -77,7 +77,7 @@ fn convert_ssh_url() {
 }
 
 #[test]
-fn parse_and_build_open_page() {
+fn open_page_url() {
     for &(repo, expected) in &[
         (
             "https://github.com/user/repo.git",
@@ -102,7 +102,7 @@ fn parse_and_build_open_page() {
 }
 
 #[test]
-fn parse_and_build_open_branch_page() {
+fn open_branch_page_url() {
     for &(repo, expected) in &[
         (
             "https://github.com/user/repo.git",
@@ -131,7 +131,7 @@ fn parse_and_build_open_branch_page() {
 }
 
 #[test]
-fn parse_and_build_commit_page() {
+fn commit_page_url() {
     let p = Page::Commit {
         hash: "90601f1037142605a32426f9ece0c07d479b9cc5".to_string(),
     };
@@ -159,7 +159,7 @@ fn parse_and_build_commit_page() {
 }
 
 #[test]
-fn parse_and_build_diff_page() {
+fn diff_page_url() {
     for (ref op, ref opstr) in &[(DiffOp::TwoDots, ".."), (DiffOp::ThreeDots, "...")] {
         let p = Page::Diff {
             lhs: "561848bad7164d7568658456088b107ec9efd9f3".to_string(),
@@ -185,7 +185,7 @@ fn parse_and_build_diff_page() {
 }
 
 #[test]
-fn parse_and_build_diff_page_for_gitlab() {
+fn diff_page_for_gitlab_url() {
     fn page(op: DiffOp) -> Page {
         Page::Diff {
             lhs: "561848bad7164d7568658456088b107ec9efd9f3".to_string(),
@@ -212,7 +212,7 @@ fn parse_and_build_diff_page_for_gitlab() {
 }
 
 #[test]
-fn parse_and_build_diff_page_for_bitbucket() {
+fn diff_page_for_bitbucket_url() {
     let p = Page::Diff {
         lhs: "561848bad7164d7568658456088b107ec9efd9f3".to_string(),
         rhs: "90601f1037142605a32426f9ece0c07d479b9cc5".to_string(),
@@ -226,7 +226,7 @@ fn parse_and_build_diff_page_for_bitbucket() {
 }
 
 #[test]
-fn parse_and_build_file_page() {
+fn file_page_url() {
     let p = Page::FileOrDir {
         relative_path: Path::new("src")
             .join("main.rs")
@@ -259,7 +259,7 @@ fn parse_and_build_file_page() {
 }
 
 #[test]
-fn parse_and_build_file_page_with_line_number() {
+fn file_page_with_line_number_url() {
     let p = Page::FileOrDir {
         relative_path: Path::new("src")
             .join("main.rs")
@@ -292,7 +292,7 @@ fn parse_and_build_file_page_with_line_number() {
 }
 
 #[test]
-fn parse_and_build_file_page_with_line_range() {
+fn file_page_with_line_range_url() {
     let p = Page::FileOrDir {
         relative_path: Path::new("src")
             .join("main.rs")
@@ -404,7 +404,7 @@ fn broken_repo_url() {
 }
 
 #[test]
-fn parse_and_build_issue_number() {
+fn issue_number_url() {
     let p = Page::Issue { number: 123 };
     for &(repo, expected) in &[
         (
@@ -482,6 +482,7 @@ fn website_github_pages() {
 fn website_github_enterprise_pages() {
     let mut env = empty_env();
     env.ghe_url_host = Some("yourcompany-github.com".to_string());
+    env.https_proxy = https_proxy();
     let env = env;
 
     // TODO: Tests for the case where domain isolation is enabled are missing
@@ -525,7 +526,8 @@ fn website_gitlab_pages() {
 
 #[test]
 fn website_bitbucket_cloud() {
-    let env = empty_env();
+    let mut env = empty_env();
+    env.https_proxy = https_proxy();
     let testcases = &[
         (
             "https://bitbucket.org/rhysd/bar.git", // Fall back to user page
@@ -608,7 +610,7 @@ fn pull_request_unsupported_services() {
         let cfg = config_for_pr(None, url, None);
         match build_page_url(&OPEN_PR, &cfg).unwrap_err() {
             Error::PullReqNotSupported { .. } => { /* OK */ }
-            err => assert!(false, "Unexpected error: {}", err),
+            err => assert!(false, "Unexpected error for URL {}: {}", url, err),
         }
     }
 }
@@ -619,5 +621,47 @@ fn pull_request_github_enterprise_with_no_token() {
     match build_page_url(&OPEN_PR, &cfg).unwrap_err() {
         Error::GheTokenRequired => { /* OK */ }
         err => assert!(false, "Unexpected error: {}", err),
+    }
+}
+
+#[test]
+fn tab_page_for_github_and_gitlab() {
+    let hosts = &[
+        "github.com",
+        "github.yourcompany.com",
+        "gitlab.com",
+        "gitlab.yourcompany.com",
+    ];
+    let page = Page::Tag {
+        tagname: "tag".to_string(),
+        commit: "01234cdef".to_string(),
+    };
+    for host in hosts {
+        let expected = format!("https://{}/foo/bar/tree/tag", host);
+        for url in &[
+            format!("https://{}/foo/bar.git", host),
+            format!("ssh://git@{}:22/foo/bar.git", host),
+        ] {
+            let c = config(url, None, None);
+            let actual = build_page_url(&page, &c).unwrap();
+            assert_eq!(actual, expected, "{}", url);
+        }
+    }
+}
+
+#[test]
+fn tab_page_for_bitbucket() {
+    let page = Page::Tag {
+        tagname: "tag".to_string(),
+        commit: "01234cdef".to_string(),
+    };
+    let expected = "https://bitbucket.org/user/repo/commits/01234cdef";
+    for url in &[
+        "https://bitbucket.org/user/repo",
+        "ssh://git@bitbucket.org:22/user/repo.git",
+    ] {
+        let c = config(url, None, None);
+        let actual = build_page_url(&page, &c).unwrap();
+        assert_eq!(actual, expected, "{}", url);
     }
 }

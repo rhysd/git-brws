@@ -125,6 +125,10 @@ fn build_github_like_url<S: AsRef<str>>(
                 Ok(format!("https://{}/{}/{}", host, user, repo))
             }
         }
+        Page::Tag { ref tagname, .. } => Ok(format!(
+            "https://{}/{}/{}/tree/{}",
+            host, user, repo, tagname,
+        )),
         Page::Diff {
             ref lhs,
             ref rhs,
@@ -230,6 +234,12 @@ fn build_bitbucket_url(user: &str, repo: &str, cfg: &Config, page: &Page) -> Res
         Page::Commit { ref hash } => Ok(format!(
             "https://bitbucket.org/{}/{}/commits/{}",
             user, repo, hash,
+        )),
+        // On Bitbucket, there is no tag-specific page. However, unlike GitHub, bitbucket supports
+        // tag commit. Open the tag commit page instead.
+        Page::Tag { ref commit, .. } => Ok(format!(
+            "https://bitbucket.org/{}/{}/commits/{}",
+            user, repo, commit,
         )),
         Page::FileOrDir {
             ref relative_path,

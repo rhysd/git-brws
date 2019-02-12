@@ -375,3 +375,20 @@ fn setting_pull_request_returns_open_always() {
         }
     }
 }
+
+#[test]
+#[cfg_attr(feature = "on-ci", ignore)]
+fn parse_tag_ref() {
+    let c = config(
+        "https://github.com/rhysd/git-brws.git",
+        None,
+        vec!["0.10.0"],
+    );
+    match parse_page(&c).unwrap() {
+        Page::Tag { tagname, commit } => {
+            assert_eq!(&tagname, "0.10.0");
+            assert_eq!(&commit, "0b412dc7b223dd3a7fc16b6406e7b2cc866e3ed3");
+        }
+        page => assert!(false, "Unexpected parse result: {:?}", page),
+    }
+}

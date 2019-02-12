@@ -83,6 +83,8 @@
 <code>git brws</code> <var>file</var>...<br />
 <code>git brws</code> <var>file</var>#<var>lnum</var>...<br />
 <code>git brws</code> <var>branch</var><br />
+<code>git brws</code> <var>commit</var><br />
+<code>git brws</code> <var>tag</var><br />
 <code>git brws</code> <var>commit</var>..<var>commit</var><br />
 <code>git brws</code> <var>commit</var>...<var>commit</var><br />
 <code>git brws</code> --repo <var>repo</var><br />
@@ -102,6 +104,7 @@ in your web browser from command line. 'brws' is an abbreviation of 'browse'.</p
 <li><strong>Part of file</strong>: <a href="https://github.com/rhysd/git-brws/blob/38f46f1/Cargo.toml#L2-L10" target="_blank" rel="noopener">https://github.com/rhysd/git-brws/blob/38f46f1/Cargo.toml#L2-L10</a></li>
 <li><strong>Commit</strong>: <a href="https://github.com/rhysd/git-brws/commit/60024ab" target="_blank" rel="noopener">https://github.com/rhysd/git-brws/commit/60024ab</a></li>
 <li><strong>Diff</strong>: <a href="https://github.com/rhysd/git-brws/compare/e3c18d0..60024ab" target="_blank" rel="noopener">https://github.com/rhysd/git-brws/compare/e3c18d0..60024ab</a></li>
+<li><strong>Tag</strong> <a href="https://github.com/rhysd/git-brws/tree/0.10.0" target="_blank" rel="noopener">https://github.com/rhysd/git-brws/tree/0.10.0</a></li>
 <li><strong>Pull request</strong>: <a href="https://github.com/rust-lang/rust.vim/pull/290" target="_blank" rel="noopener">https://github.com/rust-lang/rust.vim/pull/290</a></li>
 <li><strong>Issue</strong>: <a href="https://github.com/rhysd/git-brws/issues/8" target="_blank" rel="noopener">https://github.com/rhysd/git-brws/issues/8</a></li>
 <li><strong>Website</strong>: <a href="https://rhysd.github.io/git-brws" target="_blank" rel="noopener">https://rhysd.github.io/git-brws</a></li>
@@ -200,6 +203,11 @@ Cloud)</p></dd>
 <h3 id="-HEAD-page-of-current-repository-">'HEAD' page of current repository.</h3>
 
 <pre><code>$ git brws HEAD
+</code></pre>
+
+<h3 id="0-10-0-tag-page-of-current-repository"><code>0.10.0</code> tag page of current repository</h3>
+
+<pre><code>$ git brws 0.10.0
 </code></pre>
 
 <h3 id="Diff-between-HEAD-and-HEAD-3-">Diff between 'HEAD' and 'HEAD~3'.</h3>

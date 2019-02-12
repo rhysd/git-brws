@@ -4,8 +4,8 @@ git brws
 [![Linux and macOS CI][travis-badge]][travis-ci]
 [![Windows CI][appveyor-badge]][appveyor]
 
-`git brws` is a command line tool to open a repository, file, commit, diff, pull request or issue in
-your web browser from command line. 'brws' is an abbreviation of 'browse'.
+`git brws` is a command line tool to open a repository, file, commit, diff, tag, pull request, issue
+or project's website in your web browser from command line. 'brws' is an abbreviation of 'browse'.
 
 Features:
 
@@ -14,6 +14,7 @@ Features:
   - File ([e.g.](https://github.com/rhysd/git-brws/blob/master/Cargo.toml))
   - Commit ([e.g.](https://github.com/rhysd/git-brws/commit/60024ab1280f9f10423b22bc708f3f6ef97db6b5))
   - Diff ([e.g.](https://github.com/rhysd/git-brws/compare/e3c18d0d50252112d37bde97061370204b3cdab7..60024ab1280f9f10423b22bc708f3f6ef97db6b5), [e.g.](https://github.com/rhysd/git-brws/compare/e3c18d0d50252112d37bde97061370204b3cdab7...60024ab1280f9f10423b22bc708f3f6ef97db6b5))
+  - Tag ([e.g.](https://github.com/rhysd/git-brws/tree/0.10.0))
   - Pull request (only for GitHub and GitHub Enterprise) ([e.g.](https://github.com/rust-lang/rust.vim/pull/290))
   - Issue ([e.g.](https://github.com/rhysd/git-brws/issues/8))
   - Website ([e.g.](https://rhysd.github.io/git-brws/))
@@ -30,7 +31,7 @@ Features:
 
 `git brws` is available on Linux, macOS and Windows.
 
-- With [Homebrew](https://brew.sh/)
+### With [Homebrew](https://brew.sh/)
 
 ```
 $ brew tap "rhysd/git-brws" "https://github.com/rhysd/git-brws"
@@ -40,13 +41,13 @@ $ brew install git-brws
 It installs `git-brws` to `/usr/local/bin` and `git-brws.1` to `/usr/local/share/man/man1`.
 This is recommended way for installation on macOS since updating to the new version is easy.
 
-- With [cargo](https://crates.io/)
+### With [cargo](https://crates.io/)
 
 ```
 $ cargo install git-brws
 ```
 
-- As a single executable binary
+### As a single executable binary
 
 Pre-built binary executables are available at [release page][] for macOS (64bit), Linux (64bit, 32bit)
 and Windows (64bit, 32bit). Download and unarchive the binary then put the executable in `$PATH`.
@@ -154,6 +155,14 @@ Note: The `L` can be omit.
 
 ```
 $ git brws HEAD
+```
+
+### Open a tag page
+
+- `0.10.0` tag page of current repository
+
+```
+$ git brws 0.10.0
 ```
 
 ### Open a diff page between commits

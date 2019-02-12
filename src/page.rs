@@ -47,6 +47,10 @@ pub enum Page {
     Issue {
         number: usize,
     },
+    Tag {
+        tagname: String,
+        commit: String,
+    },
 }
 
 struct BrowsePageParser<'a> {
@@ -55,25 +59,38 @@ struct BrowsePageParser<'a> {
 }
 
 impl<'a> BrowsePageParser<'a> {
+    fn wrong_number_of_args(&self, expected: ExpectedNumberOfArgs, kind: &str) -> Result<Page> {
+        Err(Error::WrongNumberOfArgs {
+            expected,
+            actual: self.cfg.args.len(),
+            kind: kind.to_string(),
+        })
+    }
+
     fn try_parse_commit(&self) -> Result<Page> {
         if self.cfg.args.len() != 1 {
-            return Err(Error::WrongNumberOfArgs {
-                expected: ExpectedNumberOfArgs::Single(1),
-                actual: self.cfg.args.len(),
-                kind: "commit".to_string(),
-            });
+            self.wrong_number_of_args(ExpectedNumberOfArgs::Single(1), "commit")
+        } else {
+            let hash = self.git.hash(&self.cfg.args[0])?;
+            Ok(Page::Commit { hash })
         }
-        let hash = self.git.hash(&self.cfg.args[0])?;
-        Ok(Page::Commit { hash })
+    }
+
+    fn try_parse_tag(&self) -> Result<Page> {
+        if self.cfg.args.len() != 1 {
+            self.wrong_number_of_args(ExpectedNumberOfArgs::Single(1), "tag name")
+        } else {
+            let hash = self.git.tag_hash(&self.cfg.args[0])?;
+            Ok(Page::Tag {
+                tagname: self.cfg.args[0].clone(),
+                commit: hash,
+            })
+        }
     }
 
     fn try_parse_diff(&self) -> Result<Page> {
         if self.cfg.args.len() != 1 {
-            return Err(Error::WrongNumberOfArgs {
-                expected: ExpectedNumberOfArgs::Single(1),
-                actual: self.cfg.args.len(),
-                kind: "diff".to_string(),
-            });
+            return self.wrong_number_of_args(ExpectedNumberOfArgs::Single(1), "diff");
         }
 
         let arg = &self.cfg.args[0];
@@ -147,11 +164,8 @@ impl<'a> BrowsePageParser<'a> {
     fn try_parse_file_or_dir(&self) -> Result<Page> {
         let len = self.cfg.args.len();
         if len != 1 && len != 2 {
-            return Err(Error::WrongNumberOfArgs {
-                expected: ExpectedNumberOfArgs::Range(1, 2),
-                actual: len,
-                kind: "file or directory".to_string(),
-            });
+            return self
+                .wrong_number_of_args(ExpectedNumberOfArgs::Range(1, 2), "file or directory");
         }
 
         let (path, line) = self.parse_path_and_line();
@@ -187,11 +201,7 @@ impl<'a> BrowsePageParser<'a> {
 
     fn try_parse_issue_number(&self) -> Result<Page> {
         if self.cfg.args.len() != 1 {
-            return Err(Error::WrongNumberOfArgs {
-                expected: ExpectedNumberOfArgs::Single(1),
-                actual: self.cfg.args.len(),
-                kind: "issue number".to_string(),
-            });
+            return self.wrong_number_of_args(ExpectedNumberOfArgs::Single(1), "issue number");
         }
 
         let arg = &self.cfg.args[0];
@@ -232,6 +242,11 @@ pub fn parse_page(cfg: &Config) -> Result<Page> {
     }
 
     match parser.try_parse_diff() {
+        Ok(p) => return Ok(p),
+        Err(msg) => attempts.push(msg),
+    }
+
+    match parser.try_parse_tag() {
         Ok(p) => return Ok(p),
         Err(msg) => attempts.push(msg),
     }

@@ -67,6 +67,11 @@ pub enum Error {
         args: Vec<OsString>,
     },
     UnexpectedRemoteName(String),
+    GitObjectNotFound {
+        kind: &'static str,
+        object: String,
+        msg: String,
+    },
     GitRootDirNotFound {
         git_dir: PathBuf,
     },
@@ -131,6 +136,8 @@ impl fmt::Display for Error {
                 }
                 write!(f, "` exited with non-zero status")
             }
+            Error::GitObjectNotFound{kind, object, msg} if msg.is_empty() => write!(f, "Git could not find {} '{}'", kind, object),
+            Error::GitObjectNotFound{kind, object, msg} => write!(f, "Git could not find {} '{}': {}", kind, object, msg),
             Error::GitRootDirNotFound{git_dir} => write!(f, "Cannot locate root directory from GIT_DIR {:?}", git_dir),
             Error::UnexpectedRemoteName(name) => write!(f, "Tracking name must be remote-url/branch-name: {}", name),
             Error::WrongNumberOfArgs{expected, actual, kind} => write!(f, "Invalid number of arguments for {}. {} is expected but given {}", kind, expected, actual),

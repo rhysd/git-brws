@@ -7,6 +7,8 @@ git-brws(1) -- open a repository, file, commit, diff, pull request or issue in y
 `git brws` <file>...<br>
 `git brws` <file>#<lnum>...<br>
 `git brws` <branch><br>
+`git brws` <commit><br>
+`git brws` <tag><br>
 `git brws` <commit>..<commit><br>
 `git brws` <commit>...<commit><br>
 `git brws` --repo <repo><br>
@@ -26,6 +28,7 @@ Example of pages which **git-brws** can open are:
 - **Part of file**: https://github.com/rhysd/git-brws/blob/38f46f1/Cargo.toml#L2-L10
 - **Commit**: https://github.com/rhysd/git-brws/commit/60024ab
 - **Diff**: https://github.com/rhysd/git-brws/compare/e3c18d0..60024ab
+- **Tag** https://github.com/rhysd/git-brws/tree/0.10.0
 - **Pull request**: https://github.com/rust-lang/rust.vim/pull/290
 - **Issue**: https://github.com/rhysd/git-brws/issues/8
 - **Website**: https://rhysd.github.io/git-brws
@@ -126,6 +129,10 @@ arguments. All are optional.
 ### 'HEAD' page of current repository.
 
     $ git brws HEAD
+
+### `0.10.0` tag page of current repository
+
+    $ git brws 0.10.0
 
 ### Diff between 'HEAD' and 'HEAD~3'.
 

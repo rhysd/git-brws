@@ -104,12 +104,9 @@ fn valid_remote_name() {
 #[test]
 fn invalid_remote_name() {
     match Parsed::from_iter(&["git-brws", "-R", "this-remote-is-never-existing"]).unwrap_err() {
-        Error::GitCommandError { stderr, .. } => {
-            assert!(
-                stderr.contains("Remote 'this-remote-is-never-existing' does not exist"),
-                "Unexpected error message: {}",
-                stderr
-            );
+        Error::GitObjectNotFound { kind, object, .. } => {
+            assert_eq!(kind, "remote");
+            assert_eq!(&object, "this-remote-is-never-existing");
         }
         e => assert!(false, "Unexpected error: {}", e),
     }
