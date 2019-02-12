@@ -3,6 +3,7 @@ extern crate serde;
 
 use crate::error::Result;
 use crate::git::Git;
+use std::env;
 use std::path::PathBuf;
 
 #[derive(Debug)]
@@ -40,6 +41,20 @@ pub struct EnvConfig {
     pub github_token: Option<String>,
     pub ghe_token: Option<String>,
     pub https_proxy: Option<String>,
+}
+
+impl EnvConfig {
+    pub fn with_global_env(mut self) -> Self {
+        if self.https_proxy.is_none() {
+            self.https_proxy = env::var("https_proxy")
+                .or_else(|_| env::var("HTTPS_PROXY"))
+                .ok();
+        }
+        if self.github_token.is_none() {
+            self.github_token = env::var("GITHUB_TOKEN").ok();
+        }
+        self
+    }
 }
 
 impl EnvConfig {
