@@ -124,7 +124,7 @@ impl fmt::Display for Error {
             Error::PullReqNotSupported {service} => write!(f, "--pr or -p does not support the service {}", service),
             Error::GitHubStatusFailure {status, msg} => write!(f, "GitHub API response status {}: {}", status, msg),
             Error::HttpClientError(err) => write!(f, "{}", err),
-            Error::IoError(err) => write!(f, "{}", err),
+            Error::IoError(err) => write!(f, "I/O error: {}. Note: Git command or current directory or file path may not exist", err),
             Error::GitCommandError{stderr, args} => {
                 if stderr.is_empty() {
                     write!(f, "`git")?;
