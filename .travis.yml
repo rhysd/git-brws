@@ -42,7 +42,11 @@ before_script:
 script:
   - export PKG_CONFIG_ALLOW_CROSS=1
   - cargo build --target $TARGET && file target/${TARGET}/debug/git-brws
-  - if [[ "${TARGET}" != "i686-unknown-linux-gnu" ]]; then cargo test --verbose --features="on-ci"; fi
+  - |
+    if [[ "${TARGET}" != "i686-unknown-linux-gnu" ]]; then
+        git fetch --unshallow
+        cargo test --verbose --features="on-ci"
+    fi
 
 notifications:
   email:

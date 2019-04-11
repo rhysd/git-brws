@@ -163,7 +163,6 @@ fn parse_commit_branch_ref() {
 }
 
 #[test]
-#[cfg_attr(feature = "on-ci", ignore)]
 fn parse_short_commit_hash() {
     for &(cm, expected) in &[
         ("499edbb", "499edbbbad4d8054e4a47e12944e5fb4a2ef7ec5"),
@@ -218,7 +217,6 @@ fn parse_diff_branch_spec() {
 }
 
 #[test]
-#[cfg_attr(feature = "on-ci", ignore)]
 fn parse_diff_revisions() {
     for &(arg, expected_op) in &[
         ("499edbb..bc869a1", DiffOp::TwoDots),
@@ -377,7 +375,6 @@ fn setting_pull_request_returns_open_always() {
 }
 
 #[test]
-#[cfg_attr(feature = "on-ci", ignore)]
 fn parse_tag_ref() {
     let c = config(
         "https://github.com/rhysd/git-brws.git",
