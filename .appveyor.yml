@@ -34,8 +34,12 @@ install:
 build: false
 
 test_script:
+  - git fetch origin master
+  - git checkout -b master
+  - git checkout -
+  - git rev-parse HEAD
   - cd "c:\\git-brws"
-  - cargo test --verbose --features="on-ci"
+  - cargo test --verbose
   - cargo build
 
 before_deploy:

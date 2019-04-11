@@ -151,7 +151,6 @@ fn parse_commit_ref() {
 }
 
 #[test]
-#[cfg_attr(feature = "on-ci", ignore)]
 fn parse_commit_branch_ref() {
     for spec in &["master", "master@{1month}"] {
         let c = config("https://github.com/user/repo.git", None, vec![spec]);
@@ -198,7 +197,6 @@ fn parse_diff_ref_name() {
 }
 
 #[test]
-#[cfg_attr(feature = "on-ci", ignore)]
 fn parse_diff_branch_spec() {
     for &(arg, expected_op) in &[
         ("master...HEAD", DiffOp::ThreeDots),
