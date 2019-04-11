@@ -45,7 +45,7 @@ script:
     if [[ "${TARGET}" != "i686-unknown-linux-gnu" ]]; then
         git fetch --unshallow
         git fetch origin master
-        git checkout -b master
+        git checkout -b master || true
         git checkout $TRAVIS_BRANCH
         git rev-parse HEAD
         cargo test --verbose

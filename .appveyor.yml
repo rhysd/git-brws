@@ -35,7 +35,7 @@ build: false
 
 test_script:
   - git fetch origin master
-  - git checkout -b master
+  - git checkout -b master || true
   - git checkout -
   - git rev-parse HEAD
   - cd "c:\\git-brws"
