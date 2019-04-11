@@ -4,7 +4,7 @@ dist: xenial
 
 env:
   global:
-    - RUST_STACKTRACE=full
+    - RUST_BACKTRACE: full
 
 matrix:
   include:
