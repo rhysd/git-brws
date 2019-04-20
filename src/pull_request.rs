@@ -72,7 +72,7 @@ fn find_github_pr_url_for_branch<B: AsRef<str>>(
     }
 }
 
-pub fn find_url(endpoint: &str, author: &str, repo: &str, cfg: &Config) -> Result<Page> {
+pub fn find_page(endpoint: &str, author: &str, repo: &str, cfg: &Config) -> Result<Page> {
     match cfg.branch {
         Some(ref b) => find_github_pr_url_for_branch(b, endpoint, author, repo, &cfg.env),
         None => {
