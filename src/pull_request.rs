@@ -4,6 +4,7 @@ use crate::config::{Config, EnvConfig};
 use crate::error::{Error, Result};
 use crate::github_api;
 
+#[derive(PartialEq, Debug)]
 pub enum Page {
     Existing { url: String },
     New { author: String, repo: String },

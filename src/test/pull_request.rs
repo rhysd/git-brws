@@ -1,6 +1,5 @@
 use crate::config::{Config, EnvConfig};
-use crate::error::Error;
-use crate::pull_request::find_url;
+use crate::pull_request::{find_url, Page};
 use crate::test::helper;
 use std::fs;
 use std::path::Path;
@@ -33,44 +32,47 @@ fn config(branch: Option<&str>, env: EnvConfig) -> Config {
 #[test]
 fn test_find_pr_within_orig_repo() {
     let cfg = config(Some("async-eventloop"), env!());
-    let url = find_url("api.github.com", "rhysd", "vim.wasm", &cfg).unwrap();
-    assert_eq!(url.as_str(), "https://github.com/rhysd/vim.wasm/pull/10");
+    let page = find_url("api.github.com", "rhysd", "vim.wasm", &cfg).unwrap();
+    assert_eq!(
+        page,
+        Page::Existing {
+            url: "https://github.com/rhysd/vim.wasm/pull/10".to_string(),
+        },
+    );
 }
 
 #[test]
 fn test_find_pr_from_fork_repo_url() {
     let cfg = config(Some("async-contextual-keyword"), env!());
-    let url = find_url("api.github.com", "rhysd", "rust.vim", &cfg).unwrap();
+    let page = find_url("api.github.com", "rhysd", "rust.vim", &cfg).unwrap();
     assert_eq!(
-        url.as_str(),
-        "https://github.com/rust-lang/rust.vim/pull/290"
+        page,
+        Page::Existing {
+            url: "https://github.com/rust-lang/rust.vim/pull/290".to_string(),
+        },
     );
 }
 
 #[test]
 fn test_find_pr_from_original_repo_url() {
     let cfg = config(Some("async-contextual-keyword"), env!());
-    let url = find_url("api.github.com", "rust-lang", "rust.vim", &cfg).unwrap();
+    let page = find_url("api.github.com", "rust-lang", "rust.vim", &cfg).unwrap();
     assert_eq!(
-        url.as_str(),
-        "https://github.com/rust-lang/rust.vim/pull/290"
+        page,
+        Page::Existing {
+            url: "https://github.com/rust-lang/rust.vim/pull/290".to_string(),
+        },
     );
 }
 
 #[test]
 fn test_no_pr_found() {
     let cfg = config(Some("unknown-branch-which-does-not-exist-for-test"), env!());
-    match find_url("api.github.com", "rhysd", "git-brws", &cfg) {
-        Ok(v) => assert!(false, "Unexpected success: {}", v),
-        Err(Error::GitHubPullReqNotFound {
-            author,
-            repo,
-            branch,
-        }) => {
-            assert_eq!(author, "rhysd");
-            assert_eq!(repo, "git-brws");
-            assert_eq!(branch, "unknown-branch-which-does-not-exist-for-test");
-        }
-        v => assert!(false, "Unexpected success or error: {:?}", v),
-    }
+    assert_eq!(
+        find_url("api.github.com", "rhysd", "git-brws", &cfg).unwrap(),
+        Page::New {
+            author: "rhysd".to_string(),
+            repo: "git-brws".to_string(),
+        },
+    );
 }

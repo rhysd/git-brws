@@ -574,10 +574,6 @@ fn pull_request_page_url_retrieving_branch_from_git_dir() {
                 url
             );
         }
-        Err(Error::GitHubPullReqNotFound { author, repo, .. }) => {
-            assert_eq!(&author, "rhysd");
-            assert_eq!(&repo, "git-brws");
-        }
         result => assert!(false, "Unexpected result: {:?}", result),
     }
 }
