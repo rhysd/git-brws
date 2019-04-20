@@ -6,8 +6,15 @@ use crate::github_api;
 
 #[derive(PartialEq, Debug)]
 pub enum Page {
-    Existing { url: String },
-    New { author: String, repo: String },
+    Existing {
+        url: String,
+    },
+    New {
+        author: String,
+        repo: String,
+        default_branch: String,
+        branch: String,
+    },
 }
 
 fn find_github_pr_url_for_branch<B: AsRef<str>>(
@@ -36,7 +43,11 @@ fn find_github_pr_url_for_branch<B: AsRef<str>>(
         return Ok(Page::Existing { url });
     }
 
-    if let Some((owner, repo)) = client.parent_repo(author, repo)? {
+    let fetched_repo = client.repo(author, repo)?;
+    if let Some(parent) = fetched_repo.parent {
+        let owner = parent.owner.login;
+        let repo = parent.name;
+
         // Note: Search pull request URL in the case where the repository was forked from original.
         // Author should be set since other person may create another pull request with the same branch name.
         if let Some(url) =
@@ -46,13 +57,17 @@ fn find_github_pr_url_for_branch<B: AsRef<str>>(
         } else {
             Ok(Page::New {
                 author: owner,
-                repo: repo.to_string(),
+                repo,
+                default_branch: parent.default_branch,
+                branch: branch.to_string(),
             })
         }
     } else {
         Ok(Page::New {
             author: author.to_string(),
             repo: repo.to_string(),
+            default_branch: fetched_repo.default_branch,
+            branch: branch.to_string(),
         })
     }
 }

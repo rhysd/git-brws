@@ -6,17 +6,19 @@ use reqwest::{header, Proxy, StatusCode};
 use std::mem;
 
 #[derive(Debug, Deserialize)]
-struct ParentRepoOwner {
-    login: String,
+pub struct ParentRepoOwner {
+    pub login: String,
 }
 #[derive(Debug, Deserialize)]
-struct ParentRepo {
-    name: String,
-    owner: ParentRepoOwner,
+pub struct ParentRepo {
+    pub name: String,
+    pub owner: ParentRepoOwner,
+    pub default_branch: String,
 }
 #[derive(Debug, Deserialize)]
-struct RepoForParent {
-    parent: Option<ParentRepo>,
+pub struct Repo {
+    pub parent: Option<ParentRepo>,
+    pub default_branch: String,
 }
 
 #[derive(Debug, Deserialize)]
@@ -116,7 +118,7 @@ impl Client {
         }
     }
 
-    pub fn parent_repo<S, T>(&self, author: S, repo: T) -> Result<Option<(String, String)>>
+    pub fn repo<S, T>(&self, author: S, repo: T) -> Result<Repo>
     where
         S: AsRef<str>,
         T: AsRef<str>,
@@ -126,12 +128,8 @@ impl Client {
         let url = format!("https://{}/repos/{}/{}", self.endpoint, author, repo);
         let req = self.client.get(url.as_str());
         let mut res = self.send(req)?;
-        let repo: RepoForParent = res.json()?;
-
-        match repo.parent {
-            Some(p) => Ok(Some((p.owner.login, p.name))),
-            None => Ok(None),
-        }
+        let repo: Repo = res.json()?;
+        Ok(repo)
     }
 
     pub fn most_popular_repo_by_name<S: AsRef<str>>(&self, name: S) -> Result<SearchedRepo> {

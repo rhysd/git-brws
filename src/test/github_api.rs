@@ -45,25 +45,25 @@ fn no_pr_found() {
 #[test]
 fn find_parent() {
     let client = Client::build("api.github.com", skip_if_no_token!(), &https_proxy()).unwrap();
-    let parent = client.parent_repo("rhysd", "rust.vim").unwrap();
-    assert_eq!(
-        parent,
-        Some(("rust-lang".to_string(), "rust.vim".to_string())),
-    );
+    let repo = client.repo("rhysd", "rust.vim").unwrap();
+    let parent = repo.parent.unwrap();
+    assert_eq!(parent.name, "rust.vim");
+    assert_eq!(parent.owner.login, "rust-lang");
+    assert_eq!(parent.default_branch, "master");
 }
 
 #[test]
 fn parent_not_found() {
     let client = Client::build("api.github.com", skip_if_no_token!(), &https_proxy()).unwrap();
-    let parent = client.parent_repo("rhysd", "git-brws").unwrap();
-    assert_eq!(parent, None);
+    let parent = client.repo("rhysd", "git-brws").unwrap().parent;
+    assert!(parent.is_none());
 }
 
 #[test]
 fn request_failure() {
     let client =
         Client::build("unknown.endpoint.example.com", None::<&str>, &None::<&str>).unwrap();
-    match client.parent_repo("rhysd", "git-brws") {
+    match client.repo("rhysd", "git-brws") {
         Ok(_) => assert!(false, "request succeeded"),
         Err(Error::HttpClientError(..)) => { /* ok */ }
         Err(e) => assert!(false, "unexpected error: {}", e),

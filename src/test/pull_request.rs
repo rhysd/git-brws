@@ -68,11 +68,17 @@ fn test_find_pr_from_original_repo_url() {
 #[test]
 fn test_no_pr_found() {
     let cfg = config(Some("unknown-branch-which-does-not-exist-for-test"), env!());
-    assert_eq!(
-        find_url("api.github.com", "rhysd", "git-brws", &cfg).unwrap(),
+    match find_url("api.github.com", "rhysd", "git-brws", &cfg).unwrap() {
         Page::New {
-            author: "rhysd".to_string(),
-            repo: "git-brws".to_string(),
-        },
-    );
+            author,
+            repo,
+            default_branch,
+            ..
+        } => {
+            assert_eq!(author, "rhysd");
+            assert_eq!(repo, "git-brws");
+            assert_eq!(default_branch, "master");
+        }
+        p => assert!(false, "{:?}", p),
+    }
 }
