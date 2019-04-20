@@ -111,7 +111,12 @@ fn build_github_like_url<S: AsRef<str>>(
             pull_request: true, ..
         } => {
             if let Some(endpoint) = api_endpoint {
-                pull_request::find_url(endpoint.as_ref(), user, repo, cfg)
+                match pull_request::find_url(endpoint.as_ref(), user, repo, cfg)? {
+                    pull_request::Page::Existing { url } => Ok(url),
+                    pull_request::Page::New { author, repo } => {
+                        Ok(format!("https://{}/{}/{}/pulls", host, author, repo))
+                    }
+                }
             } else {
                 Err(Error::PullReqNotSupported {
                     service: host.to_string(),

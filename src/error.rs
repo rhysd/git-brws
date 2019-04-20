@@ -44,11 +44,6 @@ pub enum Error {
     UnknownHostingService {
         url: String,
     },
-    GitHubPullReqNotFound {
-        author: String,
-        repo: String,
-        branch: String,
-    },
     BrokenUrl {
         url: String,
         msg: String,
@@ -119,7 +114,6 @@ impl fmt::Display for Error {
             Error::NoUserInPath{path} => write!(f, "Can't detect user name from path {}", path),
             Error::NoRepoInPath{path} => write!(f, "Can't detect repository name from path {}", path),
             Error::UnknownHostingService {url} => write!(f, "Unknown hosting service for URL {}. If you want to use custom URL for GitHub Enterprise, please set $GIT_BRWS_GHE_URL_HOST", url),
-            Error::GitHubPullReqNotFound{author, repo, branch} => write!(f, "No pull request authored by @{} at {}@{}", author, repo, branch),
             Error::BrokenUrl {url, msg} => write!(f, "Broken URL '{}': {}", url, msg),
             Error::PullReqNotSupported {service} => write!(f, "--pr or -p does not support the service {}", service),
             Error::GitHubStatusFailure {status, msg} => write!(f, "GitHub API response status {}: {}", status, msg),
