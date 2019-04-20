@@ -39,7 +39,8 @@ test_script:
   - git checkout -
   - git rev-parse HEAD
   - cd "c:\\git-brws"
-  - cargo test --verbose
+  - |
+    if "%TARGET%" == "x86_64-pc-windows-msvc" cargo test --verbose
   - cargo build
 
 before_deploy:
