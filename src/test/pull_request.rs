@@ -66,18 +66,38 @@ fn test_find_pr_from_original_repo_url() {
 }
 
 #[test]
-fn test_no_pr_found() {
+fn test_no_pr_found_at_own_repo() {
     let cfg = config(Some("unknown-branch-which-does-not-exist-for-test"), env!());
     match find_url("api.github.com", "rhysd", "git-brws", &cfg).unwrap() {
         Page::New {
             author,
             repo,
             default_branch,
-            ..
+            branch,
         } => {
             assert_eq!(author, "rhysd");
             assert_eq!(repo, "git-brws");
             assert_eq!(default_branch, "master");
+            assert_eq!(branch, "unknown-branch-which-does-not-exist-for-test")
+        }
+        p => assert!(false, "{:?}", p),
+    }
+}
+
+#[test]
+fn test_no_pr_found_at_parent_repo() {
+    let cfg = config(Some("unknown-branch-which-does-not-exist-for-test"), env!());
+    match find_url("api.github.com", "rhysd", "rust.vim", &cfg).unwrap() {
+        Page::New {
+            author,
+            repo,
+            default_branch,
+            branch,
+        } => {
+            assert_eq!(author, "rust-lang");
+            assert_eq!(repo, "rust.vim");
+            assert_eq!(default_branch, "master");
+            assert_eq!(branch, "unknown-branch-which-does-not-exist-for-test")
         }
         p => assert!(false, "{:?}", p),
     }

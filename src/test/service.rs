@@ -558,6 +558,36 @@ fn pull_request_page_url_with_branch() {
 }
 
 #[test]
+fn pull_request_create_page_url_at_own_repo() {
+    let cfg = config_for_pr(
+        skip_if_no_token!(),
+        "https://github.com/rhysd/git-brws.git",
+        Some("this-branch-never-existing"),
+    );
+
+    let url = build_page_url(&OPEN_PR, &cfg).unwrap();
+    assert_eq!(
+        &url,
+        "https://github.com/rhysd/git-brws/compare/master...this-branch-never-existing"
+    );
+}
+
+#[test]
+fn pull_request_create_page_url_at_parent_repo() {
+    let cfg = config_for_pr(
+        skip_if_no_token!(),
+        "https://github.com/rhysd/rust.vim.git",
+        Some("this-branch-never-existing"),
+    );
+
+    let url = build_page_url(&OPEN_PR, &cfg).unwrap();
+    assert_eq!(
+        &url,
+        "https://github.com/rust-lang/rust.vim/compare/master...this-branch-never-existing"
+    );
+}
+
+#[test]
 fn pull_request_page_url_retrieving_branch_from_git_dir() {
     let cfg = config_for_pr(
         skip_if_no_token!(),
