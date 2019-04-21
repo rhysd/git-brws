@@ -102,7 +102,7 @@ arguments. All are optional.
 
     $ git brws -r rhysd/Shiba
 
-### Most popular `react` repository on GitHub
+### Most popular 'react' repository on GitHub
 
     $ git brws -r react
 
@@ -130,7 +130,7 @@ arguments. All are optional.
 
     $ git brws HEAD
 
-### `0.10.0` tag page of current repository
+### '0.10.0' tag page of current repository
 
     $ git brws 0.10.0
 
@@ -154,6 +154,9 @@ In addition to '..', diff with '...' is supported.
 ### Pull request page of current branch of current repository.
 
     $ git brws --pr
+
+Note: When a pull request page for current branch is not existing yet, it opens
+'Create Pull Request' page instead.
 
 ### Pull request page of specific branch of specific repository.
 

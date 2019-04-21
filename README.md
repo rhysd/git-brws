@@ -201,6 +201,9 @@ Note: Only GitHub and GitHub Enterprise support `...`. For GitLab, only `...` is
 $ git brws --pr
 ```
 
+Note: When a pull request page for current branch is not existing yet, it opens 'Create Pull Request'
+page instead.
+
 - Pull request page of specific branch of specific repository
 
 ```
