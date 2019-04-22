@@ -3,27 +3,28 @@ extern crate url;
 use crate::config::{Config, EnvConfig};
 use crate::error::{Error, Result};
 use crate::github_api;
+use std::borrow::Cow;
 
 #[derive(PartialEq, Debug)]
-pub enum Page {
+pub enum Page<'a, 'b> {
     Existing {
         url: String,
     },
     New {
-        author: String,
-        repo: String,
+        author: Cow<'a, str>,
+        repo: Cow<'b, str>,
         default_branch: String,
         branch: String,
     },
 }
 
-fn find_github_pr_url_for_branch<B: AsRef<str>>(
+fn find_github_pr_url_for_branch<'a, 'b, B: AsRef<str>>(
     branch: B,
     endpoint: &str,
-    author: &str,
-    repo: &str,
+    author: &'a str,
+    repo: &'b str,
     env: &EnvConfig,
-) -> Result<Page> {
+) -> Result<Page<'a, 'b>> {
     let branch = branch.as_ref();
     let token = if endpoint == "api.github.com" {
         &env.github_token
@@ -56,23 +57,28 @@ fn find_github_pr_url_for_branch<B: AsRef<str>>(
             Ok(Page::Existing { url })
         } else {
             Ok(Page::New {
-                author: owner,
-                repo,
+                author: Cow::Owned(owner),
+                repo: Cow::Owned(repo),
                 default_branch: parent.default_branch,
                 branch: branch.to_string(),
             })
         }
     } else {
         Ok(Page::New {
-            author: author.to_string(),
-            repo: repo.to_string(),
+            author: Cow::Borrowed(author),
+            repo: Cow::Borrowed(repo),
             default_branch: fetched_repo.default_branch,
             branch: branch.to_string(),
         })
     }
 }
 
-pub fn find_page(endpoint: &str, author: &str, repo: &str, cfg: &Config) -> Result<Page> {
+pub fn find_page<'a, 'b>(
+    endpoint: &str,
+    author: &'a str,
+    repo: &'b str,
+    cfg: &Config,
+) -> Result<Page<'a, 'b>> {
     match cfg.branch {
         Some(ref b) => find_github_pr_url_for_branch(b, endpoint, author, repo, &cfg.env),
         None => {
