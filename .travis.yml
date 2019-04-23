@@ -76,3 +76,5 @@ deploy:
     # Only deploy tagged commit
     tags: true
 
+# Caches $HOME/.cargo and $TRAVIS_BUILD_DIR/target.
+cache: cargo
