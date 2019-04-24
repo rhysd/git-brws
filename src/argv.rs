@@ -162,6 +162,7 @@ impl Parsed {
             "website",
             "Open website page instead of repository page (homepage URL for GitHub, GitLab pages, Bitbucket Cloud)",
         );
+        opts.optflag("B", "blame", "Open blame page instead of repository page");
         opts.optflag("h", "help", "Print this help");
         opts.optflag("v", "version", "Show version");
 
@@ -215,6 +216,7 @@ impl Parsed {
             stdout: matches.opt_present("u"),
             pull_request: matches.opt_present("p"),
             website: matches.opt_present("w"),
+            blame: matches.opt_present("B"),
             args: matches.free,
             env,
         }))

@@ -43,6 +43,7 @@ pub enum Page {
         relative_path: String,
         hash: String,
         line: Option<Line>,
+        blame: bool,
     },
     Issue {
         number: usize,
@@ -196,6 +197,7 @@ impl<'a> BrowsePageParser<'a> {
             relative_path,
             hash,
             line,
+            blame: self.cfg.blame,
         })
     }
 
@@ -239,6 +241,10 @@ pub fn parse_page(cfg: &Config) -> Result<Page> {
     match parser.try_parse_file_or_dir() {
         Ok(p) => return Ok(p),
         Err(msg) => attempts.push(("File or dir", msg)),
+    }
+
+    if cfg.blame {
+        return Err(Error::BlameWithoutFilePath);
     }
 
     match parser.try_parse_diff() {

@@ -31,6 +31,7 @@ fn config(repo: &str, branch: Option<&str>, env: Option<EnvConfig>) -> Config {
         stdout: false,
         pull_request: false,
         website: false,
+        blame: false,
         env: env.unwrap_or_else(empty_env),
     }
 }
@@ -53,6 +54,7 @@ fn config_for_pr(token: Option<String>, repo: &str, branch: Option<&str>) -> Con
         stdout: false,
         pull_request: true,
         website: false,
+        blame: false,
         env,
     }
 }
@@ -234,6 +236,7 @@ fn file_page_url() {
             .into_owned(),
         hash: "561848bad7164d7568658456088b107ec9efd9f3".to_string(),
         line: None,
+        blame: false,
     };
     for &(repo, expected) in &[
         (
@@ -267,6 +270,7 @@ fn file_page_with_line_number_url() {
             .into_owned(),
         hash: "561848bad7164d7568658456088b107ec9efd9f3".to_string(),
         line: Some(Line::At(12)),
+        blame: false,
     };
     for &(repo, expected) in &[
         (
@@ -300,6 +304,7 @@ fn file_page_with_line_range_url() {
             .into_owned(),
         hash: "561848bad7164d7568658456088b107ec9efd9f3".to_string(),
         line: Some(Line::Range(1, 2)),
+        blame: false,
     };
     for &(repo, expected) in &[
         (

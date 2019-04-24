@@ -17,6 +17,7 @@ fn config(repo: &str, branch: Option<&str>, args: Vec<&str>) -> Config {
         stdout: false,
         pull_request: false,
         website: false,
+        blame: false,
         env: empty_env(),
     }
 }
@@ -80,12 +81,32 @@ fn parse_file_or_dir() {
                 relative_path,
                 hash,
                 line: None,
+                blame,
             } => {
                 assert_eq!(relative_path, relative.to_str().unwrap());
                 assert!(!hash.is_empty());
+                assert!(!blame);
             }
             p => assert!(false, "Unexpected result: {:?}", p),
         }
+    }
+}
+
+#[test]
+fn parse_file_or_dir_for_blame() {
+    let entry = Path::new(".").join("README.md");
+
+    let mut c = config(
+        "https://github.com/user/repo.git",
+        None,
+        vec![&entry.to_str().unwrap()],
+    );
+    c.blame = true;
+    let c = c;
+
+    match parse_page(&c).unwrap() {
+        Page::FileOrDir { blame, .. } => assert!(blame),
+        p => assert!(false, "Unexpected result: {:?}", p),
     }
 }
 
@@ -385,5 +406,17 @@ fn parse_tag_ref() {
             assert_eq!(&commit, "0b412dc7b223dd3a7fc16b6406e7b2cc866e3ed3");
         }
         page => assert!(false, "Unexpected parse result: {:?}", page),
+    }
+}
+
+#[test]
+fn parse_blame_without_file_path() {
+    let mut c = config("https://github.com/user/repo.git", None, vec![]);
+    c.blame = true;
+    let c = c;
+
+    match parse_page(&c) {
+        Err(Error::BlameWithoutFilePath) => { /* ok */ }
+        r => assert!(false, "Unexpected result: {:?}", r),
     }
 }
