@@ -201,9 +201,6 @@ Note: Only GitHub and GitHub Enterprise support `...`. For GitLab, only `...` is
 $ git brws --pr
 ```
 
-Note: When a pull request page for current branch is not existing yet, it opens 'Create Pull Request'
-page instead.
-
 - Pull request page of specific branch of specific repository
 
 ```
@@ -218,6 +215,9 @@ Note: Currently only GitHub and GitHub Enterprise are supported.
 
 Note: If you have created multiple pull requests at the same repository with the same branch name,
 the command may not open a pull request page you want.
+
+Note: When a pull request page for current branch is not existing yet, it opens 'Create Pull Request'
+page instead.
 
 ### Open a website for the repository
 
