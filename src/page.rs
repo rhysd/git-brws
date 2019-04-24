@@ -221,6 +221,10 @@ pub fn parse_page(cfg: &Config) -> Result<Page> {
 
     // Note: Ignore any arguments when opening a website
     if cfg.args.is_empty() || cfg.website || cfg.pull_request {
+        if cfg.blame {
+            return Err(Error::BlameWithoutFilePath);
+        }
+
         return Ok(Page::Open {
             website: cfg.website,
             pull_request: cfg.pull_request,

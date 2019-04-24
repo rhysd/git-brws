@@ -153,7 +153,7 @@ impl fmt::Display for Error {
             Error::NoSearchResult{query} => write!(f, "No repository was hit for query '{}'", query),
             Error::ArgsNotAllowed{flag, args} => write!(f, "{} option does not allow any command line argument. It opens page based on {{repo}}, but argument(s) {:?} retrives information from local directory.", flag, args),
             Error::GheTokenRequired => write!(f, "GitHub Enterprise requires API token. Please set $GIT_BRWS_GHE_TOKEN"),
-            Error::BlameWithoutFilePath => write!(f, "Blame requires file path"),
+            Error::BlameWithoutFilePath => write!(f, "File path is not given to blame"),
         }
     }
 }

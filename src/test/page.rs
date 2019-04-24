@@ -411,12 +411,14 @@ fn parse_tag_ref() {
 
 #[test]
 fn parse_blame_without_file_path() {
-    let mut c = config("https://github.com/user/repo.git", None, vec![]);
-    c.blame = true;
-    let c = c;
+    for args in &[vec![], vec!["0.10.0"]] {
+        let mut c = config("https://github.com/user/repo.git", None, args.clone());
+        c.blame = true;
+        let c = c;
 
-    match parse_page(&c) {
-        Err(Error::BlameWithoutFilePath) => { /* ok */ }
-        r => assert!(false, "Unexpected result: {:?}", r),
+        match parse_page(&c) {
+            Err(Error::BlameWithoutFilePath) => { /* ok */ }
+            r => assert!(false, "Unexpected result: {:?}", r),
+        }
     }
 }
