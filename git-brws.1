@@ -42,7 +42,7 @@
 .br
 .
 .SH "DESCRIPTION"
-\fBgit\-brws\fR is a command line tool to open a repository, file, commit, diff, pull request or issue in your web browser from command line\. \'brws\' is an abbreviation of \'browse\'\.
+\fBgit\-brws\fR is a command line tool to open a repository, file, commit, diff, tag, blame, pull request, issue or project\'s website in your web browser from command line\. \'brws\' is an abbreviation of \'browse\'\.
 .
 .P
 Example of pages which \fBgit\-brws\fR can open are:
@@ -73,6 +73,9 @@ Example of pages which \fBgit\-brws\fR can open are:
 .
 .IP "\(bu" 4
 \fBWebsite\fR: https://rhysd\.github\.io/git\-brws
+.
+.IP "\(bu" 4
+\fBBlame\fR: https://github\.com/rhysd/git\-brws/blame/9ab093f/src/service\.rs
 .
 .IP "" 0
 .
@@ -128,6 +131,10 @@ Open pull request page instead of repository page\.
 Open website page instead of repository page (homepage URL for GitHub, GitLab pages, Bitbucket Cloud)
 .
 .TP
+\fB\-B\fR, \fB\-\-blame\fR
+Open blame page instead of repository page\. File path to blame must be passed also\.
+.
+.TP
 \fB\-h\fR, \fB\-\-help\fR
 Print this help\.
 .
@@ -169,7 +176,7 @@ $ git brws \-r rhysd/Shiba
 .
 .fi
 .
-.SS "Most popular <code>react</code> repository on GitHub"
+.SS "Most popular \'react\' repository on GitHub"
 .
 .nf
 
@@ -328,6 +335,30 @@ $ git brws \'#8\'
 .
 .P
 \fINote:\fR \'#\' is usually used for a line comment in major shells\. Please quote the argument
+.
+.SS "Blame a file"
+.
+.nf
+
+$ git brws \-\-blame some/file\.txt
+.
+.fi
+.
+.SS "Blame specific line of a file"
+.
+.nf
+
+$ git brws \-\-blame some/file\.txt#L5
+.
+.fi
+.
+.SS "Blame specific range of a file"
+.
+.nf
+
+$ git brws \-\-blame some/file\.txt#L5\-L9
+.
+.fi
 .
 .SH "ENVIRONMENT"
 .

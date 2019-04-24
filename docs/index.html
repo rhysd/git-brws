@@ -93,8 +93,9 @@
 
 <h2 id="DESCRIPTION">DESCRIPTION</h2>
 
-<p><strong>git-brws</strong> is a command line tool to open a repository, file, commit, diff, pull request or issue
-in your web browser from command line. 'brws' is an abbreviation of 'browse'.</p>
+<p><strong>git-brws</strong> is a command line tool to open a repository, file, commit, diff, tag, blame, pull
+request, issue or project's website in your web browser from command line. 'brws' is an
+abbreviation of 'browse'.</p>
 
 <p>Example of pages which <strong>git-brws</strong> can open are:</p>
 
@@ -108,6 +109,7 @@ in your web browser from command line. 'brws' is an abbreviation of 'browse'.</p
 <li><strong>Pull request</strong>: <a href="https://github.com/rust-lang/rust.vim/pull/290" target="_blank" rel="noopener">https://github.com/rust-lang/rust.vim/pull/290</a></li>
 <li><strong>Issue</strong>: <a href="https://github.com/rhysd/git-brws/issues/8" target="_blank" rel="noopener">https://github.com/rhysd/git-brws/issues/8</a></li>
 <li><strong>Website</strong>: <a href="https://rhysd.github.io/git-brws" target="_blank" rel="noopener">https://rhysd.github.io/git-brws</a></li>
+<li><strong>Blame</strong>: <a href="https://github.com/rhysd/git-brws/blame/9ab093f/src/service.rs" target="_blank" rel="noopener">https://github.com/rhysd/git-brws/blame/9ab093f/src/service.rs</a></li>
 </ul>
 
 
@@ -144,6 +146,7 @@ branch tracks no branch, it falls back to 'origin'.</p></dd>
 <dt><code>-p</code>, <code>--pr</code></dt><dd><p>Open pull request page instead of repository page.</p></dd>
 <dt><code>-w</code>, <code>--website</code></dt><dd><p>Open website page instead of repository page (homepage URL for GitHub, GitLab pages, Bitbucket
 Cloud)</p></dd>
+<dt><code>-B</code>, <code>--blame</code></dt><dd><p>Open blame page instead of repository page. File path to blame must be passed also.</p></dd>
 <dt><code>-h</code>, <code>--help</code></dt><dd><p>Print this help.</p></dd>
 <dt><code>-v</code>, <code>--version</code></dt><dd><p>Show version.</p></dd>
 </dl>
@@ -171,7 +174,7 @@ Cloud)</p></dd>
 <pre><code>$ git brws -r rhysd/Shiba
 </code></pre>
 
-<h3 id="Most-popular-react-repository-on-GitHub">Most popular <code>react</code> repository on GitHub</h3>
+<h3 id="Most-popular-react-repository-on-GitHub">Most popular 'react' repository on GitHub</h3>
 
 <pre><code>$ git brws -r react
 </code></pre>
@@ -278,6 +281,21 @@ depending on your GitHub Enterprise configuration of subdomain isolation</li>
 </code></pre>
 
 <p><em>Note:</em> '#' is usually used for a line comment in major shells. Please quote the argument</p>
+
+<h3 id="Blame-a-file">Blame a file</h3>
+
+<pre><code>$ git brws --blame some/file.txt
+</code></pre>
+
+<h3 id="Blame-specific-line-of-a-file">Blame specific line of a file</h3>
+
+<pre><code>$ git brws --blame some/file.txt#L5
+</code></pre>
+
+<h3 id="Blame-specific-range-of-a-file">Blame specific range of a file</h3>
+
+<pre><code>$ git brws --blame some/file.txt#L5-L9
+</code></pre>
 
 <h2 id="ENVIRONMENT">ENVIRONMENT</h2>
 
