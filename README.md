@@ -70,12 +70,13 @@ Options:
                         from GitHub
     -b, --branch BRANCH Branch name to browse. Default value is current branch
     -d, --dir PATH      Directory path to the repository. Default value is
-                        current working directory.
+                        current working directory
     -R, --remote REMOTE Remote name (e.g. origin). Default value is a remote
-                        the current branch is tracking. If current
-                        branch tracks no branch, it falls back to 'origin'.
+                        the current branch is tracking. If current branch
+                        tracks no branch, it falls back to 'origin'
     -u, --url           Output URL to stdout instead of opening in browser
-    -p, --pr            Open pull request page instead of repository page
+    -p, --pr            Open pull request page instead of repository page. If
+                        not existing, open 'Create Pull Request' page
     -w, --website       Open website page instead of repository page (homepage
                         URL for GitHub, GitLab pages, Bitbucket Cloud)
     -h, --help          Print this help

@@ -72,7 +72,8 @@ arguments. All are optional.
     Output URL to stdout instead of opening in browser.
 
   * `-p`, `--pr`:
-    Open pull request page instead of repository page.
+    Open pull request page instead of repository page. If not existing, open 'Create Pull Request'
+    page.
 
   * `-w`, `--website`:
     Open website page instead of repository page (homepage URL for GitHub, GitLab pages, Bitbucket
