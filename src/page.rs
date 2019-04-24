@@ -19,7 +19,7 @@ impl fmt::Display for DiffOp {
     }
 }
 
-#[derive(Debug, PartialEq)]
+#[derive(Debug, PartialEq, Clone)]
 pub enum Line {
     At(usize),
     Range(usize, usize), // start and end
