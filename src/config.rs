@@ -15,6 +15,7 @@ pub struct Config {
     pub stdout: bool,
     pub pull_request: bool,
     pub website: bool,
+    pub blame: bool,
     pub env: EnvConfig,
 }
 

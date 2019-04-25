@@ -4,8 +4,8 @@ git brws
 [![Linux and macOS CI][travis-badge]][travis-ci]
 [![Windows CI][appveyor-badge]][appveyor]
 
-`git brws` is a command line tool to open a repository, file, commit, diff, tag, pull request, issue
-or project's website in your web browser from command line. 'brws' is an abbreviation of 'browse'.
+`git brws` is a command line tool to open a repository, file, commit, diff, tag, blame, pull request,
+issue or project's website in your web browser from command line. 'brws' is an abbreviation of 'browse'.
 
 Features:
 
@@ -19,6 +19,7 @@ Features:
   - Issue ([e.g.](https://github.com/rhysd/git-brws/issues/8))
   - Website ([e.g.](https://rhysd.github.io/git-brws/))
     - Homepage of the repository for GitHub or GitHub Enterprise, [GitLab pages][gitlab-pages], [Bitbucket Cloud][bitbucket-cloud]
+  - Blame ([e.g.](https://github.com/rhysd/git-brws/blame/9ab093f6720c2c2fe8375408f7f3ab40a3d3337a/src/service.rs))
 - Supports following services
   - [GitHub](https://github.com)
   - [Bitbucket](https://bitbucket.org)
@@ -79,6 +80,8 @@ Options:
                         not existing, open 'Create Pull Request' page
     -w, --website       Open website page instead of repository page (homepage
                         URL for GitHub, GitLab pages, Bitbucket Cloud)
+    -B, --blame         Open blame page instead of repository page. File path
+                        to blame must be passed also.
     -h, --help          Print this help
     -v, --version       Show version
 ```
@@ -252,6 +255,26 @@ $ git brws '#8'
 ```
 
 Note: `#` is usually used for a line comment in major shells. Please quote the argument
+
+### Open a blame page
+
+- Specific file
+
+```
+$ git brws --blame some/file.txt
+```
+
+- Specific line at file
+
+```
+$ git brws --blame some/file.txt#L5
+```
+
+- Specific range at file
+
+```
+$ git brws --blame some/file.txt#L5-L9
+```
 
 ### Cooperate with other tools
 

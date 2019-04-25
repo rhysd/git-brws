@@ -18,8 +18,9 @@ git-brws(1) -- open a repository, file, commit, diff, pull request or issue in y
 
 ## DESCRIPTION
 
-**git-brws** is a command line tool to open a repository, file, commit, diff, pull request or issue
-in your web browser from command line. 'brws' is an abbreviation of 'browse'.
+**git-brws** is a command line tool to open a repository, file, commit, diff, tag, blame, pull
+request, issue or project's website in your web browser from command line. 'brws' is an
+abbreviation of 'browse'.
 
 Example of pages which **git-brws** can open are:
 
@@ -32,6 +33,7 @@ Example of pages which **git-brws** can open are:
 - **Pull request**: https://github.com/rust-lang/rust.vim/pull/290
 - **Issue**: https://github.com/rhysd/git-brws/issues/8
 - **Website**: https://rhysd.github.io/git-brws
+- **Blame**: https://github.com/rhysd/git-brws/blame/9ab093f/src/service.rs
 
 **git-brws** prefers permlink to the latest page since the latest page will change when new commit
 is pushed to the branch.
@@ -78,6 +80,9 @@ arguments. All are optional.
   * `-w`, `--website`:
     Open website page instead of repository page (homepage URL for GitHub, GitLab pages, Bitbucket
     Cloud)
+
+  * `-B`, `--blame`:
+    Open blame page instead of repository page. File path to blame must be passed also.
 
   * `-h`, `--help`:
     Print this help.
@@ -196,6 +201,18 @@ the command may not open a pull request page you want.
     $ git brws '#8'
 
 *Note:* '#' is usually used for a line comment in major shells. Please quote the argument
+
+### Blame a file
+
+    $ git brws --blame some/file.txt
+
+### Blame specific line of a file
+
+    $ git brws --blame some/file.txt#L5
+
+### Blame specific range of a file
+
+    $ git brws --blame some/file.txt#L5-L9
 
 ## ENVIRONMENT
 

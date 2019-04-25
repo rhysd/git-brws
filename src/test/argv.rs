@@ -6,28 +6,30 @@ use std::fs;
 #[test]
 fn args_with_no_option() {
     match Parsed::from_iter(&["git-brws"]).unwrap() {
-        Parsed::OpenPage(o) => {
+        Parsed::OpenPage(c) => {
             assert!(vec![
                 "https://github.com/rhysd/git-brws.git",
                 "ssh://git@github.com:22/rhysd/git-brws.git",
                 "git@github.com:rhysd/git-brws.git",
             ]
             .iter()
-            .any(|u| &o.repo == u));
-            assert_eq!(o.branch, None);
-            match o.git_dir {
+            .any(|u| &c.repo == u));
+            assert_eq!(c.branch, None);
+            match c.git_dir {
                 Some(ref d) => assert!(d.ends_with(".git"), "{:?}", d),
                 None => assert!(false, ".git was not found"),
             }
-            assert!(o.args.is_empty());
-            assert!(!o.stdout);
+            assert!(c.args.is_empty());
+            assert!(!c.stdout);
+            assert!(!c.website);
+            assert!(!c.blame);
         }
         r => assert!(false, "Failed to parse args with no option: {:?}", r),
     };
 
     match Parsed::from_iter(&["git-brws", "foo", "bar"]).unwrap() {
-        Parsed::OpenPage(o) => {
-            assert_eq!(o.args.len(), 2);
+        Parsed::OpenPage(c) => {
+            assert_eq!(c.args.len(), 2);
         }
         p => assert!(false, "{:?}", p),
     };
@@ -35,18 +37,22 @@ fn args_with_no_option() {
 
 #[test]
 fn multiple_options() {
-    match Parsed::from_iter(&["git-brws", "-u", "-r", "foo/bar", "--dir", ".", "-b", "dev"])
-        .unwrap()
+    match Parsed::from_iter(&[
+        "git-brws", "-u", "-r", "foo/bar", "--dir", ".", "-b", "dev", "-w", "--blame",
+    ])
+    .unwrap()
     {
-        Parsed::OpenPage(o) => {
-            assert_eq!(o.repo, "https://github.com/foo/bar.git");
-            assert_eq!(o.branch, Some("dev".to_string()));
-            match o.git_dir {
+        Parsed::OpenPage(c) => {
+            assert_eq!(c.repo, "https://github.com/foo/bar.git");
+            assert_eq!(c.branch, Some("dev".to_string()));
+            match c.git_dir {
                 Some(ref d) => assert!(d.ends_with(".git"), "{:?}", d),
                 None => assert!(false, ".git was not found"),
             }
-            assert_eq!(o.args.len(), 0);
-            assert!(o.stdout);
+            assert_eq!(c.args.len(), 0);
+            assert!(c.stdout);
+            assert!(c.website);
+            assert!(c.blame);
         }
         p => assert!(false, "{:?}", p),
     };
@@ -55,8 +61,8 @@ fn multiple_options() {
 #[test]
 fn ssh_conversion_with_option() {
     match Parsed::from_iter(&["git-brws", "-r", "git@github.com:user/repo.git"]).unwrap() {
-        Parsed::OpenPage(o) => {
-            assert_eq!(o.repo, "ssh://git@github.com:22/user/repo.git");
+        Parsed::OpenPage(c) => {
+            assert_eq!(c.repo, "ssh://git@github.com:22/user/repo.git");
         }
         p => assert!(
             false,
@@ -70,15 +76,15 @@ fn ssh_conversion_with_option() {
 fn repo_formatting() {
     let p = |r| Parsed::from_iter(&["git-brws", "-r", r]).unwrap();
     match p("bitbucket.org/foo/bar") {
-        Parsed::OpenPage(o) => assert_eq!(o.repo, "https://bitbucket.org/foo/bar.git"),
+        Parsed::OpenPage(c) => assert_eq!(c.repo, "https://bitbucket.org/foo/bar.git"),
         p => assert!(false, "{:?}", p),
     }
     match p("https://gitlab.com/foo/bar") {
-        Parsed::OpenPage(o) => assert_eq!(o.repo, "https://gitlab.com/foo/bar.git"),
+        Parsed::OpenPage(c) => assert_eq!(c.repo, "https://gitlab.com/foo/bar.git"),
         p => assert!(false, "{:?}", p),
     }
     match p("foo/bar") {
-        Parsed::OpenPage(o) => assert_eq!(o.repo, "https://github.com/foo/bar.git"),
+        Parsed::OpenPage(c) => assert_eq!(c.repo, "https://github.com/foo/bar.git"),
         p => assert!(false, "{:?}", p),
     }
 }
@@ -86,16 +92,16 @@ fn repo_formatting() {
 #[test]
 fn valid_remote_name() {
     match Parsed::from_iter(&["git-brws", "-R", "origin"]).unwrap() {
-        Parsed::OpenPage(o) => assert!(
+        Parsed::OpenPage(c) => assert!(
             [
                 "https://github.com/rhysd/git-brws.git",
                 "ssh://git@github.com:22/rhysd/git-brws.git"
             ]
             .iter()
-            .find(|u| *u == &o.repo)
+            .find(|u| *u == &c.repo)
             .is_some(),
             "Unexpected remote URL for 'origin' remote: {}. For pull request, please ignore this test is failing",
-            o.repo
+            c.repo
         ),
         p => assert!(false, "{:?}", p),
     }
@@ -142,9 +148,9 @@ fn detect_git_dir() {
     let current = fs::canonicalize(env::current_dir().unwrap()).unwrap();
     let p = current.join("src").join("test");
     match Parsed::from_iter(&["git-brws", "-d", p.to_str().unwrap()]).unwrap() {
-        Parsed::OpenPage(o) => {
+        Parsed::OpenPage(c) => {
             let expected = Some(current.join(".git"));
-            assert_eq!(o.git_dir, expected);
+            assert_eq!(c.git_dir, expected);
         }
         p => assert!(false, "{:?}", p),
     }
@@ -173,9 +179,9 @@ fn no_git_dir() {
     );
 
     match Parsed::from_iter(&["git-brws", "-d", root.to_str().unwrap(), "-r", "foo/bar"]).unwrap() {
-        Parsed::OpenPage(o) => {
-            assert_eq!(o.git_dir, None);
-            assert_eq!(&o.repo, "https://github.com/foo/bar.git");
+        Parsed::OpenPage(c) => {
+            assert_eq!(c.git_dir, None);
+            assert_eq!(&c.repo, "https://github.com/foo/bar.git");
         }
         p => assert!(false, "{:?}", p),
     }
@@ -189,8 +195,8 @@ fn search_repo_from_github_by_name() {
     // passed like `-r react` as use case.
     let parsed = Parsed::from_iter(&["git-brws", "-r", "user:rhysd vim.wasm"]).unwrap();
     match parsed {
-        Parsed::OpenPage(o) => {
-            assert_eq!(&o.repo, "https://github.com/rhysd/vim.wasm.git");
+        Parsed::OpenPage(c) => {
+            assert_eq!(&c.repo, "https://github.com/rhysd/vim.wasm.git");
         }
         p => assert!(false, "{:?}", p),
     }

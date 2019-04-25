@@ -25,6 +25,7 @@ fn config(branch: Option<&str>, env: EnvConfig) -> Config {
         stdout: false,       // Unused
         pull_request: false, // Unused
         website: false,      // Unused
+        blame: false,        // Unused
         env,
     }
 }

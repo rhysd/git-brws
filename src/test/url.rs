@@ -16,6 +16,7 @@ fn smoke() {
         stdout: false,
         pull_request: false,
         website: false,
+        blame: false,
         env: empty_env(),
     };
     match url::build_url(&c) {

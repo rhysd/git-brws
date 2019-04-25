@@ -19,7 +19,7 @@ impl fmt::Display for DiffOp {
     }
 }
 
-#[derive(Debug, PartialEq)]
+#[derive(Debug, PartialEq, Clone)]
 pub enum Line {
     At(usize),
     Range(usize, usize), // start and end
@@ -43,6 +43,7 @@ pub enum Page {
         relative_path: String,
         hash: String,
         line: Option<Line>,
+        blame: bool,
     },
     Issue {
         number: usize,
@@ -196,6 +197,7 @@ impl<'a> BrowsePageParser<'a> {
             relative_path,
             hash,
             line,
+            blame: self.cfg.blame,
         })
     }
 
@@ -219,6 +221,10 @@ pub fn parse_page(cfg: &Config) -> Result<Page> {
 
     // Note: Ignore any arguments when opening a website
     if cfg.args.is_empty() || cfg.website || cfg.pull_request {
+        if cfg.blame {
+            return Err(Error::BlameWithoutFilePath);
+        }
+
         return Ok(Page::Open {
             website: cfg.website,
             pull_request: cfg.pull_request,
@@ -239,6 +245,10 @@ pub fn parse_page(cfg: &Config) -> Result<Page> {
     match parser.try_parse_file_or_dir() {
         Ok(p) => return Ok(p),
         Err(msg) => attempts.push(("File or dir", msg)),
+    }
+
+    if cfg.blame {
+        return Err(Error::BlameWithoutFilePath);
     }
 
     match parser.try_parse_diff() {

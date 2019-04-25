@@ -31,6 +31,7 @@ fn config(repo: &str, branch: Option<&str>, env: Option<EnvConfig>) -> Config {
         stdout: false,
         pull_request: false,
         website: false,
+        blame: false,
         env: env.unwrap_or_else(empty_env),
     }
 }
@@ -53,6 +54,7 @@ fn config_for_pr(token: Option<String>, repo: &str, branch: Option<&str>) -> Con
         stdout: false,
         pull_request: true,
         website: false,
+        blame: false,
         env,
     }
 }
@@ -226,101 +228,85 @@ fn diff_page_for_bitbucket_url() {
 }
 
 #[test]
-fn file_page_url() {
-    let p = Page::FileOrDir {
-        relative_path: Path::new("src")
-            .join("main.rs")
-            .to_string_lossy()
-            .into_owned(),
-        hash: "561848bad7164d7568658456088b107ec9efd9f3".to_string(),
-        line: None,
+fn file_path_with_file_path() {
+    let relative_path = Path::new("src")
+        .join("main.rs")
+        .to_string_lossy()
+        .into_owned();
+    let hash = "561848bad7164d7568658456088b107ec9efd9f3".to_string();
+
+    let page = move |line: Option<Line>, blame: bool| Page::FileOrDir {
+        relative_path: relative_path.clone(),
+        hash: hash.clone(),
+        line,
+        blame,
     };
-    for &(repo, expected) in &[
+
+    for (
+        repo,
+        no_line,
+        with_line,
+        with_range,
+        blame_no_line,
+        blame_with_line,
+        blame_with_range,
+    ) in vec![
         (
             "https://github.com/user/repo.git",
             "https://github.com/user/repo/blob/561848bad7164d7568658456088b107ec9efd9f3/src/main.rs",
+            "https://github.com/user/repo/blob/561848bad7164d7568658456088b107ec9efd9f3/src/main.rs#L12",
+            "https://github.com/user/repo/blob/561848bad7164d7568658456088b107ec9efd9f3/src/main.rs#L1-L2",
+            "https://github.com/user/repo/blame/561848bad7164d7568658456088b107ec9efd9f3/src/main.rs",
+            "https://github.com/user/repo/blame/561848bad7164d7568658456088b107ec9efd9f3/src/main.rs#L12",
+            "https://github.com/user/repo/blame/561848bad7164d7568658456088b107ec9efd9f3/src/main.rs#L1-L2",
         ),
         (
             "https://bitbucket.org/user/repo.git",
             "https://bitbucket.org/user/repo/src/561848bad7164d7568658456088b107ec9efd9f3/src/main.rs",
+            "https://bitbucket.org/user/repo/src/561848bad7164d7568658456088b107ec9efd9f3/src/main.rs#lines-12",
+            "https://bitbucket.org/user/repo/src/561848bad7164d7568658456088b107ec9efd9f3/src/main.rs#lines-1:2",
+            "https://bitbucket.org/user/repo/annotate/561848bad7164d7568658456088b107ec9efd9f3/src/main.rs",
+            "https://bitbucket.org/user/repo/annotate/561848bad7164d7568658456088b107ec9efd9f3/src/main.rs#lines-12",
+            "https://bitbucket.org/user/repo/annotate/561848bad7164d7568658456088b107ec9efd9f3/src/main.rs#lines-1:2",
         ),
         (
             "https://github.somewhere.com/user/repo.git",
             "https://github.somewhere.com/user/repo/blob/561848bad7164d7568658456088b107ec9efd9f3/src/main.rs",
+            "https://github.somewhere.com/user/repo/blob/561848bad7164d7568658456088b107ec9efd9f3/src/main.rs#L12",
+            "https://github.somewhere.com/user/repo/blob/561848bad7164d7568658456088b107ec9efd9f3/src/main.rs#L1-L2",
+            "https://github.somewhere.com/user/repo/blame/561848bad7164d7568658456088b107ec9efd9f3/src/main.rs",
+            "https://github.somewhere.com/user/repo/blame/561848bad7164d7568658456088b107ec9efd9f3/src/main.rs#L12",
+            "https://github.somewhere.com/user/repo/blame/561848bad7164d7568658456088b107ec9efd9f3/src/main.rs#L1-L2",
         ),
         (
             "https://gitlab.com/user/repo.git",
             "https://gitlab.com/user/repo/blob/561848bad7164d7568658456088b107ec9efd9f3/src/main.rs",
-        ),
-    ] {
-        let c = config(repo, None, None);
-        assert_eq!(build_page_url(&p, &c).unwrap(), expected);
-    }
-}
-
-#[test]
-fn file_page_with_line_number_url() {
-    let p = Page::FileOrDir {
-        relative_path: Path::new("src")
-            .join("main.rs")
-            .to_string_lossy()
-            .into_owned(),
-        hash: "561848bad7164d7568658456088b107ec9efd9f3".to_string(),
-        line: Some(Line::At(12)),
-    };
-    for &(repo, expected) in &[
-        (
-            "https://github.com/user/repo.git",
-            "https://github.com/user/repo/blob/561848bad7164d7568658456088b107ec9efd9f3/src/main.rs#L12",
-        ),
-        (
-            "https://bitbucket.org/user/repo.git",
-            "https://bitbucket.org/user/repo/src/561848bad7164d7568658456088b107ec9efd9f3/src/main.rs#lines-12",
-        ),
-        (
-            "https://github.somewhere.com/user/repo.git",
-            "https://github.somewhere.com/user/repo/blob/561848bad7164d7568658456088b107ec9efd9f3/src/main.rs#L12",
-        ),
-        (
-            "https://gitlab.com/user/repo.git",
             "https://gitlab.com/user/repo/blob/561848bad7164d7568658456088b107ec9efd9f3/src/main.rs#L12",
-        ),
-    ] {
-        let c = config(repo, None, None);
-        assert_eq!(build_page_url(&p, &c).unwrap(), expected);
-    }
-}
-
-#[test]
-fn file_page_with_line_range_url() {
-    let p = Page::FileOrDir {
-        relative_path: Path::new("src")
-            .join("main.rs")
-            .to_string_lossy()
-            .into_owned(),
-        hash: "561848bad7164d7568658456088b107ec9efd9f3".to_string(),
-        line: Some(Line::Range(1, 2)),
-    };
-    for &(repo, expected) in &[
-        (
-            "https://github.com/user/repo.git",
-            "https://github.com/user/repo/blob/561848bad7164d7568658456088b107ec9efd9f3/src/main.rs#L1-L2",
-        ),
-        (
-            "https://bitbucket.org/user/repo.git",
-            "https://bitbucket.org/user/repo/src/561848bad7164d7568658456088b107ec9efd9f3/src/main.rs#lines-1:2",
-        ),
-        (
-            "https://github.somewhere.com/user/repo.git",
-            "https://github.somewhere.com/user/repo/blob/561848bad7164d7568658456088b107ec9efd9f3/src/main.rs#L1-L2",
-        ),
-        (
-            "https://gitlab.com/user/repo.git",
             "https://gitlab.com/user/repo/blob/561848bad7164d7568658456088b107ec9efd9f3/src/main.rs#L1-L2",
+            "https://gitlab.com/user/repo/blame/561848bad7164d7568658456088b107ec9efd9f3/src/main.rs",
+            "https://gitlab.com/user/repo/blame/561848bad7164d7568658456088b107ec9efd9f3/src/main.rs#L12",
+            "https://gitlab.com/user/repo/blame/561848bad7164d7568658456088b107ec9efd9f3/src/main.rs#L1-L2",
         ),
     ] {
         let c = config(repo, None, None);
-        assert_eq!(build_page_url(&p, &c).unwrap(), expected);
+
+        let p = page(None, false);
+        assert_eq!(build_page_url(&p, &c).unwrap(), no_line);
+
+        let p = page(Some(Line::At(12)), false);
+        assert_eq!(build_page_url(&p, &c).unwrap(), with_line);
+
+        let p = page(Some(Line::Range(1, 2)), false);
+        assert_eq!(build_page_url(&p, &c).unwrap(), with_range);
+
+        let p = page(None, true);
+        assert_eq!(build_page_url(&p, &c).unwrap(), blame_no_line);
+
+        let p = page(Some(Line::At(12)), true);
+        assert_eq!(build_page_url(&p, &c).unwrap(), blame_with_line);
+
+        let p = page(Some(Line::Range(1, 2)), true);
+        assert_eq!(build_page_url(&p, &c).unwrap(), blame_with_range);
     }
 }
 
