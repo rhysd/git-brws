@@ -106,18 +106,23 @@ impl<'a> Git<'a> {
     pub fn current_branch(&self) -> Result<String> {
         self.command(&["rev-parse", "--abbrev-ref", "--symbolic", "HEAD"])
     }
+
+    pub fn remote_contains<S: AsRef<str>>(&self, spec: S) -> Result<bool> {
+        self.command(&["branch", "--remote", "--contains", spec.as_ref()])
+            .map(|o| !o.is_empty())
+    }
 }
 
 impl<'a> Git<'a> {
-    pub fn new<P: AsRef<Path>>(dir: &'a P, command: &'a str) -> Git<'a> {
+    pub fn new(dir: &'a Path, command: &'a str) -> Git<'a> {
         Git {
             command,
-            git_dir: dir.as_ref(),
+            git_dir: dir,
         }
     }
 }
 
-pub fn git_dir(dir: Option<String>, git_cmd: &str) -> Result<PathBuf> {
+pub fn git_dir<P: AsRef<Path>>(dir: Option<P>, git_cmd: &str) -> Result<PathBuf> {
     let mut cmd = Command::new(if git_cmd != "" { git_cmd } else { "git" });
     cmd.arg("rev-parse").arg("--absolute-git-dir");
     if let Some(d) = dir {

@@ -70,6 +70,14 @@ fn parse_file_or_dir() {
             Path::new(".").join("src").join("test").join("..").as_path(),
             Path::new("src"),
         ),
+        // Prefix '..'
+        (
+            Path::new("..")
+                .join(std::env::current_dir().unwrap().file_name().unwrap())
+                .join("src")
+                .as_path(),
+            Path::new("src"),
+        ),
     ] {
         let c = config(
             "https://github.com/user/repo.git",
