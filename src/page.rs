@@ -187,10 +187,18 @@ impl<'a> BrowsePageParser<'a> {
             .expect("Failed to convert path into UTF-8 string")
             .to_string();
 
-        let hash = if len == 2 {
+        let mut hash = if len == 2 {
             self.git.hash(self.cfg.args[1].as_str())?
         } else {
             self.git.hash("HEAD")?
+        };
+
+        // Fall back into branch name when the commit is not existing in remote branch (#12)
+        if !self.git.remote_contains(&hash)? {
+            hash = match &self.cfg.branch {
+                Some(b) => b.clone(),
+                None => self.git.current_branch()?,
+            };
         };
 
         Ok(Page::FileOrDir {

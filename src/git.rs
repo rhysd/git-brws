@@ -106,6 +106,11 @@ impl<'a> Git<'a> {
     pub fn current_branch(&self) -> Result<String> {
         self.command(&["rev-parse", "--abbrev-ref", "--symbolic", "HEAD"])
     }
+
+    pub fn remote_contains<S: AsRef<str>>(&self, spec: S) -> Result<bool> {
+        self.command(&["branch", "--remote", "--contains", spec.as_ref()])
+            .map(|o| !o.is_empty())
+    }
 }
 
 impl<'a> Git<'a> {
