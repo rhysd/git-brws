@@ -11,19 +11,27 @@ pub fn build_url(cfg: &Config) -> Result<String> {
     service::build_page_url(&page, &cfg)
 }
 
+fn browse_with_cmd(url: &str, cmd: &str) -> Result<()> {
+    let out = Command::new(cmd).arg(url).output()?;
+    if out.status.success() {
+        if !out.stdout.is_empty() {
+            print!("{}", String::from_utf8_lossy(&out.stdout));
+        }
+        Ok(())
+    } else {
+        Err(Error::UserBrowseCommandFailed {
+            cmd: cmd.to_string(),
+            url: url.to_string(),
+            msg: String::from_utf8_lossy(&out.stderr)
+                .trim()
+                .replace('\n', " "),
+        })
+    }
+}
+
 pub fn browse(url: &str, env: &EnvConfig) -> Result<()> {
     if let Some(ref cmd) = env.browse_command {
-        let out = Command::new(cmd).arg(url).output()?;
-        if !out.status.success() {
-            return Err(Error::UserBrowseCommandFailed {
-                cmd: cmd.to_string(),
-                url: url.to_string(),
-                msg: String::from_utf8_lossy(&out.stderr)
-                    .trim()
-                    .replace('\n', " "),
-            });
-        }
-        return Ok(());
+        return browse_with_cmd(url, cmd);
     }
 
     match open::that(url) {
