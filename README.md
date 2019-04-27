@@ -305,6 +305,7 @@ Some environment variables are available to customize behavior of `git-brws`.
 | `$GIT_BRWS_GITHUB_TOKEN` | This variable is used for `--pr` (or `-p`) only. API access token for github.com. They are optional, but useful for avoiding API rate limit and accessing to private repositories. Please generate a token from https://github.com/settings/tokens/new |
 | `$GITHUB_TOKEN` | Ditto. When `GIT_BRWS_GITHUB_TOKEN` is not set, `GITHUB_TOKEN` is looked. |
 | `$GIT_BRWS_GHE_TOKEN` | This variable is used for `--pr` (or `-p`) only. API access token for GitHub Enterprise instance. It is sometimes mandatory (depending on your GHE instance configuration). Please generate a token from `https://{YOUR GHE HOST}/settings/tokens/new`. |
+| `$GIT_BRWS_BROWSE_COMMAND` | Command to open URL. If this value is specified, the command is executed with URL as first argument to browse the URL. |
 | `$https_proxy` | This variable is used for `--pr` (or `-p`) only. A HTTPS Proxy server URL if you use a web proxy. |
 
 ## Related Projects

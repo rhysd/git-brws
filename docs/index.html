@@ -303,26 +303,37 @@ depending on your GitHub Enterprise configuration of subdomain isolation</li>
 
 <h2 id="ENVIRONMENT">ENVIRONMENT</h2>
 
-<dl>
-<dt><code>$GIT_BRWS_GIT_COMMAND</code></dt><dd><p>Git command to use. If not specified, "git" will be used.</p></dd>
-<dt><code>$GIT_BRWS_GHE_URL_HOST</code></dt><dd><p>When you use your own GitHub Enterprise repository, you can specify its host to this variable.
+<ul>
+<li><p><code>$GIT_BRWS_GIT_COMMAND</code>:
+Git command to use. If not specified, "git" will be used.</p></li>
+<li><p><code>$GIT_BRWS_GHE_URL_HOST</code>:
+When you use your own GitHub Enterprise repository, you can specify its host to this variable.
 By default, <strong>git-brws</strong> detects '^github.' as GHE host. If your GHE repository host does not
 match it, please specify this variable. If your repository is
-'https://example-repo.org/user/repo', 'example-repo.org' should be set.</p></dd>
-<dt><code>$GIT_BRWS_GHE_SSH_PORT</code></dt><dd><p>When you set a number to it, the number will be used for the ssh port for GitHub Enterprise
-URLs.</p></dd>
-<dt><code>$GIT_BRWS_GITLAB_SSH_PORT</code></dt><dd><p>When you set a number to it, the number will be used for the ssh port for self-hosted GitLab
-URLs. This is useful when your environment hosts GitLab to non-trivial ssh port URL.</p></dd>
-<dt><code>$GIT_BRWS_GITHUB_TOKEN</code></dt><dd><p>This variable is used for '--pr' (or '-p') only. API access token for github.com. They are
+'https://example-repo.org/user/repo', 'example-repo.org' should be set.</p></li>
+<li><p><code>$GIT_BRWS_GHE_SSH_PORT</code>:
+When you set a number to it, the number will be used for the ssh port for GitHub Enterprise
+URLs.</p></li>
+<li><p><code>$GIT_BRWS_GITLAB_SSH_PORT</code>:
+When you set a number to it, the number will be used for the ssh port for self-hosted GitLab
+URLs. This is useful when your environment hosts GitLab to non-trivial ssh port URL.</p></li>
+<li><p><code>$GIT_BRWS_GITHUB_TOKEN</code>:
+This variable is used for '--pr' (or '-p') only. API access token for github.com. They are
 optional, but useful for avoiding API rate limit and accessing to private repositories. Please
-generate a token from <a href="https://github.com/settings/tokens/new" target="_blank" rel="noopener">https://github.com/settings/tokens/new</a></p></dd>
-<dt><code>$GITHUB_TOKEN</code></dt><dd><p>Ditto. When $GIT_BRWS_GITHUB_TOKEN is not set, $GITHUB_TOKEN is looked.</p></dd>
-<dt><code>$GIT_BRWS_GHE_TOKEN</code></dt><dd><p>This variable is used for '--pr' (or '-p') only. API access token for GitHub Enterprise
+generate a token from <a href="https://github.com/settings/tokens/new" target="_blank" rel="noopener">https://github.com/settings/tokens/new</a></p></li>
+<li><p><code>$GITHUB_TOKEN</code>:
+Ditto. When $GIT_BRWS_GITHUB_TOKEN is not set, $GITHUB_TOKEN is looked.</p></li>
+<li><p><code>$GIT_BRWS_GHE_TOKEN</code>:
+This variable is used for '--pr' (or '-p') only. API access token for GitHub Enterprise
 instance. It is sometimes mandatory (depending on your GHE instance configuration). Please
-generate a token from 'https://{YOUR GHE HOST}/settings/tokens/new'.</p></dd>
-<dt><code>$https_proxy</code></dt><dd><p>This variable is used for '--pr' (or '-p') only. A HTTPS Proxy server URL if you use a web
-proxy.</p></dd>
-</dl>
+generate a token from 'https://{YOUR GHE HOST}/settings/tokens/new'.</p></li>
+<li><p><code>$GIT_BRWS_BROWSE_COMMAND</code>
+Command to open URL. If this value is specified, the command is executed with URL as first
+argument to browse the URL.</p></li>
+<li><p><code>$https_proxy</code>:
+This variable is used for '--pr' (or '-p') only. A HTTPS Proxy server URL if you use a web
+proxy.</p></li>
+</ul>
 
 
 <h2 id="REPOSITORY">REPOSITORY</h2>

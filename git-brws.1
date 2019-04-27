@@ -365,37 +365,34 @@ $ git brws \-\-blame some/file\.txt#L5\-L9
 .
 .SH "ENVIRONMENT"
 .
-.TP
-\fB$GIT_BRWS_GIT_COMMAND\fR
-Git command to use\. If not specified, "git" will be used\.
+.IP "\(bu" 4
+\fB$GIT_BRWS_GIT_COMMAND\fR: Git command to use\. If not specified, "git" will be used\.
 .
-.TP
-\fB$GIT_BRWS_GHE_URL_HOST\fR
-When you use your own GitHub Enterprise repository, you can specify its host to this variable\. By default, \fBgit\-brws\fR detects \'^github\.\' as GHE host\. If your GHE repository host does not match it, please specify this variable\. If your repository is \'https://example\-repo\.org/user/repo\', \'example\-repo\.org\' should be set\.
+.IP "\(bu" 4
+\fB$GIT_BRWS_GHE_URL_HOST\fR: When you use your own GitHub Enterprise repository, you can specify its host to this variable\. By default, \fBgit\-brws\fR detects \'^github\.\' as GHE host\. If your GHE repository host does not match it, please specify this variable\. If your repository is \'https://example\-repo\.org/user/repo\', \'example\-repo\.org\' should be set\.
 .
-.TP
-\fB$GIT_BRWS_GHE_SSH_PORT\fR
-When you set a number to it, the number will be used for the ssh port for GitHub Enterprise URLs\.
+.IP "\(bu" 4
+\fB$GIT_BRWS_GHE_SSH_PORT\fR: When you set a number to it, the number will be used for the ssh port for GitHub Enterprise URLs\.
 .
-.TP
-\fB$GIT_BRWS_GITLAB_SSH_PORT\fR
-When you set a number to it, the number will be used for the ssh port for self\-hosted GitLab URLs\. This is useful when your environment hosts GitLab to non\-trivial ssh port URL\.
+.IP "\(bu" 4
+\fB$GIT_BRWS_GITLAB_SSH_PORT\fR: When you set a number to it, the number will be used for the ssh port for self\-hosted GitLab URLs\. This is useful when your environment hosts GitLab to non\-trivial ssh port URL\.
 .
-.TP
-\fB$GIT_BRWS_GITHUB_TOKEN\fR
-This variable is used for \'\-\-pr\' (or \'\-p\') only\. API access token for github\.com\. They are optional, but useful for avoiding API rate limit and accessing to private repositories\. Please generate a token from https://github\.com/settings/tokens/new
+.IP "\(bu" 4
+\fB$GIT_BRWS_GITHUB_TOKEN\fR: This variable is used for \'\-\-pr\' (or \'\-p\') only\. API access token for github\.com\. They are optional, but useful for avoiding API rate limit and accessing to private repositories\. Please generate a token from https://github\.com/settings/tokens/new
 .
-.TP
-\fB$GITHUB_TOKEN\fR
-Ditto\. When $GIT_BRWS_GITHUB_TOKEN is not set, $GITHUB_TOKEN is looked\.
+.IP "\(bu" 4
+\fB$GITHUB_TOKEN\fR: Ditto\. When $GIT_BRWS_GITHUB_TOKEN is not set, $GITHUB_TOKEN is looked\.
 .
-.TP
-\fB$GIT_BRWS_GHE_TOKEN\fR
-This variable is used for \'\-\-pr\' (or \'\-p\') only\. API access token for GitHub Enterprise instance\. It is sometimes mandatory (depending on your GHE instance configuration)\. Please generate a token from \'https://{YOUR GHE HOST}/settings/tokens/new\'\.
+.IP "\(bu" 4
+\fB$GIT_BRWS_GHE_TOKEN\fR: This variable is used for \'\-\-pr\' (or \'\-p\') only\. API access token for GitHub Enterprise instance\. It is sometimes mandatory (depending on your GHE instance configuration)\. Please generate a token from \'https://{YOUR GHE HOST}/settings/tokens/new\'\.
 .
-.TP
-\fB$https_proxy\fR
-This variable is used for \'\-\-pr\' (or \'\-p\') only\. A HTTPS Proxy server URL if you use a web proxy\.
+.IP "\(bu" 4
+\fB$GIT_BRWS_BROWSE_COMMAND\fR Command to open URL\. If this value is specified, the command is executed with URL as first argument to browse the URL\.
+.
+.IP "\(bu" 4
+\fB$https_proxy\fR: This variable is used for \'\-\-pr\' (or \'\-p\') only\. A HTTPS Proxy server URL if you use a web proxy\.
+.
+.IP "" 0
 .
 .SH "REPOSITORY"
 \fBgit\-brws\fR is developed at repository hosted on GitHub\.
