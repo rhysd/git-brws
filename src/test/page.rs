@@ -162,10 +162,10 @@ fn file_at_specific_commit() {
     let c = config(
         "https://github.com/user/repo.git",
         None,
-        vec!["README.md", "HEAD^"],
+        vec!["README.md", "dbb66be9b78ecddef734d2f9cf8c2c7a2836145b"],
     );
     let p2 = parse_page(&c).unwrap();
-    assert!(p != p2, format!("{:?} v.s. {:?}", p, p2));
+    assert_ne!(p, p2);
 }
 
 #[test]
