@@ -159,7 +159,7 @@ impl fmt::Display for Error {
             Error::ArgsNotAllowed{flag, args} => write!(f, "{} option does not allow any command line argument. It opens page based on {{repo}}, but argument(s) {:?} retrives information from local directory.", flag, args),
             Error::GheTokenRequired => write!(f, "GitHub Enterprise requires API token. Please set $GIT_BRWS_GHE_TOKEN"),
             Error::BlameWithoutFilePath => write!(f, "File path is not given to blame"),
-            Error::UserBrowseCommandFailed{cmd, url, msg} => write!(f, "Command '{}' cannot open URL {}. stderr: {}", cmd, url, msg),
+            Error::UserBrowseCommandFailed{cmd, url, msg} => write!(f, "Command '{}' failed to open URL {}. Please check $GIT_BRWS_BROWSE_COMMAND. stderr: {}", cmd, url, msg),
         }
     }
 }
