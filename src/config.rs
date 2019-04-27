@@ -42,6 +42,7 @@ pub struct EnvConfig {
     pub github_token: Option<String>,
     pub ghe_token: Option<String>,
     pub https_proxy: Option<String>,
+    pub browse_command: Option<String>,
 }
 
 impl EnvConfig {

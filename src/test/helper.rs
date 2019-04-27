@@ -10,6 +10,7 @@ pub fn empty_env() -> EnvConfig {
         github_token: None,
         ghe_token: None,
         https_proxy: None,
+        browse_command: None,
     }
 }
 

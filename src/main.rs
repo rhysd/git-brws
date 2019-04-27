@@ -23,7 +23,7 @@ fn run() -> error::Result<()> {
         Parsed::Help(usage) => eprintln!("{}", usage),
         Parsed::Version(version) => println!("{}", version),
         Parsed::OpenPage(ref opts) if opts.stdout => println!("{}", url::build_url(opts)?),
-        Parsed::OpenPage(ref opts) => url::browse(&url::build_url(opts)?)?,
+        Parsed::OpenPage(ref opts) => url::browse(&url::build_url(opts)?, &opts.env)?,
     }
     Ok(())
 }
