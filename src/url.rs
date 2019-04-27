@@ -4,7 +4,7 @@ use crate::config::{Config, EnvConfig};
 use crate::error::{Error, Result};
 use crate::page::parse_page;
 use crate::service;
-use std::process::Command;
+use std::process::{Command, Stdio};
 
 pub fn build_url(cfg: &Config) -> Result<String> {
     let page = parse_page(&cfg)?;
@@ -12,11 +12,11 @@ pub fn build_url(cfg: &Config) -> Result<String> {
 }
 
 fn browse_with_cmd(url: &str, cmd: &str) -> Result<()> {
-    let out = Command::new(cmd).arg(url).output()?;
+    let out = Command::new(cmd)
+        .arg(url)
+        .stdout(Stdio::inherit())
+        .output()?;
     if out.status.success() {
-        if !out.stdout.is_empty() {
-            print!("{}", String::from_utf8_lossy(&out.stdout));
-        }
         Ok(())
     } else {
         Err(Error::UserBrowseCommandFailed {
