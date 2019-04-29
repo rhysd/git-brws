@@ -172,8 +172,15 @@ impl<'a> BrowsePageParser<'a> {
         let (path, line) = self.parse_path_and_line();
         let path = fs::canonicalize(path)?;
 
-        if line.is_some() && path.is_dir() {
-            return Err(Error::LineSpecifiedForDir(path));
+        if path.is_dir() {
+            if self.cfg.blame {
+                return Err(Error::CannotBlameDirectory {
+                    dir: path.to_string_lossy().into(),
+                });
+            }
+            if line.is_some() {
+                return Err(Error::LineSpecifiedForDir(path));
+            }
         }
 
         let repo_root = self.git.root_dir()?;
@@ -247,31 +254,30 @@ pub fn parse_page(cfg: &Config) -> Result<Page> {
 
     match parser.try_parse_issue_number() {
         Ok(p) => return Ok(p),
-        Err(msg) => attempts.push(("Issue number", msg)),
+        Err(e) => attempts.push(("Issue number", e)),
     }
 
+    // Note: Early return for --blame
     match parser.try_parse_file_or_dir() {
         Ok(p) => return Ok(p),
-        Err(msg) => attempts.push(("File or dir", msg)),
-    }
-
-    if cfg.blame {
-        return Err(Error::BlameWithoutFilePath);
+        err @ Err(Error::CannotBlameDirectory { .. }) => return err,
+        Err(..) if cfg.blame => return Err(Error::BlameWithoutFilePath),
+        Err(e) => attempts.push(("File or dir", e)),
     }
 
     match parser.try_parse_diff() {
         Ok(p) => return Ok(p),
-        Err(msg) => attempts.push(("Diff", msg)),
+        Err(e) => attempts.push(("Diff", e)),
     }
 
     match parser.try_parse_tag() {
         Ok(p) => return Ok(p),
-        Err(msg) => attempts.push(("Tag", msg)),
+        Err(e) => attempts.push(("Tag", e)),
     }
 
     match parser.try_parse_commit() {
         Ok(p) => return Ok(p),
-        Err(msg) => attempts.push(("Commit", msg)),
+        Err(e) => attempts.push(("Commit", e)),
     }
 
     Err(Error::PageParseError {

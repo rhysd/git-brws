@@ -430,3 +430,17 @@ fn parse_blame_without_file_path() {
         }
     }
 }
+
+#[test]
+fn parse_blame_directory() {
+    let mut c = config("https://github.com/rhysd/git-brws.git", None, vec!["src"]);
+    c.blame = true;
+    let c = c;
+
+    match parse_page(&c).unwrap_err() {
+        Error::CannotBlameDirectory { dir } => {
+            assert!(dir.ends_with("src"), "{:?}", dir);
+        }
+        e => assert!(false, "Unexpected parse e: {:?}", e),
+    }
+}
