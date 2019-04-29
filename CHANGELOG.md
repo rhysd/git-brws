@@ -1,9 +1,10 @@
 <a name="0.11.0"></a>
 # [0.11.0](https://github.com/rhysd/git-brws/releases/tag/0.11.0) - 29 Apr 2019
 
-- **Change:** Open 'Create Pull Request' page when pull request is not created yet for the branch. Previous behavior caused an error in the case
-- **New:** Support 'Blame' page for file path with `--blame` or `-B` option. Not only file path, with line such as `/path#L123` and with range such as `/path#L1-2` are supported. This feature is available for all services; GitHub, GitHub:Enterprise, GitLab and bitbucket
+- **Change:** Open 'Create Pull Request' page when pull request is not created yet for the branch. Previous behavior caused an error in the case.
+- **New:** Support 'Blame' page for file path with `--blame` or `-B` option. Not only file path, with line such as `/path#L123` and with range such as `/path#L1-2` are supported. This feature is available for all services; GitHub, GitHub:Enterprise, GitLab and bitbucket. #11
 - **New:** `$GIT_BRWS_BROWSE_COMMAND` environment variable was introduced to customize how to open the URL. The command specified with the environment variable is invoked with URL as the first argument for opening the URL.
+- **Fix:** When opening file path, fallback into branch name instead of commit hash if the latest commit is not contained in remote branch. Since the commit page where the commit is not contained in remote is 404. #12
 
 [Changes][0.11.0]
 
