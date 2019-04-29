@@ -1,3 +1,13 @@
+<a name="0.11.0"></a>
+# [0.11.0](https://github.com/rhysd/git-brws/releases/tag/0.11.0) - 29 Apr 2019
+
+- **Change:** Open 'Create Pull Request' page when pull request is not created yet for the branch. Previous behavior caused an error in the case
+- **New:** Support 'Blame' page for file path with `--blame` or `-B` option. Not only file path, with line such as `/path#L123` and with range such as `/path#L1-2` are supported. This feature is available for all services; GitHub, GitHub:Enterprise, GitLab and bitbucket
+- **New:** `$GIT_BRWS_BROWSE_COMMAND` environment variable was introduced to customize how to open the URL. The command specified with the environment variable is invoked with URL as the first argument for opening the URL.
+
+[Changes][0.11.0]
+
+
 <a name="0.10.1"></a>
 # [0.10.1](https://github.com/rhysd/git-brws/releases/tag/0.10.1) - 12 Feb 2019
 
@@ -18,6 +28,10 @@
 - **Breaking:** `--repo` no longer accepts remote name. Instead, `--remote` (or `-R`) is available. This is for avoiding confusing behavior that repo name is intended but remote name is accidentally matched.
 - **Improve:** Error handlings. Now invalid combination of options and arguments are reported as an error
 - Many refactorings to clean up internal structure
+
+This is a demo that `-w -r react` can open https://reactjs.org:
+
+![tmp](https://user-images.githubusercontent.com/823277/52643570-abd78d00-2f20-11e9-870b-489580bb756a.gif)
 
 
 [Changes][0.10.0]
@@ -153,6 +167,7 @@ First binaries release for Linux (32bit/64bit) and macOS (64bit) using Travis CI
 [Changes][v0.4.2]
 
 
+[0.11.0]: https://github.com/rhysd/git-brws/compare/0.10.1...0.11.0
 [0.10.1]: https://github.com/rhysd/git-brws/compare/0.10.0...0.10.1
 [0.10.0]: https://github.com/rhysd/git-brws/compare/0.9.2...0.10.0
 [0.9.2]: https://github.com/rhysd/git-brws/compare/0.9.1...0.9.2
