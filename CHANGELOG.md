@@ -1,3 +1,11 @@
+<a name="0.11.1"></a>
+# [0.11.1](https://github.com/rhysd/git-brws/releases/tag/0.11.1) - 30 Apr 2019
+
+**Fix:** Cause an error when attempting to blame directory path
+
+[Changes][0.11.1]
+
+
 <a name="0.11.0"></a>
 # [0.11.0](https://github.com/rhysd/git-brws/releases/tag/0.11.0) - 29 Apr 2019
 
@@ -168,6 +176,7 @@ First binaries release for Linux (32bit/64bit) and macOS (64bit) using Travis CI
 [Changes][v0.4.2]
 
 
+[0.11.1]: https://github.com/rhysd/git-brws/compare/0.11.0...0.11.1
 [0.11.0]: https://github.com/rhysd/git-brws/compare/0.10.1...0.11.0
 [0.10.1]: https://github.com/rhysd/git-brws/compare/0.10.0...0.10.1
 [0.10.0]: https://github.com/rhysd/git-brws/compare/0.9.2...0.10.0
