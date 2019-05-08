@@ -1,5 +1,3 @@
-extern crate open;
-
 use crate::config::{Config, EnvConfig};
 use crate::error::{Error, Result};
 use crate::page::parse_page;

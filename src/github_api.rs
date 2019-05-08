@@ -1,6 +1,3 @@
-extern crate reqwest;
-extern crate serde;
-
 use crate::error::{Error, Result};
 use reqwest::{header, Proxy, StatusCode};
 use std::mem;

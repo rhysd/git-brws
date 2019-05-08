@@ -1,6 +1,3 @@
-extern crate envy;
-extern crate serde;
-
 use crate::error::Result;
 use crate::git::Git;
 use std::env;

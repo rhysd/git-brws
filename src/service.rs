@@ -1,7 +1,3 @@
-extern crate path_slash;
-extern crate reqwest;
-extern crate url;
-
 use crate::config::Config;
 use crate::error::{Error, Result};
 use crate::github_api::Client;

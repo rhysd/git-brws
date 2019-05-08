@@ -11,7 +11,7 @@ pub enum DiffOp {
 }
 
 impl fmt::Display for DiffOp {
-    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         match self {
             DiffOp::TwoDots => write!(f, ".."),
             DiffOp::ThreeDots => write!(f, "..."),

@@ -1,8 +1,3 @@
-extern crate envy;
-extern crate getopts;
-extern crate reqwest;
-extern crate url;
-
 use std::ffi::OsString;
 use std::fmt;
 use std::io;
@@ -15,7 +10,7 @@ pub enum ExpectedNumberOfArgs {
 }
 
 impl fmt::Display for ExpectedNumberOfArgs {
-    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         match self {
             ExpectedNumberOfArgs::Single(num) => write!(f, "{}", num),
             ExpectedNumberOfArgs::Range(min, max) => write!(f, "{}..{}", min, max),
@@ -113,7 +108,7 @@ pub enum Error {
 }
 
 impl fmt::Display for Error {
-    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         match self {
             Error::BrokenRepoFormat {input} => write!(f, "Invalid repository format '{}' or unknown remote. Note: Format must be one of 'repo', 'user/repo', 'host/user/repo', Git URL", input),
             Error::CliParseFail(e) => write!(f, "{}", e),
