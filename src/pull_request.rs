@@ -14,6 +14,13 @@ pub enum Page<'a, 'b> {
         default_branch: String,
         branch: String,
     },
+    NewAtParent {
+        author: Cow<'a, str>,
+        repo: Cow<'b, str>,
+        fork_author: &'a str,
+        default_branch: String,
+        branch: String,
+    },
 }
 
 fn find_github_pr_url_for_branch<'a, 'b, B: AsRef<str>>(
@@ -54,9 +61,10 @@ fn find_github_pr_url_for_branch<'a, 'b, B: AsRef<str>>(
         {
             Ok(Page::Existing { url })
         } else {
-            Ok(Page::New {
+            Ok(Page::NewAtParent {
                 author: Cow::Owned(owner),
                 repo: Cow::Owned(repo),
+                fork_author: author,
                 default_branch: parent.default_branch,
                 branch: branch.to_string(),
             })

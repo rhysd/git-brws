@@ -118,6 +118,16 @@ fn build_github_like_url<S: AsRef<str>>(
                         "https://{}/{}/{}/compare/{}...{}",
                         host, author, repo, default_branch, branch,
                     )),
+                    pull_request::Page::NewAtParent {
+                        author,
+                        repo,
+                        fork_author,
+                        default_branch,
+                        branch,
+                    } => Ok(format!(
+                        "https://{}/{}/{}/compare/{}...{}:{}",
+                        host, author, repo, default_branch, fork_author, branch,
+                    )),
                 }
             } else {
                 Err(Error::PullReqNotSupported {
