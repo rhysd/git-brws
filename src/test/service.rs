@@ -569,7 +569,7 @@ fn pull_request_create_page_url_at_parent_repo() {
     let url = build_page_url(&OPEN_PR, &cfg).unwrap();
     assert_eq!(
         &url,
-        "https://github.com/rust-lang/rust.vim/compare/master...this-branch-never-existing"
+        "https://github.com/rust-lang/rust.vim/compare/master...rhysd:this-branch-never-existing"
     );
 }
 
