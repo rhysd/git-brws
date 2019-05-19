@@ -1,3 +1,12 @@
+<a name="0.11.2"></a>
+# [0.11.2](https://github.com/rhysd/git-brws/releases/tag/0.11.2) - 19 May 2019
+
+- **Fix:** URL is wrong when opening 'New Pull Request' page of parent repository (#13)
+- **Improve:** Reduce binary size (about 30% smaller) by tweaking build configuration
+
+[Changes][0.11.2]
+
+
 <a name="0.11.1"></a>
 # [0.11.1](https://github.com/rhysd/git-brws/releases/tag/0.11.1) - 30 Apr 2019
 
@@ -176,6 +185,7 @@ First binaries release for Linux (32bit/64bit) and macOS (64bit) using Travis CI
 [Changes][v0.4.2]
 
 
+[0.11.2]: https://github.com/rhysd/git-brws/compare/0.11.1...0.11.2
 [0.11.1]: https://github.com/rhysd/git-brws/compare/0.11.0...0.11.1
 [0.11.0]: https://github.com/rhysd/git-brws/compare/0.10.1...0.11.0
 [0.10.1]: https://github.com/rhysd/git-brws/compare/0.10.0...0.10.1
