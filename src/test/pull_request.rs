@@ -103,3 +103,24 @@ fn test_no_pr_found_at_parent_repo() {
         p => assert!(false, "{:?}", p),
     }
 }
+
+#[test]
+fn test_find_pr_new_pr_from_fork() {
+    let cfg = config(Some("unknown-branch-which-does-not-exist-for-test"), env!());
+    match find_page("api.github.com", "rhysd", "rust.vim", &cfg).unwrap() {
+        Page::NewAtParent {
+            author,
+            repo,
+            fork_author,
+            default_branch,
+            branch,
+        } => {
+            assert_eq!(author, "rust-lang");
+            assert_eq!(repo, "rust.vim");
+            assert_eq!(default_branch, "master");
+            assert_eq!(branch, "unknown-branch-which-does-not-exist-for-test");
+            assert_eq!(fork_author, "rhysd");
+        }
+        p => assert!(false, "{:?}", p),
+    }
+}
