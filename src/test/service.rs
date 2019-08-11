@@ -73,7 +73,7 @@ fn convert_ssh_url() {
             "https://bitbucket.org/user/repo",
         ),
         (
-           "ssh://team@vs-ssh.visualstudio.com:v3/team/repo/repo",
+            "ssh://team@vs-ssh.visualstudio.com:v3/team/repo/repo",
             "https://dev.azure.com/team/repo",
         ),
         (
@@ -107,7 +107,7 @@ fn open_page_url() {
         ),
         (
             "https://dev.azure.com/team/repo/_git/repo",
-            "https://dev.azure.com/team/repo"
+            "https://dev.azure.com/team/repo",
         ),
     ] {
         let c = config(repo, None, None);
@@ -445,7 +445,7 @@ fn issue_number_url() {
         ),
         (
             "https://dev.azure.com/team/repo/_git/repo",
-            "https://dev.azure.com/team/repo/_workitems/edit/123"
+            "https://dev.azure.com/team/repo/_workitems/edit/123",
         ),
     ] {
         let c = config(repo, None, None);

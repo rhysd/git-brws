@@ -263,36 +263,40 @@ fn build_bitbucket_url(user: &str, repo: &str, cfg: &Config, page: &Page) -> Res
     }
 }
 
-fn build_azdevops_url(
-    team: &str,
-    repo: &str,
-    cfg: &Config,
-    page: &Page,
-) -> Result<String> {
+fn build_azdevops_url(team: &str, repo: &str, cfg: &Config, page: &Page) -> Result<String> {
     match page {
-        Page::Open { pull_request: true, ..  } => {
+        Page::Open {
+            pull_request: true, ..
+        } => {
             if let Some(ref b) = cfg.branch {
                 Ok(format!("https://dev.azure.com/{}/_git/{}/pullrequestcreate?sourceRef={}&targetRef=master", team, repo, b))
             } else {
-                Err(Error::NoLocalRepoFound { operation: "opening a pull request without specifying branch".to_string(), })
+                Err(Error::NoLocalRepoFound {
+                    operation: "opening a pull request without specifying branch".to_string(),
+                })
             }
-        },
+        }
 
         Page::Open { .. } => {
             if let Some(ref b) = cfg.branch {
-                Ok(format!("https://dev.azure.com/{}/_git/{}?version=GB{}", team, repo, b))
+                Ok(format!(
+                    "https://dev.azure.com/{}/_git/{}?version=GB{}",
+                    team, repo, b
+                ))
             } else {
                 Ok(format!("https://dev.azure.com/{}/{}", team, repo))
             }
-        },
+        }
 
-        Page::Commit { ref hash } => {
-            Ok(format!("https://dev.azure.com/{}/_git/{}/commit/{}", team, repo, hash))
-        },
+        Page::Commit { ref hash } => Ok(format!(
+            "https://dev.azure.com/{}/_git/{}/commit/{}",
+            team, repo, hash
+        )),
 
-        Page::Tag { ref tagname, .. } => {
-            Ok(format!("https://dev.azure.com/{}/_git/{}?version=GT{}", team, repo, tagname))
-        },
+        Page::Tag { ref tagname, .. } => Ok(format!(
+            "https://dev.azure.com/{}/_git/{}?version=GT{}",
+            team, repo, tagname
+        )),
 
         Page::FileOrDir {
             ref relative_path,
@@ -308,11 +312,12 @@ fn build_azdevops_url(
             if *blame { "?_a=annotate" } else { "" },
         )),
 
-        Page::Issue { number } => {
-            Ok(format!("https://dev.azure.com/{}/{}/_workitems/edit/{}", team, repo, number))
-        },
+        Page::Issue { number } => Ok(format!(
+            "https://dev.azure.com/{}/{}/_workitems/edit/{}",
+            team, repo, number
+        )),
 
-       _ => Err(Error::AzureDevOpsNotSupported)
+        _ => Err(Error::AzureDevOpsNotSupported),
     }
 }
 
@@ -326,7 +331,8 @@ pub fn slug_from_path<'a>(path: &'a str) -> Result<(&'a str, &'a str)> {
     if user == "v3-special-az-devops-case" {
         // Skip v3 in azure devops ssh urls.
         user = split.next().ok_or_else(|| Error::NoUserInPath {
-        path: path.to_string(),})?;
+            path: path.to_string(),
+        })?;
     }
 
     let mut repo = split.next().ok_or_else(|| Error::NoRepoInPath {
@@ -338,7 +344,7 @@ pub fn slug_from_path<'a>(path: &'a str) -> Result<(&'a str, &'a str)> {
     } else if repo.ends_with("_git") {
         // Handle special case for weird azure urls.
         repo = split.next().ok_or_else(|| Error::NoRepoInPath {
-        path: path.to_string(),
+            path: path.to_string(),
         })?;
     }
     Ok((user, repo))
