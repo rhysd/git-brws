@@ -263,20 +263,104 @@ fn build_bitbucket_url(user: &str, repo: &str, cfg: &Config, page: &Page) -> Res
     }
 }
 
+fn build_azdevops_url(
+    team: &str,
+    repo: &str,
+    cfg: &Config,
+    page: &Page,
+) -> Result<String> {
+    match page {
+        Page::Open { pull_request: true, ..  } => {
+            if let Some(ref b) = cfg.branch {
+                Ok(format!("https://dev.azure.com/{}/_git/{}/pullrequestcreate?sourceRef={}&targetRef=master", team, repo, b))
+            } else {
+                Err(Error::NoLocalRepoFound { operation: "opening a pull request without specifying branch".to_string(), })
+            }
+        },
+
+        Page::Open { .. } => {
+            if let Some(ref b) = cfg.branch {
+                Ok(format!("https://dev.azure.com/{}/_git/{}?version=GB{}", team, repo, b))
+            } else {
+                Ok(format!("https://dev.azure.com/{}/{}", team, repo))
+            }
+        },
+
+        Page::Commit { ref hash } => {
+            Ok(format!("https://dev.azure.com/{}/_git/{}/commit/{}", team, repo, hash))
+        },
+
+        Page::Tag { ref tagname, .. } => {
+            Ok(format!("https://dev.azure.com/{}/_git/{}?version=GT{}", team, repo, tagname))
+        },
+
+        Page::FileOrDir {
+            ref relative_path,
+            ref hash,
+            line: None,
+            blame,
+        } => Ok(format!(
+            "https://dev.azure.com/{}/_git/{}/commit/{}?path={}{}",
+            team,
+            repo,
+            hash,
+            to_slash(relative_path),
+            if *blame { "?_a=annotate" } else { "" },
+        )),
+
+        Page::Issue { number } => {
+            Ok(format!("https://dev.azure.com/{}/{}/_workitems/edit/{}", team, repo, number))
+        },
+
+       _ => Err(Error::AzureDevOpsNotSupported)
+    }
+}
+
 // Note: Parse '/user/repo.git' or '/user/repo' or 'user/repo' into 'user' and 'repo'
 pub fn slug_from_path<'a>(path: &'a str) -> Result<(&'a str, &'a str)> {
     let mut split = path.split('/').skip_while(|s| s.is_empty());
-    let user = split.next().ok_or_else(|| Error::NoUserInPath {
+    let mut user = split.next().ok_or_else(|| Error::NoUserInPath {
         path: path.to_string(),
     })?;
+
+    if user == "v3-special-az-devops-case" {
+        // Skip v3 in azure devops ssh urls.
+        user = split.next().ok_or_else(|| Error::NoUserInPath {
+        path: path.to_string(),})?;
+    }
+
     let mut repo = split.next().ok_or_else(|| Error::NoRepoInPath {
         path: path.to_string(),
     })?;
     if repo.ends_with(".git") {
         // Slice '.git' from 'repo.git'
         repo = &repo[0..repo.len() - 4];
+    } else if repo.ends_with("_git") {
+        // Handle special case for weird azure urls.
+        repo = split.next().ok_or_else(|| Error::NoRepoInPath {
+        path: path.to_string(),
+        })?;
     }
     Ok((user, repo))
+}
+
+fn preprocess_repo_to_url(repo: &str) -> Result<Url> {
+    let processed_repo: String;
+
+    // Workaround Url::parse not being able to parse the SSH urls for AzureDevOps,
+    // it seems like the URL's don't adhere to the RFC?
+    if repo.contains("visualstudio.com:v3") || repo.contains("azure.com:v3") {
+        // Hack: It should be nice to find a cleaner solution than having
+        // this special marker that slug_from_path knows about.
+        processed_repo = repo.replace(":v3/", ":22/v3-special-az-devops-case/");
+    } else {
+        processed_repo = repo.to_string();
+    }
+
+    Url::parse(&processed_repo).map_err(|e| Error::BrokenUrl {
+        url: processed_repo,
+        msg: format!("{}", e),
+    })
 }
 
 // Known URL formats
@@ -284,12 +368,9 @@ pub fn slug_from_path<'a>(path: &'a str) -> Result<(&'a str, &'a str)> {
 //  2. git@hosting_service.com:user/repo.git (-> ssh://git@hosting_service.com:22/user/repo.git)
 pub fn build_page_url(page: &Page, cfg: &Config) -> Result<String> {
     let repo_url = &cfg.repo;
+    let url = preprocess_repo_to_url(&repo_url)?;
     let env = &cfg.env;
 
-    let url = Url::parse(repo_url).map_err(|e| Error::BrokenUrl {
-        url: repo_url.to_string(),
-        msg: format!("{}", e),
-    })?;
     let path = url.path();
     let (user, repo_name) = slug_from_path(path)?;
     let host = url.host_str().ok_or_else(|| Error::BrokenUrl {
@@ -303,6 +384,10 @@ pub fn build_page_url(page: &Page, cfg: &Config) -> Result<String> {
         }
         "gitlab.com" => build_gitlab_url(host, user, repo_name, cfg, page),
         "bitbucket.org" => build_bitbucket_url(user, repo_name, cfg, page),
+        "visualstudio.com" => build_azdevops_url(user, repo_name, cfg, page),
+        "vs-ssh.visualstudio.com" => build_azdevops_url(user, repo_name, cfg, page),
+        "dev.azure.com" => build_azdevops_url(user, repo_name, cfg, page),
+        "ssh.dev.azure.com" => build_azdevops_url(user, repo_name, cfg, page),
         _ => {
             let is_gitlab = host.starts_with("gitlab.");
             let port = if host.starts_with("github.") {
