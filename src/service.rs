@@ -345,17 +345,15 @@ pub fn slug_from_path<'a>(path: &'a str) -> Result<(&'a str, &'a str)> {
 }
 
 fn preprocess_repo_to_url(repo: &str) -> Result<Url> {
-    let processed_repo: String;
-
     // Workaround Url::parse not being able to parse the SSH urls for AzureDevOps,
     // it seems like the URL's don't adhere to the RFC?
-    if repo.contains("visualstudio.com:v3") || repo.contains("azure.com:v3") {
+    let processed_repo = if repo.contains("visualstudio.com:v3") || repo.contains("azure.com:v3") {
         // Hack: It should be nice to find a cleaner solution than having
         // this special marker that slug_from_path knows about.
-        processed_repo = repo.replace(":v3/", ":22/v3-special-az-devops-case/");
+        repo.replace(":v3/", ":22/v3-special-az-devops-case/")
     } else {
-        processed_repo = repo.to_string();
-    }
+        repo.to_string()
+    };
 
     Url::parse(&processed_repo).map_err(|e| Error::BrokenUrl {
         url: processed_repo,
