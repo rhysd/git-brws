@@ -42,6 +42,16 @@ $ brew install git-brws
 It installs `git-brws` to `/usr/local/bin` and `git-brws.1` to `/usr/local/share/man/man1`.
 This is recommended way for installation on macOS since updating to the new version is easy.
 
+### On [Arch Linux](https://www.archlinux.org/)
+
+You can install `git-brws` via the [AUR package](https://aur.archlinux.org/packages/git-brws/):
+
+```
+git clone https://aur.archlinux.org/git-brws.git
+cd git-brws
+makepkg -si
+```
+
 ### With [cargo](https://crates.io/)
 
 ```
