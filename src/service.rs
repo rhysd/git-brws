@@ -321,16 +321,31 @@ fn build_azdevops_url(team: &str, repo: &str, cfg: &Config, page: &Page) -> Resu
     }
 }
 
-// Note: Parse '/user/repo.git' or '/user/repo' or 'user/repo' into 'user' and 'repo'
-pub fn slug_from_path<'a>(path: &'a str) -> Result<(&'a str, &'a str)> {
+fn is_azdevops(host: &str) -> bool {
+    match host {
+        "visualstudio.com" => true,
+        "vs-ssh.visualstudio.com" => true,
+        "dev.azure.com" => true,
+        "ssh.dev.azure.com" => true,
+        _ => false,
+    }
+}
+
+// Note: Parse '/team/_git/repo' or '/team/repo' into 'team' and 'repo'
+pub fn azdevops_slug_from_path<'a>(path: &'a str) -> Result<(&'a str, &'a str)> {
     let mut split = path.split('/').skip_while(|s| s.is_empty());
-    let mut user = split.next().ok_or_else(|| Error::NoUserInPath {
+
+    let mut team = split.next().ok_or_else(|| Error::NoUserInPath {
         path: path.to_string(),
     })?;
 
-    if user == "v3-special-az-devops-case" {
-        // Skip v3 in azure devops ssh urls.
-        user = split.next().ok_or_else(|| Error::NoUserInPath {
+    // Strip off v3 from Azure DevOps ssh:// paths.
+    // See: preprocess_repo_to_url
+    //
+    // Example: ssh://git@ssh.dev.azure.com:v3/team/repo/repo
+    //
+    if team == "v3" {
+        team = split.next().ok_or_else(|| Error::NoRepoInPath {
             path: path.to_string(),
         })?;
     }
@@ -338,25 +353,44 @@ pub fn slug_from_path<'a>(path: &'a str) -> Result<(&'a str, &'a str)> {
     let mut repo = split.next().ok_or_else(|| Error::NoRepoInPath {
         path: path.to_string(),
     })?;
-    if repo.ends_with(".git") {
-        // Slice '.git' from 'repo.git'
-        repo = &repo[0..repo.len() - 4];
-    } else if repo.ends_with("_git") {
-        // Handle special case for weird azure urls.
+
+    if repo.ends_with("_git") {
         repo = split.next().ok_or_else(|| Error::NoRepoInPath {
             path: path.to_string(),
         })?;
     }
+    Ok((team, repo))
+}
+
+// Note: Parse '/user/repo.git' or '/user/repo' or 'user/repo' into 'user' and 'repo'
+pub fn slug_from_path<'a>(path: &'a str) -> Result<(&'a str, &'a str)> {
+    let mut split = path.split('/').skip_while(|s| s.is_empty());
+    let user = split.next().ok_or_else(|| Error::NoUserInPath {
+        path: path.to_string(),
+    })?;
+
+    let mut repo = split.next().ok_or_else(|| Error::NoRepoInPath {
+        path: path.to_string(),
+    })?;
+
+    if repo.ends_with(".git") {
+        // Slice '.git' from 'repo.git'
+        repo = &repo[0..repo.len() - 4];
+    } 
+
     Ok((user, repo))
 }
 
 fn preprocess_repo_to_url(repo: &str) -> Result<Url> {
-    // Workaround Url::parse not being able to parse the SSH urls for AzureDevOps,
-    // it seems like the URL's don't adhere to the RFC?
+    // Workaround Url::parse not being able to parse the SSH urls for AzureDevOps
+    // as they don't specify a port number, but use the colon syntax. It seems like
+    // the URL's don't adhere to the RFC? So we force a port number to the default
+    // SSH port so the Url will parse correctly.
+    //
+    // Example: ssh://git@ssh.dev.azure.com:v3/team/repo/repo
+    //
     let processed_repo = if repo.contains("visualstudio.com:v3") || repo.contains("azure.com:v3") {
-        // Hack: It should be nice to find a cleaner solution than having
-        // this special marker that slug_from_path knows about.
-        repo.replace(":v3/", ":22/v3-special-az-devops-case/")
+        repo.replace(":v3/", ":22/v3/")
     } else {
         repo.to_string()
     };
@@ -376,11 +410,16 @@ pub fn build_page_url(page: &Page, cfg: &Config) -> Result<String> {
     let env = &cfg.env;
 
     let path = url.path();
-    let (user, repo_name) = slug_from_path(path)?;
     let host = url.host_str().ok_or_else(|| Error::BrokenUrl {
         url: repo_url.to_string(),
         msg: "No host in URL".to_string(),
     })?;
+
+    let (user, repo_name) = if is_azdevops(host) {
+        azdevops_slug_from_path(path)?
+    } else {
+        slug_from_path(path)?
+    };
 
     match host {
         "github.com" => {
