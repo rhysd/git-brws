@@ -376,7 +376,7 @@ pub fn slug_from_path<'a>(path: &'a str) -> Result<(&'a str, &'a str)> {
     if repo.ends_with(".git") {
         // Slice '.git' from 'repo.git'
         repo = &repo[0..repo.len() - 4];
-    } 
+    }
 
     Ok((user, repo))
 }
