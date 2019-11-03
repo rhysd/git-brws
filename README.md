@@ -25,6 +25,7 @@ Features:
   - [Bitbucket](https://bitbucket.org)
   - [GitHub Enterprise](https://enterprise.github.com/home)
   - [GitLab](https://about.gitlab.com/)
+  - [Azure DevOps](https://azure.microsoft.com/services/devops/)
 - Prefers commit-specific page URL (permlink)
 - Available on Linux, macOS and Windows
 

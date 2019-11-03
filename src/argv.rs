@@ -60,8 +60,8 @@ const USAGE: &str = "\
 Usage: git brws [Options] {Args}
 
   Open a repository, file, commit, diff or pull request in your web browser from
-  command line. GitHub, Bitbucket, GitLab, GitHub Enterprise are supported as
-  hosting service.
+  command line. GitHub, Bitbucket, GitLab, GitHub Enterprise, Azure DevOps are
+  supported as hosting service.
   git-brws looks some environment variables for configuration. Please see
   https://github.com/rhysd/git-brws for more detail.
 
