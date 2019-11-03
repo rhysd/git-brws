@@ -263,7 +263,7 @@ fn build_bitbucket_url(user: &str, repo: &str, cfg: &Config, page: &Page) -> Res
     }
 }
 
-fn build_azdevops_url(team: &str, repo: &str, cfg: &Config, page: &Page) -> Result<String> {
+fn build_azure_devops_url(team: &str, repo: &str, cfg: &Config, page: &Page) -> Result<String> {
     match page {
         Page::Open {
             pull_request: true, ..
@@ -276,7 +276,6 @@ fn build_azdevops_url(team: &str, repo: &str, cfg: &Config, page: &Page) -> Resu
                 })
             }
         }
-
         Page::Open { .. } => {
             if let Some(ref b) = cfg.branch {
                 Ok(format!(
@@ -287,17 +286,14 @@ fn build_azdevops_url(team: &str, repo: &str, cfg: &Config, page: &Page) -> Resu
                 Ok(format!("https://dev.azure.com/{}/{}", team, repo))
             }
         }
-
         Page::Commit { ref hash } => Ok(format!(
             "https://dev.azure.com/{}/_git/{}/commit/{}",
             team, repo, hash
         )),
-
         Page::Tag { ref tagname, .. } => Ok(format!(
             "https://dev.azure.com/{}/_git/{}?version=GT{}",
             team, repo, tagname
         )),
-
         Page::FileOrDir {
             ref relative_path,
             ref hash,
@@ -311,28 +307,26 @@ fn build_azdevops_url(team: &str, repo: &str, cfg: &Config, page: &Page) -> Resu
             to_slash(relative_path),
             if *blame { "?_a=annotate" } else { "" },
         )),
-
         Page::Issue { number } => Ok(format!(
             "https://dev.azure.com/{}/{}/_workitems/edit/{}",
             team, repo, number
         )),
-
         _ => Err(Error::AzureDevOpsNotSupported),
     }
 }
 
-fn is_azdevops(host: &str) -> bool {
-    match host {
-        "visualstudio.com" => true,
-        "vs-ssh.visualstudio.com" => true,
-        "dev.azure.com" => true,
-        "ssh.dev.azure.com" => true,
-        _ => false,
-    }
+fn is_azure_devops_host(host: &str) -> bool {
+    [
+        "visualstudio.com",
+        "vs-ssh.visualstudio.com",
+        "dev.azure.com",
+        "ssh.dev.azure.com",
+    ]
+    .contains(&host)
 }
 
 // Note: Parse '/team/_git/repo' or '/team/repo' into 'team' and 'repo'
-pub fn azdevops_slug_from_path<'a>(path: &'a str) -> Result<(&'a str, &'a str)> {
+pub fn azure_devops_slug_from_path<'a>(path: &'a str) -> Result<(&'a str, &'a str)> {
     let mut split = path.split('/').skip_while(|s| s.is_empty());
 
     let mut team = split.next().ok_or_else(|| Error::NoUserInPath {
@@ -359,6 +353,7 @@ pub fn azdevops_slug_from_path<'a>(path: &'a str) -> Result<(&'a str, &'a str)> 
             path: path.to_string(),
         })?;
     }
+
     Ok((team, repo))
 }
 
@@ -415,8 +410,8 @@ pub fn build_page_url(page: &Page, cfg: &Config) -> Result<String> {
         msg: "No host in URL".to_string(),
     })?;
 
-    let (user, repo_name) = if is_azdevops(host) {
-        azdevops_slug_from_path(path)?
+    let (user, repo_name) = if is_azure_devops_host(host) {
+        azure_devops_slug_from_path(path)?
     } else {
         slug_from_path(path)?
     };
@@ -427,10 +422,9 @@ pub fn build_page_url(page: &Page, cfg: &Config) -> Result<String> {
         }
         "gitlab.com" => build_gitlab_url(host, user, repo_name, cfg, page),
         "bitbucket.org" => build_bitbucket_url(user, repo_name, cfg, page),
-        "visualstudio.com" => build_azdevops_url(user, repo_name, cfg, page),
-        "vs-ssh.visualstudio.com" => build_azdevops_url(user, repo_name, cfg, page),
-        "dev.azure.com" => build_azdevops_url(user, repo_name, cfg, page),
-        "ssh.dev.azure.com" => build_azdevops_url(user, repo_name, cfg, page),
+        "visualstudio.com" | "vs-ssh.visualstudio.com" | "dev.azure.com" | "ssh.dev.azure.com" => {
+            build_azure_devops_url(user, repo_name, cfg, page)
+        }
         _ => {
             let is_gitlab = host.starts_with("gitlab.");
             let port = if host.starts_with("github.") {
