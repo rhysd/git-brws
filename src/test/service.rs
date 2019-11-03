@@ -72,6 +72,14 @@ fn convert_ssh_url() {
             "ssh://git@bitbucket.org:22/user/repo.git",
             "https://bitbucket.org/user/repo",
         ),
+        (
+            "ssh://team@vs-ssh.visualstudio.com:v3/team/repo/repo",
+            "https://dev.azure.com/team/repo",
+        ),
+        (
+            "ssh://git@ssh.dev.azure.com:v3/team/repo/repo",
+            "https://dev.azure.com/team/repo",
+        ),
     ] {
         let c = config(repo, None, None);
         assert_eq!(build_page_url(&OPEN, &c).unwrap(), expected);
@@ -96,6 +104,10 @@ fn open_page_url() {
         (
             "https://gitlab.com/user/repo.git",
             "https://gitlab.com/user/repo",
+        ),
+        (
+            "https://dev.azure.com/team/repo/_git/repo",
+            "https://dev.azure.com/team/repo",
         ),
     ] {
         let c = config(repo, None, None);
@@ -126,6 +138,10 @@ fn open_branch_page_url() {
             "https://gitlab.somewhere.com/user/repo.git",
             "https://gitlab.somewhere.com/user/repo/tree/dev",
         ),
+        (
+            "https://dev.azure.com/team/_git/repo",
+            "https://dev.azure.com/team/_git/repo?version=GBdev",
+        ),
     ] {
         let c = config(repo, Some("dev"), None);
         assert_eq!(build_page_url(&OPEN, &c).unwrap(), expected);
@@ -153,6 +169,10 @@ fn commit_page_url() {
         (
             "https://gitlab.com/user/repo.git",
             "https://gitlab.com/user/repo/commit/90601f1037142605a32426f9ece0c07d479b9cc5",
+        ),
+        (
+            "https://dev.azure.com/team/_git/repo",
+            "https://dev.azure.com/team/_git/repo/commit/90601f1037142605a32426f9ece0c07d479b9cc5",
         ),
     ] {
         let c = config(repo, None, None);
@@ -224,6 +244,20 @@ fn diff_page_for_bitbucket_url() {
     assert!(
         build_page_url(&p, &c).is_err(),
         "bitbucket does not support diff page"
+    );
+}
+
+#[test]
+fn diff_page_for_azuredevops_url() {
+    let p = Page::Diff {
+        lhs: "561848bad7164d7568658456088b107ec9efd9f3".to_string(),
+        rhs: "90601f1037142605a32426f9ece0c07d479b9cc5".to_string(),
+        op: DiffOp::ThreeDots,
+    };
+    let c = config("https://dev.azure.com/team/repo/_git/repo", None, None);
+    assert!(
+        build_page_url(&p, &c).is_err(),
+        "azure devops does not support diff page"
     );
 }
 
@@ -408,6 +442,10 @@ fn issue_number_url() {
         (
             "https://gitlab.com/user/repo.git",
             "https://gitlab.com/user/repo/issues/123",
+        ),
+        (
+            "https://dev.azure.com/team/repo/_git/repo",
+            "https://dev.azure.com/team/repo/_workitems/edit/123",
         ),
     ] {
         let c = config(repo, None, None);

@@ -30,6 +30,7 @@ pub enum Error {
     },
     GitLabDiffNotSupported,
     BitbucketDiffNotSupported,
+    AzureDevOpsNotSupported,
     NoUserInPath {
         path: String,
     },
@@ -115,6 +116,7 @@ impl fmt::Display for Error {
             Error::OpenUrlFailure {url, msg} => write!(f, "{}: Cannot open URL {}", msg, url),
             Error::GitLabDiffNotSupported => write!(f, "GitLab does not support '..' for comparing diff between commits. Please use '...'"),
             Error::BitbucketDiffNotSupported => write!(f, "BitBucket does not support diff between commits (see https://bitbucket.org/site/master/issues/4779/ability-to-diff-between-any-two-commits)"),
+            Error::AzureDevOpsNotSupported => write!(f, "Azure Devops does not currently support this operation"),
             Error::NoUserInPath{path} => write!(f, "Can't detect user name from path {}", path),
             Error::NoRepoInPath{path} => write!(f, "Can't detect repository name from path {}", path),
             Error::UnknownHostingService {url} => write!(f, "Unknown hosting service for URL {}. If you want to use custom URL for GitHub Enterprise, please set $GIT_BRWS_GHE_URL_HOST", url),
