@@ -1,3 +1,13 @@
+<a name="0.11.3"></a>
+# [0.11.3](https://github.com/rhysd/git-brws/releases/tag/0.11.3) - 04 Nov 2019
+
+- **New:** Repositories hosted on [Azure DevOps](https://azure.microsoft.com/ja-jp/services/devops/) are now supported. Special thanks to @bgianfo for adding this. (#15)
+- **Improve:** On WSL, [`wslview`](https://github.com/wslutilities/wslu) may be used to open a page in browser if available. This was added by updating `open` crate from 0.12 to 0.13.
+- **Improve:** Update dependencies (especially `url` crate had major update)
+
+[Changes][0.11.3]
+
+
 <a name="0.11.2"></a>
 # [0.11.2](https://github.com/rhysd/git-brws/releases/tag/0.11.2) - 19 May 2019
 
@@ -185,6 +195,7 @@ First binaries release for Linux (32bit/64bit) and macOS (64bit) using Travis CI
 [Changes][v0.4.2]
 
 
+[0.11.3]: https://github.com/rhysd/git-brws/compare/0.11.2...0.11.3
 [0.11.2]: https://github.com/rhysd/git-brws/compare/0.11.1...0.11.2
 [0.11.1]: https://github.com/rhysd/git-brws/compare/0.11.0...0.11.1
 [0.11.0]: https://github.com/rhysd/git-brws/compare/0.10.1...0.11.0
