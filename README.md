@@ -336,56 +336,8 @@ Please see [the project page](https://github.com/rhysd/git-brws/projects/1).
 
 ## Development
 
-Repository for `git-brws` is [hosted at GitHub][github-repo].
+Please see [CONTRIBUTING.md](https://github.com/rhysd/git-brws/blob/master/CONTRIBUTING.md).
 
-To watch file changes and run linter/tests automatically:
-
-```sh
-cargo install cargo-watch
-cargo watch -x clippy -x test
-```
-
-Some tests require GitHub API access token. To run full tests:
-
-```sh
-export GITHUB_TOKEN=xxxxxxxxxxx
-cargo test
-```
-
-`cargo test` and `cargo clippy` are automatically run on pushing to remote by [cargo-husky](https://github.com/rhysd/cargo-husky).
-But some tests fail when the remote tracking branch does not exist. When you create a new branch,
-please use `--no-verify`. Please do not use `--no-verify` otherwise.
-
-```sh
-git checkout -b new-branch
-git push -u origin new-branch --no-verify
-```
-
-To update manpage file `git-brws.1` and `docs/index.html`, please edit `git-brws.1.ronn` and generate
-`git-brws.1` automatically with `docs/gen.sh` script. [ronn][] is necessary as a dependency.
-
-```sh
-gem install ronn
-./docs/gen.sh
-```
-
-To update Homebrew formula file, please use `HomebrewFormula/update.sh`.
-
-For example, when updating to 0.9.2:
-
-```sh
-./HomebrewFormula/update.sh 0.9.2
-```
-
-To update changelog, please run [changelog-from-release][] after describing release note at GitHub
-repository. It regenerates `CHANGELOG.md` from releases on GitHub.
-
-```sh
-go get github.com/rhysd/changelog-from-release
-changelog-from-release
-```
-
-[github-repo]: https://github.com/rhysd/git-brws
 [crate-badge]: https://img.shields.io/crates/v/git-brws.svg
 [crate]: https://crates.io/crates/git-brws
 [travis-ci]: https://travis-ci.org/rhysd/git-brws
@@ -393,7 +345,5 @@ changelog-from-release
 [appveyor-badge]: https://ci.appveyor.com/api/projects/status/q9gvpd30k1k5jsf0/branch/master?svg=true
 [appveyor]: https://ci.appveyor.com/project/rhysd/git-brws/branch/master
 [release page]: https://github.com/rhysd/git-brws/releases
-[ronn]: https://github.com/rtomayko/ronn
 [gitlab-pages]: https://docs.gitlab.com/ee/user/project/pages/getting_started_part_one.html#project-websites
 [bitbucket-cloud]: https://confluence.atlassian.com/bitbucket/publishing-a-website-on-bitbucket-cloud-221449776.html
-[changelog-from-release]: https://github.com/rhysd/changelog-from-release
