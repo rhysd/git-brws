@@ -7,14 +7,28 @@ use getopts::Options;
 use std::env;
 use std::ffi::OsStr;
 
-fn convert_ssh_url(mut url: String) -> String {
+fn fix_ssh_url(mut url: String) -> String {
     if url.starts_with("git@") {
-        // Note: Convert SSH protocol URL
-        //  git@service.com:user/repo.git -> ssh://git@service.com:22/user/repo.git
-        if let Some(i) = url.find(':') {
-            url.insert_str(i + 1, "22/");
-        }
+        // Examples:
+        //  git@service.com:user/repo.git -> ssh://git@service.com:user/repo.git
         url.insert_str(0, "ssh://");
+    }
+    if url.starts_with("ssh://") {
+        // Note: Convert SSH protocol URL port number. In Git protocol port number can be omitted
+        // but url::Url::parse does not allow it. So if port number is provided but colon is put,
+        // we replace it with default SSH port number 22.
+        //
+        // Examples:
+        //  ssh://git@service.com:user/repo.git -> ssh://git@service.com:22/user/repo.git
+        //  ssh://git@ssh.dev.azure.com:v3/team/repo/repo -> ssh://git@ssh.dev.azure.com:22/v3/team/repo/repo
+        let scheme_len = "ssh://".len();
+        if let Some(i) = &url[scheme_len..].find(':') {
+            // Check if port number is omitted
+            let after_colon = url[scheme_len + i + 1..].as_bytes();
+            if after_colon.is_empty() || !after_colon[0].is_ascii_digit() {
+                url.insert_str(scheme_len + i + 1, "22/");
+            }
+        }
     }
     url
 }
@@ -32,7 +46,11 @@ fn normalize_repo_format(mut slug: String, env: &EnvConfig) -> Result<String> {
         return Err(Error::BrokenRepoFormat { input: slug });
     }
 
-    if slug.starts_with("git@") || slug.starts_with("https://") || slug.starts_with("http://") {
+    if slug.starts_with("git@")
+        || slug.starts_with("https://")
+        || slug.starts_with("http://")
+        || slug.starts_with("ssh://")
+    {
         if !slug.ends_with(".git") {
             slug.push_str(".git");
         }
@@ -208,7 +226,7 @@ impl Parsed {
             }
         };
 
-        let repo = convert_ssh_url(repo);
+        let repo = fix_ssh_url(repo);
 
         Ok(Parsed::OpenPage(Config {
             repo,

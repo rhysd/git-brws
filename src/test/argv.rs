@@ -7,13 +7,16 @@ use std::fs;
 fn args_with_no_option() {
     match Parsed::from_iter(&["git-brws"]).unwrap() {
         Parsed::OpenPage(c) => {
-            assert!(vec![
-                "https://github.com/rhysd/git-brws.git",
-                "ssh://git@github.com:22/rhysd/git-brws.git",
-                "git@github.com:rhysd/git-brws.git",
-            ]
-            .iter()
-            .any(|u| &c.repo == u));
+            assert!(
+                &[
+                    "https://github.com/rhysd/git-brws.git",
+                    "ssh://git@github.com:22/rhysd/git-brws.git",
+                    "git@github.com:rhysd/git-brws.git",
+                ]
+                .contains(&c.repo.as_str()),
+                "{:?}",
+                c.repo
+            );
             assert_eq!(c.branch, None);
             match c.git_dir {
                 Some(ref d) => assert!(d.ends_with(".git"), "{:?}", d),
@@ -59,17 +62,52 @@ fn multiple_options() {
 }
 
 #[test]
-fn ssh_conversion_with_option() {
-    match Parsed::from_iter(&["git-brws", "-r", "git@github.com:user/repo.git"]).unwrap() {
-        Parsed::OpenPage(c) => {
-            assert_eq!(c.repo, "ssh://git@github.com:22/user/repo.git");
-        }
-        p => assert!(
-            false,
-            "Parse must be succeeded but actually results in {:?}",
-            p
+fn fix_ssh_repo_url() {
+    for (url, expected) in &[
+        // GitHub SSH protocols with SCP form.
+        // .git file extension and ssh:// and port number can be omitted
+        (
+            "git@github.com:user/repo.git",
+            "ssh://git@github.com:22/user/repo.git",
         ),
-    };
+        (
+            "ssh://git@github.com:user/repo.git",
+            "ssh://git@github.com:22/user/repo.git",
+        ),
+        (
+            "ssh://git@github.com:22/user/repo.git",
+            "ssh://git@github.com:22/user/repo.git",
+        ),
+        (
+            "ssh://git@github.com:user/repo",
+            "ssh://git@github.com:22/user/repo.git",
+        ),
+        // Azure DevOps URLs
+        (
+            "ssh://team@vs-ssh.visualstudio.com:v3/team/repo/repo",
+            "ssh://team@vs-ssh.visualstudio.com:22/v3/team/repo/repo.git",
+        ),
+        (
+            "ssh://git@ssh.dev.azure.com:v3/team/repo/repo",
+            "ssh://git@ssh.dev.azure.com:22/v3/team/repo/repo.git",
+        ),
+        // Port number is not omitted
+        (
+            "git@github.somewhere.com:123/user/repo.git",
+            "ssh://git@github.somewhere.com:123/user/repo.git",
+        ),
+    ] {
+        match Parsed::from_iter(&["git-brws", "-r", url]).unwrap() {
+            Parsed::OpenPage(c) => {
+                assert_eq!(c.repo, *expected);
+            }
+            p => assert!(
+                false,
+                "Parse must be succeeded but actually results in {:?}",
+                p
+            ),
+        }
+    }
 }
 
 #[test]

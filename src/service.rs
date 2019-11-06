@@ -376,32 +376,15 @@ pub fn slug_from_path<'a>(path: &'a str) -> Result<(&'a str, &'a str)> {
     Ok((user, repo))
 }
 
-fn preprocess_repo_to_url(repo: &str) -> Result<Url> {
-    // Workaround Url::parse not being able to parse the SSH urls for AzureDevOps
-    // as they don't specify a port number, but use the colon syntax. It seems like
-    // the URL's don't adhere to the RFC? So we force a port number to the default
-    // SSH port so the Url will parse correctly.
-    //
-    // Example: ssh://git@ssh.dev.azure.com:v3/team/repo/repo
-    //
-    let processed_repo = if repo.contains("visualstudio.com:v3") || repo.contains("azure.com:v3") {
-        repo.replace(":v3/", ":22/v3/")
-    } else {
-        repo.to_string()
-    };
-
-    Url::parse(&processed_repo).map_err(|e| Error::BrokenUrl {
-        url: processed_repo,
-        msg: format!("{}", e),
-    })
-}
-
 // Known URL formats
 //  1. https://hosting_service.com/user/repo.git
 //  2. git@hosting_service.com:user/repo.git (-> ssh://git@hosting_service.com:22/user/repo.git)
 pub fn build_page_url(page: &Page, cfg: &Config) -> Result<String> {
     let repo_url = &cfg.repo;
-    let url = preprocess_repo_to_url(&repo_url)?;
+    let url = Url::parse(&repo_url).map_err(|e| Error::BrokenUrl {
+        url: repo_url.to_string(),
+        msg: format!("{}", e),
+    })?;
     let env = &cfg.env;
 
     let path = url.path();

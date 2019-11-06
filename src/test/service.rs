@@ -60,9 +60,9 @@ fn config_for_pr(token: Option<String>, repo: &str, branch: Option<&str>) -> Con
 }
 
 // Note:
-// git@ -> ssh://git@ conversion is done in git.rs.
+// git@ -> ssh://git@ conversion is done in argv.rs.
 #[test]
-fn convert_ssh_url() {
+fn build_url_from_ssh_url() {
     for &(repo, expected) in &[
         (
             "ssh://git@github.com:22/user/repo.git",
@@ -73,11 +73,11 @@ fn convert_ssh_url() {
             "https://bitbucket.org/user/repo",
         ),
         (
-            "ssh://team@vs-ssh.visualstudio.com:v3/team/repo/repo",
+            "ssh://team@vs-ssh.visualstudio.com:22/v3/team/repo/repo.git",
             "https://dev.azure.com/team/repo",
         ),
         (
-            "ssh://git@ssh.dev.azure.com:v3/team/repo/repo",
+            "ssh://git@ssh.dev.azure.com:22/v3/team/repo/repo.git",
             "https://dev.azure.com/team/repo",
         ),
     ] {
