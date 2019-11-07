@@ -15,8 +15,8 @@ fn fix_ssh_url(mut url: String) -> String {
     }
     if url.starts_with("ssh://") {
         // Note: Convert SSH protocol URL port number. In Git protocol port number can be omitted
-        // but url::Url::parse does not allow it. So if port number is provided but colon is put,
-        // we replace it with default SSH port number 22.
+        // but url::Url::parse does not allow it. So if port number is not provided but colon is
+        // put, we append default SSH port number 22.
         //
         // Examples:
         //  ssh://git@service.com:user/repo.git -> ssh://git@service.com:22/user/repo.git
@@ -26,7 +26,7 @@ fn fix_ssh_url(mut url: String) -> String {
             // Check if port number is omitted
             let after_colon = url[scheme_len + i + 1..].as_bytes();
             if after_colon.is_empty() || !after_colon[0].is_ascii_digit() {
-                url.insert_str(scheme_len + i + 1, "22/");
+                url.insert_str(scheme_len + i + 1, "22/"); // Insert port number after colon
             }
         }
     }
