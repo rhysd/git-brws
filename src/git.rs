@@ -65,7 +65,10 @@ impl<'a> Git<'a> {
             })
     }
 
-    pub fn tracking_remote_url<S: AsRef<str>>(&self, branch: &Option<S>) -> Result<String> {
+    pub fn tracking_remote_url<S>(&self, branch: &Option<S>) -> Result<(String, String)>
+    where
+        S: AsRef<str>,
+    {
         let rev = match branch {
             Some(b) => format!("{}@{{u}}", b.as_ref()),
             None => "@{u}".to_string(),
@@ -76,14 +79,14 @@ impl<'a> Git<'a> {
             Err(Error::GitCommandError { ref stderr, .. })
                 if stderr.contains("does not point to a branch") =>
             {
-                return Ok(self.remote_url("origin")?);
+                return Ok((self.remote_url("origin")?, "origin".to_string()));
             }
             Err(err) => return Err(err),
         };
 
         // out is formatted as '{remote-name}/{branch-name}'
         match out.splitn(2, '/').next() {
-            Some(ref u) => self.remote_url(u),
+            Some(ref u) => Ok((self.remote_url(u)?, u.to_string())),
             None => Err(Error::UnexpectedRemoteName(out.clone())),
         }
     }
@@ -107,9 +110,37 @@ impl<'a> Git<'a> {
         self.command(&["rev-parse", "--abbrev-ref", "--symbolic", "HEAD"])
     }
 
-    pub fn remote_contains<S: AsRef<str>>(&self, spec: S) -> Result<bool> {
-        self.command(&["branch", "--remote", "--contains", spec.as_ref()])
-            .map(|o| !o.is_empty())
+    pub fn remote_contains<S, T>(&self, spec: S, remote_branch: T) -> Result<bool>
+    where
+        S: AsRef<str>,
+        T: AsRef<str>,
+    {
+        self.command(&[
+            "branch",
+            "--remote",
+            remote_branch.as_ref(),
+            "--contains",
+            spec.as_ref(),
+        ])
+        .map(|o| !o.is_empty())
+    }
+
+    // Returns {remote}/{branch}
+    pub fn remote_branch<S: AsRef<str>, T: AsRef<str>>(
+        &self,
+        remote_name: &Option<S>,
+        local_branch: &Option<T>,
+    ) -> Result<String> {
+        let remote = match remote_name {
+            Some(r) => r.as_ref(),
+            None => "{u}",
+        };
+        let branch = match local_branch {
+            Some(b) => b.as_ref(),
+            None => "",
+        };
+        let rev = format!("{}@{}", branch, remote);
+        self.command(&["rev-parse", "--abbrev-ref", "--symbolic", rev.as_str()])
     }
 }
 

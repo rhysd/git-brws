@@ -18,6 +18,7 @@ fn config(repo: &str, branch: Option<&str>, args: Vec<&str>) -> Config {
         pull_request: false,
         website: false,
         blame: false,
+        remote: None,
         env: empty_env(),
     }
 }

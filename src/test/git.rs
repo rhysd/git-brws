@@ -98,6 +98,6 @@ fn git_root_dir() {
 fn git_check_remote_contains() {
     let g = Git::new(".git".as_ref(), "git");
     let h = g.tag_hash("0.10.1").unwrap();
-    let b = g.remote_contains(&h).unwrap();
+    let b = g.remote_contains(&h, "origin/master").unwrap();
     assert!(b);
 }

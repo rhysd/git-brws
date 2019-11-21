@@ -32,6 +32,7 @@ fn config(repo: &str, branch: Option<&str>, env: Option<EnvConfig>) -> Config {
         pull_request: false,
         website: false,
         blame: false,
+        remote: None,
         env: env.unwrap_or_else(empty_env),
     }
 }
@@ -55,6 +56,7 @@ fn config_for_pr(token: Option<String>, repo: &str, branch: Option<&str>) -> Con
         pull_request: true,
         website: false,
         blame: false,
+        remote: None,
         env,
     }
 }

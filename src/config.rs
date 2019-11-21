@@ -13,6 +13,7 @@ pub struct Config {
     pub pull_request: bool,
     pub website: bool,
     pub blame: bool,
+    pub remote: Option<String>,
     pub env: EnvConfig,
 }
 

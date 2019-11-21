@@ -201,7 +201,14 @@ impl<'a> BrowsePageParser<'a> {
         };
 
         // Fall back into branch name when the commit is not existing in remote branch (#12)
-        if !self.git.remote_contains(&hash)? {
+        //
+        // Ignore this check when the local branch does not point to any branch
+        let remote_contains_hash = match self.git.remote_branch(&self.cfg.remote, &self.cfg.branch)
+        {
+            Ok(remote_branch) => self.git.remote_contains(&hash, &remote_branch)?,
+            Err(_) => false,
+        };
+        if !remote_contains_hash {
             hash = match &self.cfg.branch {
                 Some(b) => b.clone(),
                 None => self.git.current_branch()?,

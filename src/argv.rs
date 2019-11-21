@@ -200,8 +200,8 @@ impl Parsed {
         let env = EnvConfig::from_iter(env::vars())?.with_global_env();
         let git_dir = git::git_dir(matches.opt_str("d"), env.git_command.as_str());
         let branch = matches.opt_str("b");
-        let (repo_url, git_dir) = match (matches.opt_str("r"), matches.opt_str("R")) {
-            (Some(repo), _) => {
+        let (repo_url, git_dir, remote) = match (matches.opt_str("r"), matches.opt_str("R")) {
+            (Some(repo), remote) => {
                 if !matches.free.is_empty() {
                     return Err(Error::ArgsNotAllowed {
                         flag: "--repo {repo}",
@@ -210,19 +210,19 @@ impl Parsed {
                 }
                 // In this case, `.git` directory is optional. So user can use this command
                 // outside Git repository
-                (normalize_repo_format(repo, &env)?, git_dir.ok())
+                (normalize_repo_format(repo, &env)?, git_dir.ok(), remote)
             }
             (None, remote) => {
                 // In this case, `.git` directory is required because remote URL is retrieved
                 // from Git configuration.
                 let git_dir = git_dir?;
                 let git = Git::new(&git_dir, &env.git_command);
-                let url = if let Some(remote) = remote {
-                    git.remote_url(&remote)?
+                let (url, remote) = if let Some(remote) = remote {
+                    (git.remote_url(&remote)?, remote)
                 } else {
                     git.tracking_remote_url(&branch)?
                 };
-                (url, Some(git_dir))
+                (url, Some(git_dir), Some(remote))
             }
         };
 
@@ -237,6 +237,7 @@ impl Parsed {
             website: matches.opt_present("w"),
             blame: matches.opt_present("B"),
             args: matches.free,
+            remote,
             env,
         }))
     }

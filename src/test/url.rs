@@ -24,6 +24,7 @@ fn smoke() {
         pull_request: false,
         website: false,
         blame: false,
+        remote: None,
         env: empty_env(),
     };
     match url::build_url(&c) {
