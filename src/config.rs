@@ -5,7 +5,7 @@ use std::path::PathBuf;
 
 #[derive(Debug)]
 pub struct Config {
-    pub repo: String,
+    pub repo_url: String,
     pub branch: Option<String>,
     pub git_dir: Option<PathBuf>,
     pub args: Vec<String>,

@@ -65,7 +65,7 @@ impl<'a> Git<'a> {
             })
     }
 
-    pub fn tracking_remote<S: AsRef<str>>(&self, branch: &Option<S>) -> Result<String> {
+    pub fn tracking_remote_url<S: AsRef<str>>(&self, branch: &Option<S>) -> Result<String> {
         let rev = match branch {
             Some(b) => format!("{}@{{u}}", b.as_ref()),
             None => "@{u}".to_string(),

@@ -10,7 +10,7 @@ fn config(repo: &str, branch: Option<&str>, args: Vec<&str>) -> Config {
     dir.push(Path::new(".git"));
     let dir = fs::canonicalize(dir).unwrap();
     Config {
-        repo: repo.to_string(),
+        repo_url: repo.to_string(),
         branch: branch.map(|s| s.to_string()),
         git_dir: Some(dir),
         args: args.into_iter().map(String::from).collect(),

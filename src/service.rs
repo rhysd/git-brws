@@ -380,7 +380,7 @@ pub fn slug_from_path<'a>(path: &'a str) -> Result<(&'a str, &'a str)> {
 //  1. https://hosting_service.com/user/repo.git
 //  2. git@hosting_service.com:user/repo.git (-> ssh://git@hosting_service.com:22/user/repo.git)
 pub fn build_page_url(page: &Page, cfg: &Config) -> Result<String> {
-    let repo_url = &cfg.repo;
+    let repo_url = &cfg.repo_url;
     let url = Url::parse(&repo_url).map_err(|e| Error::BrokenUrl {
         url: repo_url.to_string(),
         msg: format!("{}", e),

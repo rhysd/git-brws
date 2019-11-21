@@ -16,7 +16,7 @@ fn smoke() {
     let mut d = env::current_dir().unwrap();
     d.push(Path::new(".git"));
     let c = Config {
-        repo: "ssh://git@github.com:22/rhysd/git-brws.git".to_string(),
+        repo_url: "ssh://git@github.com:22/rhysd/git-brws.git".to_string(),
         branch: None,
         git_dir: Some(d),
         args: vec![],

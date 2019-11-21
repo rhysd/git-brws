@@ -18,7 +18,7 @@ fn config(branch: Option<&str>, env: EnvConfig) -> Config {
     dir.push(Path::new(".git"));
     let dir = fs::canonicalize(dir).unwrap();
     Config {
-        repo: "dummy url not used".to_string(),
+        repo_url: "dummy url not used".to_string(),
         branch: branch.map(|s| s.to_string()),
         git_dir: Some(dir),
         args: vec![],        // Unused

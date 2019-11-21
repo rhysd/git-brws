@@ -13,9 +13,9 @@ fn args_with_no_option() {
                     "ssh://git@github.com:22/rhysd/git-brws.git",
                     "git@github.com:rhysd/git-brws.git",
                 ]
-                .contains(&c.repo.as_str()),
+                .contains(&c.repo_url.as_str()),
                 "{:?}",
-                c.repo
+                c.repo_url,
             );
             assert_eq!(c.branch, None);
             match c.git_dir {
@@ -46,7 +46,7 @@ fn multiple_options() {
     .unwrap()
     {
         Parsed::OpenPage(c) => {
-            assert_eq!(c.repo, "https://github.com/foo/bar.git");
+            assert_eq!(c.repo_url, "https://github.com/foo/bar.git");
             assert_eq!(c.branch, Some("dev".to_string()));
             match c.git_dir {
                 Some(ref d) => assert!(d.ends_with(".git"), "{:?}", d),
@@ -99,7 +99,7 @@ fn fix_ssh_repo_url() {
     ] {
         match Parsed::from_iter(&["git-brws", "-r", url]).unwrap() {
             Parsed::OpenPage(c) => {
-                assert_eq!(c.repo, *expected);
+                assert_eq!(c.repo_url, *expected);
             }
             p => assert!(
                 false,
@@ -114,15 +114,15 @@ fn fix_ssh_repo_url() {
 fn repo_formatting() {
     let p = |r| Parsed::from_iter(&["git-brws", "-r", r]).unwrap();
     match p("bitbucket.org/foo/bar") {
-        Parsed::OpenPage(c) => assert_eq!(c.repo, "https://bitbucket.org/foo/bar.git"),
+        Parsed::OpenPage(c) => assert_eq!(c.repo_url, "https://bitbucket.org/foo/bar.git"),
         p => assert!(false, "{:?}", p),
     }
     match p("https://gitlab.com/foo/bar") {
-        Parsed::OpenPage(c) => assert_eq!(c.repo, "https://gitlab.com/foo/bar.git"),
+        Parsed::OpenPage(c) => assert_eq!(c.repo_url, "https://gitlab.com/foo/bar.git"),
         p => assert!(false, "{:?}", p),
     }
     match p("foo/bar") {
-        Parsed::OpenPage(c) => assert_eq!(c.repo, "https://github.com/foo/bar.git"),
+        Parsed::OpenPage(c) => assert_eq!(c.repo_url, "https://github.com/foo/bar.git"),
         p => assert!(false, "{:?}", p),
     }
 }
@@ -136,10 +136,10 @@ fn valid_remote_name() {
                 "ssh://git@github.com:22/rhysd/git-brws.git"
             ]
             .iter()
-            .find(|u| *u == &c.repo)
+            .find(|u| *u == &c.repo_url)
             .is_some(),
             "Unexpected remote URL for 'origin' remote: {}. For pull request, please ignore this test is failing",
-            c.repo
+            c.repo_url,
         ),
         p => assert!(false, "{:?}", p),
     }
@@ -219,7 +219,7 @@ fn no_git_dir() {
     match Parsed::from_iter(&["git-brws", "-d", root.to_str().unwrap(), "-r", "foo/bar"]).unwrap() {
         Parsed::OpenPage(c) => {
             assert_eq!(c.git_dir, None);
-            assert_eq!(&c.repo, "https://github.com/foo/bar.git");
+            assert_eq!(&c.repo_url, "https://github.com/foo/bar.git");
         }
         p => assert!(false, "{:?}", p),
     }
@@ -234,7 +234,7 @@ fn search_repo_from_github_by_name() {
     let parsed = Parsed::from_iter(&["git-brws", "-r", "user:rhysd vim.wasm"]).unwrap();
     match parsed {
         Parsed::OpenPage(c) => {
-            assert_eq!(&c.repo, "https://github.com/rhysd/vim.wasm.git");
+            assert_eq!(&c.repo_url, "https://github.com/rhysd/vim.wasm.git");
         }
         p => assert!(false, "{:?}", p),
     }

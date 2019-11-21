@@ -24,7 +24,7 @@ fn config(repo: &str, branch: Option<&str>, env: Option<EnvConfig>) -> Config {
     dir.push(Path::new(".git"));
     let dir = fs::canonicalize(dir).unwrap();
     Config {
-        repo: repo.to_string(),
+        repo_url: repo.to_string(),
         branch: branch.map(|s| s.to_string()),
         git_dir: Some(dir),
         args: vec![],
@@ -47,7 +47,7 @@ fn config_for_pr(token: Option<String>, repo: &str, branch: Option<&str>) -> Con
     let env = env;
 
     Config {
-        repo: repo.to_string(),
+        repo_url: repo.to_string(),
         branch: branch.map(|b| b.to_string()),
         git_dir: Some(dir),
         args: vec![],

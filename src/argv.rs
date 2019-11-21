@@ -200,7 +200,7 @@ impl Parsed {
         let env = EnvConfig::from_iter(env::vars())?.with_global_env();
         let git_dir = git::git_dir(matches.opt_str("d"), env.git_command.as_str());
         let branch = matches.opt_str("b");
-        let (repo, git_dir) = match (matches.opt_str("r"), matches.opt_str("R")) {
+        let (repo_url, git_dir) = match (matches.opt_str("r"), matches.opt_str("R")) {
             (Some(repo), _) => {
                 if !matches.free.is_empty() {
                     return Err(Error::ArgsNotAllowed {
@@ -220,16 +220,16 @@ impl Parsed {
                 let url = if let Some(remote) = remote {
                     git.remote_url(&remote)?
                 } else {
-                    git.tracking_remote(&branch)?
+                    git.tracking_remote_url(&branch)?
                 };
                 (url, Some(git_dir))
             }
         };
 
-        let repo = fix_ssh_url(repo);
+        let repo_url = fix_ssh_url(repo_url);
 
         Ok(Parsed::OpenPage(Config {
-            repo,
+            repo_url,
             branch,
             git_dir,
             stdout: matches.opt_present("u"),
