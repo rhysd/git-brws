@@ -1,3 +1,12 @@
+<a name="0.11.5"></a>
+# [0.11.5](https://github.com/rhysd/git-brws/releases/tag/0.11.5) - 21 Nov 2019
+
+- **Fix:** Opening file or directory is slow when remote repository has so many (~1000) branches (#19)
+- **Improve:** More accurately convert abbreviated notation of SSH URL
+
+[Changes][0.11.5]
+
+
 <a name="0.11.3"></a>
 # [0.11.3](https://github.com/rhysd/git-brws/releases/tag/0.11.3) - 04 Nov 2019
 
@@ -195,6 +204,7 @@ First binaries release for Linux (32bit/64bit) and macOS (64bit) using Travis CI
 [Changes][v0.4.2]
 
 
+[0.11.5]: https://github.com/rhysd/git-brws/compare/0.11.3...0.11.5
 [0.11.3]: https://github.com/rhysd/git-brws/compare/0.11.2...0.11.3
 [0.11.2]: https://github.com/rhysd/git-brws/compare/0.11.1...0.11.2
 [0.11.1]: https://github.com/rhysd/git-brws/compare/0.11.0...0.11.1
