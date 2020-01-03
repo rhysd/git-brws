@@ -1,4 +1,5 @@
 use crate::error::{Error, Result};
+use reqwest::blocking::{Client as ReqwestClient, RequestBuilder, Response};
 use reqwest::{header, Proxy, StatusCode};
 use std::mem;
 
@@ -42,7 +43,7 @@ struct RepoForHomepage {
 }
 
 pub struct Client {
-    client: reqwest::Client,
+    client: ReqwestClient,
     token: Option<String>,
     endpoint: String,
 }
@@ -54,7 +55,7 @@ impl Client {
         U: ToString,
         V: AsRef<str>,
     {
-        let mut b = reqwest::Client::builder();
+        let mut b = ReqwestClient::builder();
 
         if let Some(ref p) = https_proxy {
             b = b.proxy(Proxy::https(p.as_ref())?);
@@ -67,13 +68,13 @@ impl Client {
         })
     }
 
-    pub fn send(&self, mut req: reqwest::RequestBuilder) -> Result<reqwest::Response> {
+    pub fn send(&self, mut req: RequestBuilder) -> Result<Response> {
         req = req.header(header::ACCEPT, "application/vnd.github.v3+json");
         if let Some(token) = &self.token {
             req = req.bearer_auth(token);
         }
 
-        let mut res = req.send()?;
+        let res = req.send()?;
 
         let status = res.status();
         if status == StatusCode::OK {
@@ -104,7 +105,7 @@ impl Client {
         let params = [("q", query.as_str()), ("sort", "updated")];
         let url = format!("https://{}/search/issues", self.endpoint);
         let req = self.client.get(url.as_str()).query(&params);
-        let mut res = self.send(req)?;
+        let res = self.send(req)?;
         let mut issues: Issues = res.json()?;
 
         if issues.items.is_empty() {
@@ -124,7 +125,7 @@ impl Client {
         let repo = repo.as_ref();
         let url = format!("https://{}/repos/{}/{}", self.endpoint, author, repo);
         let req = self.client.get(url.as_str());
-        let mut res = self.send(req)?;
+        let res = self.send(req)?;
         let repo: Repo = res.json()?;
         Ok(repo)
     }
@@ -136,7 +137,7 @@ impl Client {
         let params = [("q", query.as_str()), ("per_page", "1")];
         let url = format!("https://{}/search/repositories", self.endpoint);
         let req = self.client.get(&url).query(&params);
-        let mut res = self.send(req)?;
+        let res = self.send(req)?;
         let mut results: SearchResults = res.json()?;
 
         if results.items.is_empty() {
@@ -155,7 +156,7 @@ impl Client {
         let repo = repo.as_ref();
         let url = format!("https://{}/repos/{}/{}", self.endpoint, owner, repo);
         let req = self.client.get(url.as_str());
-        let mut res = self.send(req)?;
+        let res = self.send(req)?;
         let repo: RepoForHomepage = res.json()?;
         Ok(repo.homepage)
     }

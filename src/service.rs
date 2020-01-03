@@ -26,7 +26,7 @@ fn first_available_url<T: AsRef<str>>(
     fallback: String,
     https_proxy: &Option<T>,
 ) -> String {
-    let mut builder = reqwest::Client::builder();
+    let mut builder = reqwest::blocking::Client::builder();
     if let Some(ref p) = https_proxy {
         if let Ok(p) = reqwest::Proxy::https(p.as_ref()) {
             builder = builder.proxy(p);
