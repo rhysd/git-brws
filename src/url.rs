@@ -4,9 +4,9 @@ use crate::page::parse_page;
 use crate::service;
 use std::process::{Command, Stdio};
 
-pub fn build_url(cfg: &Config) -> Result<String> {
+pub async fn build_url(cfg: &Config) -> Result<String> {
     let page = parse_page(&cfg)?;
-    service::build_page_url(&page, &cfg)
+    service::build_page_url(&page, &cfg).await
 }
 
 fn browse_with_cmd(url: &str, cmd: &str) -> Result<()> {

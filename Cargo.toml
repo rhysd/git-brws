@@ -22,11 +22,15 @@ maintenance = { status = "actively-developed" }
 getopts = "0.2"
 url = "2.1"
 open = "1.3"
-reqwest = { version = "0.10", features = ["default-tls", "blocking", "json"] }
+reqwest = { version = "0.10", features = ["json"] }
 serde_derive = "1.0"
 serde = "1.0"
 path-slash = "0.1"
 envy = "0.4"
+# For tokio::main
+tokio = { version = "0.2", default-features = false, features = ["macros"] }
+# Only for futures::join!
+futures = { version = "0.3", default-features = false, features = ["std", "async-await"] }
 
 [dev-dependencies.cargo-husky]
 version = "1.4"

@@ -41,7 +41,7 @@ pub enum Parsed {
     OpenPage(Config),
 }
 
-fn normalize_repo_format(mut slug: String, env: &EnvConfig) -> Result<String> {
+async fn normalize_repo_format(mut slug: String, env: &EnvConfig) -> Result<String> {
     if slug.is_empty() {
         return Err(Error::BrokenRepoFormat { input: slug });
     }
@@ -68,6 +68,7 @@ fn normalize_repo_format(mut slug: String, env: &EnvConfig) -> Result<String> {
             )?;
             client
                 .most_popular_repo_by_name(&slug)
+                .await
                 .map(|repo| repo.clone_url)
         }
         _ => Err(Error::BrokenRepoFormat { input: slug }),
@@ -141,7 +142,7 @@ Examples:
     $ git brws '#8'";
 
 impl Parsed {
-    pub fn from_iter<I>(argv: I) -> Result<Parsed>
+    pub async fn from_iter<I>(argv: I) -> Result<Parsed>
     where
         I: IntoIterator,
         I::Item: AsRef<OsStr>,
@@ -210,7 +211,7 @@ impl Parsed {
                 }
                 // In this case, `.git` directory is optional. So user can use this command
                 // outside Git repository
-                (normalize_repo_format(repo, &env)?, git_dir.ok(), remote)
+                (normalize_repo_format(repo, &env).await?, git_dir.ok(), remote)
             }
             (None, remote) => {
                 // In this case, `.git` directory is required because remote URL is retrieved
