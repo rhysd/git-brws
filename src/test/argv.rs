@@ -3,9 +3,9 @@ use crate::error::Error;
 use std::env;
 use std::fs;
 
-#[test]
-fn args_with_no_option() {
-    match Parsed::from_iter(&["git-brws"]).unwrap() {
+#[tokio::test]
+async fn args_with_no_option() {
+    match Parsed::from_iter(&["git-brws"]).await.unwrap() {
         Parsed::OpenPage(c) => {
             assert!(
                 &[
@@ -30,7 +30,7 @@ fn args_with_no_option() {
         r => assert!(false, "Failed to parse args with no option: {:?}", r),
     };
 
-    match Parsed::from_iter(&["git-brws", "foo", "bar"]).unwrap() {
+    match Parsed::from_iter(&["git-brws", "foo", "bar"]).await.unwrap() {
         Parsed::OpenPage(c) => {
             assert_eq!(c.args.len(), 2);
         }
@@ -38,11 +38,12 @@ fn args_with_no_option() {
     };
 }
 
-#[test]
-fn multiple_options() {
+#[tokio::test]
+async fn multiple_options() {
     match Parsed::from_iter(&[
         "git-brws", "-u", "-r", "foo/bar", "--dir", ".", "-b", "dev", "-w", "--blame",
     ])
+    .await
     .unwrap()
     {
         Parsed::OpenPage(c) => {
@@ -61,8 +62,8 @@ fn multiple_options() {
     };
 }
 
-#[test]
-fn fix_ssh_repo_url() {
+#[tokio::test]
+async fn fix_ssh_repo_url() {
     for (url, expected) in &[
         // GitHub SSH protocols with SCP form.
         // .git file extension and ssh:// and port number can be omitted
@@ -97,7 +98,7 @@ fn fix_ssh_repo_url() {
             "ssh://git@github.somewhere.com:123/user/repo.git",
         ),
     ] {
-        match Parsed::from_iter(&["git-brws", "-r", url]).unwrap() {
+        match Parsed::from_iter(&["git-brws", "-r", url]).await.unwrap() {
             Parsed::OpenPage(c) => {
                 assert_eq!(c.repo_url, *expected);
             }
@@ -110,26 +111,28 @@ fn fix_ssh_repo_url() {
     }
 }
 
-#[test]
-fn repo_formatting() {
-    let p = |r| Parsed::from_iter(&["git-brws", "-r", r]).unwrap();
-    match p("bitbucket.org/foo/bar") {
+#[tokio::test]
+async fn repo_formatting() {
+    async fn p(r: &str) -> Parsed {
+        Parsed::from_iter(&["git-brws", "-r", r]).await.unwrap()
+    }
+    match p("bitbucket.org/foo/bar").await {
         Parsed::OpenPage(c) => assert_eq!(c.repo_url, "https://bitbucket.org/foo/bar.git"),
         p => assert!(false, "{:?}", p),
     }
-    match p("https://gitlab.com/foo/bar") {
+    match p("https://gitlab.com/foo/bar").await {
         Parsed::OpenPage(c) => assert_eq!(c.repo_url, "https://gitlab.com/foo/bar.git"),
         p => assert!(false, "{:?}", p),
     }
-    match p("foo/bar") {
+    match p("foo/bar").await {
         Parsed::OpenPage(c) => assert_eq!(c.repo_url, "https://github.com/foo/bar.git"),
         p => assert!(false, "{:?}", p),
     }
 }
 
-#[test]
-fn valid_remote_name() {
-    match Parsed::from_iter(&["git-brws", "-R", "origin"]).unwrap() {
+#[tokio::test]
+async fn valid_remote_name() {
+    match Parsed::from_iter(&["git-brws", "-R", "origin"]).await.unwrap() {
         Parsed::OpenPage(c) => assert!(
             [
                 "https://github.com/rhysd/git-brws.git",
@@ -145,9 +148,9 @@ fn valid_remote_name() {
     }
 }
 
-#[test]
-fn invalid_remote_name() {
-    match Parsed::from_iter(&["git-brws", "-R", "this-remote-is-never-existing"]).unwrap_err() {
+#[tokio::test]
+async fn invalid_remote_name() {
+    match Parsed::from_iter(&["git-brws", "-R", "this-remote-is-never-existing"]).await.unwrap_err() {
         Error::GitObjectNotFound { kind, object, .. } => {
             assert_eq!(kind, "remote");
             assert_eq!(&object, "this-remote-is-never-existing");
@@ -156,9 +159,9 @@ fn invalid_remote_name() {
     }
 }
 
-#[test]
-fn help_option() {
-    match Parsed::from_iter(&["git-brws", "-h"]).unwrap() {
+#[tokio::test]
+async fn help_option() {
+    match Parsed::from_iter(&["git-brws", "-h"]).await.unwrap() {
         Parsed::Help(s) => {
             assert!(s.starts_with("Usage:"));
         }
@@ -166,9 +169,9 @@ fn help_option() {
     }
 }
 
-#[test]
-fn version_option() {
-    match Parsed::from_iter(&["git-brws", "-v"]).unwrap() {
+#[tokio::test]
+async fn version_option() {
+    match Parsed::from_iter(&["git-brws", "-v"]).await.unwrap() {
         Parsed::Version(s) => {
             assert!(!s.is_empty());
         }
@@ -176,16 +179,16 @@ fn version_option() {
     }
 }
 
-#[test]
-fn unknown_options() {
-    assert!(Parsed::from_iter(&["git-brws", "--unknown"]).is_err());
+#[tokio::test]
+async fn unknown_options() {
+    assert!(Parsed::from_iter(&["git-brws", "--unknown"]).await.is_err());
 }
 
-#[test]
-fn detect_git_dir() {
+#[tokio::test]
+async fn detect_git_dir() {
     let current = fs::canonicalize(env::current_dir().unwrap()).unwrap();
     let p = current.join("src").join("test");
-    match Parsed::from_iter(&["git-brws", "-d", p.to_str().unwrap()]).unwrap() {
+    match Parsed::from_iter(&["git-brws", "-d", p.to_str().unwrap()]).await.unwrap() {
         Parsed::OpenPage(c) => {
             let expected = Some(current.join(".git"));
             assert_eq!(c.git_dir, expected);
@@ -195,8 +198,8 @@ fn detect_git_dir() {
 }
 
 // For checking #9
-#[test]
-fn no_git_dir() {
+#[tokio::test]
+async fn no_git_dir() {
     let mut root = fs::canonicalize(env::current_dir().unwrap())
         .unwrap()
         .clone();
@@ -216,7 +219,7 @@ fn no_git_dir() {
         git_dir
     );
 
-    match Parsed::from_iter(&["git-brws", "-d", root.to_str().unwrap(), "-r", "foo/bar"]).unwrap() {
+    match Parsed::from_iter(&["git-brws", "-d", root.to_str().unwrap(), "-r", "foo/bar"]).await.unwrap() {
         Parsed::OpenPage(c) => {
             assert_eq!(c.git_dir, None);
             assert_eq!(&c.repo_url, "https://github.com/foo/bar.git");
@@ -225,13 +228,13 @@ fn no_git_dir() {
     }
 }
 
-#[test]
-fn search_repo_from_github_by_name() {
+#[tokio::test]
+async fn search_repo_from_github_by_name() {
     skip_if_no_token!();
 
     // Add user:rhysd to ensure to get expected result. But actually repository name is usually
     // passed like `-r react` as use case.
-    let parsed = Parsed::from_iter(&["git-brws", "-r", "user:rhysd vim.wasm"]).unwrap();
+    let parsed = Parsed::from_iter(&["git-brws", "-r", "user:rhysd vim.wasm"]).await.unwrap();
     match parsed {
         Parsed::OpenPage(c) => {
             assert_eq!(&c.repo_url, "https://github.com/rhysd/vim.wasm.git");
@@ -240,9 +243,9 @@ fn search_repo_from_github_by_name() {
     }
 }
 
-#[test]
-fn repo_specified_but_argument_is_not_empty() {
-    let err = Parsed::from_iter(&["git-brws", "-r", "foo", "HEAD"]).unwrap_err();
+#[tokio::test]
+async fn repo_specified_but_argument_is_not_empty() {
+    let err = Parsed::from_iter(&["git-brws", "-r", "foo", "HEAD"]).await.unwrap_err();
     match err {
         Error::ArgsNotAllowed { ref args, .. } => {
             assert!(format!("{}", err).contains("\"HEAD\""), "{:?}", args);

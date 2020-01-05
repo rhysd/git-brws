@@ -11,8 +11,8 @@ fn browse_env_config<S: ToString>(cmd: S) -> EnvConfig {
     env
 }
 
-#[test]
-fn smoke() {
+#[tokio::test]
+async fn smoke() {
     let mut d = env::current_dir().unwrap();
     d.push(Path::new(".git"));
     let c = Config {
@@ -27,7 +27,7 @@ fn smoke() {
         remote: None,
         env: empty_env(),
     };
-    match url::build_url(&c) {
+    match url::build_url(&c).await {
         Ok(u) => assert_eq!(
             u, "https://github.com/rhysd/git-brws",
             "Unexpected URL: {}",

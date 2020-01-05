@@ -63,8 +63,8 @@ fn config_for_pr(token: Option<String>, repo: &str, branch: Option<&str>) -> Con
 
 // Note:
 // git@ -> ssh://git@ conversion is done in argv.rs.
-#[test]
-fn build_url_from_ssh_url() {
+#[tokio::test]
+async fn build_url_from_ssh_url() {
     for &(repo, expected) in &[
         (
             "ssh://git@github.com:22/user/repo.git",
@@ -84,12 +84,12 @@ fn build_url_from_ssh_url() {
         ),
     ] {
         let c = config(repo, None, None);
-        assert_eq!(build_page_url(&OPEN, &c).unwrap(), expected);
+        assert_eq!(build_page_url(&OPEN, &c).await.unwrap(), expected);
     }
 }
 
-#[test]
-fn open_page_url() {
+#[tokio::test]
+async fn open_page_url() {
     for &(repo, expected) in &[
         (
             "https://github.com/user/repo.git",
@@ -113,12 +113,12 @@ fn open_page_url() {
         ),
     ] {
         let c = config(repo, None, None);
-        assert_eq!(build_page_url(&OPEN, &c).unwrap(), expected);
+        assert_eq!(build_page_url(&OPEN, &c).await.unwrap(), expected);
     }
 }
 
-#[test]
-fn open_branch_page_url() {
+#[tokio::test]
+async fn open_branch_page_url() {
     for &(repo, expected) in &[
         (
             "https://github.com/user/repo.git",
@@ -146,12 +146,12 @@ fn open_branch_page_url() {
         ),
     ] {
         let c = config(repo, Some("dev"), None);
-        assert_eq!(build_page_url(&OPEN, &c).unwrap(), expected);
+        assert_eq!(build_page_url(&OPEN, &c).await.unwrap(), expected);
     }
 }
 
-#[test]
-fn commit_page_url() {
+#[tokio::test]
+async fn commit_page_url() {
     let p = Page::Commit {
         hash: "90601f1037142605a32426f9ece0c07d479b9cc5".to_string(),
     };
@@ -178,12 +178,12 @@ fn commit_page_url() {
         ),
     ] {
         let c = config(repo, None, None);
-        assert_eq!(build_page_url(&p, &c).unwrap(), expected);
+        assert_eq!(build_page_url(&p, &c).await.unwrap(), expected);
     }
 }
 
-#[test]
-fn diff_page_url() {
+#[tokio::test]
+async fn diff_page_url() {
     for (ref op, ref opstr) in &[(DiffOp::TwoDots, ".."), (DiffOp::ThreeDots, "...")] {
         let p = Page::Diff {
             lhs: "561848bad7164d7568658456088b107ec9efd9f3".to_string(),
@@ -203,13 +203,13 @@ fn diff_page_url() {
             ),
         ] {
             let c = config(repo, None, None);
-            assert_eq!(build_page_url(&p, &c).unwrap(), expected, "for {:?}", op);
+            assert_eq!(build_page_url(&p, &c).await.unwrap(), expected, "for {:?}", op);
         }
     }
 }
 
-#[test]
-fn diff_page_for_gitlab_url() {
+#[tokio::test]
+async fn diff_page_for_gitlab_url() {
     fn page(op: DiffOp) -> Page {
         Page::Diff {
             lhs: "561848bad7164d7568658456088b107ec9efd9f3".to_string(),
@@ -222,7 +222,7 @@ fn diff_page_for_gitlab_url() {
     let u = "https://gitlab.com/user/repo.git";
     let c = config(u, None, None);
     assert!(
-        build_page_url(&p, &c).is_err(),
+        build_page_url(&p, &c).await.is_err(),
         "GitLab does not support '..' but error did not occur"
     );
 
@@ -230,13 +230,13 @@ fn diff_page_for_gitlab_url() {
     let u = "https://gitlab.com/user/repo.git";
     let c = config(u, None, None);
     assert_eq!(
-        build_page_url(&p, &c).unwrap(),
+        build_page_url(&p, &c).await.unwrap(),
         "https://gitlab.com/user/repo/compare/561848bad7164d7568658456088b107ec9efd9f3...90601f1037142605a32426f9ece0c07d479b9cc5",
     );
 }
 
-#[test]
-fn diff_page_for_bitbucket_url() {
+#[tokio::test]
+async fn diff_page_for_bitbucket_url() {
     let p = Page::Diff {
         lhs: "561848bad7164d7568658456088b107ec9efd9f3".to_string(),
         rhs: "90601f1037142605a32426f9ece0c07d479b9cc5".to_string(),
@@ -244,13 +244,13 @@ fn diff_page_for_bitbucket_url() {
     };
     let c = config("https://bitbucket.org/user/repo", None, None);
     assert!(
-        build_page_url(&p, &c).is_err(),
+        build_page_url(&p, &c).await.is_err(),
         "bitbucket does not support diff page"
     );
 }
 
-#[test]
-fn diff_page_for_azuredevops_url() {
+#[tokio::test]
+async fn diff_page_for_azuredevops_url() {
     let p = Page::Diff {
         lhs: "561848bad7164d7568658456088b107ec9efd9f3".to_string(),
         rhs: "90601f1037142605a32426f9ece0c07d479b9cc5".to_string(),
@@ -258,13 +258,13 @@ fn diff_page_for_azuredevops_url() {
     };
     let c = config("https://dev.azure.com/team/repo/_git/repo", None, None);
     assert!(
-        build_page_url(&p, &c).is_err(),
+        build_page_url(&p, &c).await.is_err(),
         "azure devops does not support diff page"
     );
 }
 
-#[test]
-fn file_path_with_file_path() {
+#[tokio::test]
+async fn file_path_with_file_path() {
     let relative_path = Path::new("src")
         .join("main.rs")
         .to_string_lossy()
@@ -327,27 +327,27 @@ fn file_path_with_file_path() {
         let c = config(repo, None, None);
 
         let p = page(None, false);
-        assert_eq!(build_page_url(&p, &c).unwrap(), no_line);
+        assert_eq!(build_page_url(&p, &c).await.unwrap(), no_line);
 
         let p = page(Some(Line::At(12)), false);
-        assert_eq!(build_page_url(&p, &c).unwrap(), with_line);
+        assert_eq!(build_page_url(&p, &c).await.unwrap(), with_line);
 
         let p = page(Some(Line::Range(1, 2)), false);
-        assert_eq!(build_page_url(&p, &c).unwrap(), with_range);
+        assert_eq!(build_page_url(&p, &c).await.unwrap(), with_range);
 
         let p = page(None, true);
-        assert_eq!(build_page_url(&p, &c).unwrap(), blame_no_line);
+        assert_eq!(build_page_url(&p, &c).await.unwrap(), blame_no_line);
 
         let p = page(Some(Line::At(12)), true);
-        assert_eq!(build_page_url(&p, &c).unwrap(), blame_with_line);
+        assert_eq!(build_page_url(&p, &c).await.unwrap(), blame_with_line);
 
         let p = page(Some(Line::Range(1, 2)), true);
-        assert_eq!(build_page_url(&p, &c).unwrap(), blame_with_range);
+        assert_eq!(build_page_url(&p, &c).await.unwrap(), blame_with_range);
     }
 }
 
-#[test]
-fn invalid_repo_url() {
+#[tokio::test]
+async fn invalid_repo_url() {
     for repo in &[
         "https://github.com.git",
         "https://github.com/user.git",
@@ -355,15 +355,15 @@ fn invalid_repo_url() {
     ] {
         let c = config(repo, None, None);
         assert!(
-            build_page_url(&OPEN, &c).is_err(),
+            build_page_url(&OPEN, &c).await.is_err(),
             "{} must be invalid",
             repo
         );
     }
 }
 
-#[test]
-fn customized_ssh_port() {
+#[tokio::test]
+async fn customized_ssh_port() {
     let mut env = empty_env();
     env.ghe_ssh_port = Some(10022);
     env.gitlab_ssh_port = Some(10022);
@@ -387,12 +387,12 @@ fn customized_ssh_port() {
         ),
     ] {
         let c = config(repo, None, Some(env.clone()));
-        assert_eq!(build_page_url(&OPEN, &c).unwrap(), expected.to_string(),);
+        assert_eq!(build_page_url(&OPEN, &c).await.unwrap(), expected.to_string(),);
     }
 }
 
-#[test]
-fn customized_ghe_host() {
+#[tokio::test]
+async fn customized_ghe_host() {
     let mut env = empty_env();
     env.ghe_url_host = Some("my-original-ghe.org".to_string());
 
@@ -406,27 +406,27 @@ fn customized_ghe_host() {
             None,
             Some(env.clone()),
         );
-        assert_eq!(build_page_url(&OPEN, &c).unwrap(), expected.to_string(),);
+        assert_eq!(build_page_url(&OPEN, &c).await.unwrap(), expected.to_string(),);
     }
 }
 
-#[test]
-fn broken_repo_url() {
+#[tokio::test]
+async fn broken_repo_url() {
     let env = &empty_env();
     for &url in &[
         "https://foo@/foo.bar", // empty host
         "https://foo bar",      // invalid domain character
     ] {
         let c = config(url, None, Some(env.clone()));
-        match build_page_url(&OPEN, &c) {
+        match build_page_url(&OPEN, &c).await {
             Err(Error::BrokenUrl { .. }) => { /* ok */ }
             v => assert!(false, "Unexpected error or success: {:?}", v),
         }
     }
 }
 
-#[test]
-fn issue_number_url() {
+#[tokio::test]
+async fn issue_number_url() {
     let p = Page::Issue { number: 123 };
     for &(repo, expected) in &[
         (
@@ -451,12 +451,12 @@ fn issue_number_url() {
         ),
     ] {
         let c = config(repo, None, None);
-        assert_eq!(build_page_url(&p, &c).unwrap(), expected);
+        assert_eq!(build_page_url(&p, &c).await.unwrap(), expected);
     }
 }
 
-#[test]
-fn unknown_github_enterprise_url() {
+#[tokio::test]
+async fn unknown_github_enterprise_url() {
     let mut env = empty_env();
     env.ghe_url_host = Some("github-yourcompany.com".to_string());
     let c = config(
@@ -464,21 +464,21 @@ fn unknown_github_enterprise_url() {
         None,
         Some(env),
     );
-    match build_page_url(&OPEN, &c).unwrap_err() {
+    match build_page_url(&OPEN, &c).await.unwrap_err() {
         Error::UnknownHostingService { .. } => { /* OK */ }
         err => assert!(false, "Unexpected error: {}", err),
     }
 
     let mut c = config_for_pr(None, "https://github-othercompany.com/foo/bar.git", None);
     c.env.ghe_url_host = Some("github-yourcompany.com".to_string());
-    match build_page_url(&OPEN_PR, &c).unwrap_err() {
+    match build_page_url(&OPEN_PR, &c).await.unwrap_err() {
         Error::UnknownHostingService { .. } => { /* OK */ }
         err => assert!(false, "Unexpected error: {}", err),
     }
 }
 
-#[test]
-fn website_github_pages() {
+#[tokio::test]
+async fn website_github_pages() {
     let mut env = empty_env();
     env.github_token = skip_if_no_token!();
     env.https_proxy = https_proxy();
@@ -499,13 +499,13 @@ fn website_github_pages() {
     ];
     for (url, expected) in testcases {
         let c = config(url, None, Some(env.clone()));
-        let actual = build_page_url(&OPEN_WEBSITE, &c).unwrap();
+        let actual = build_page_url(&OPEN_WEBSITE, &c).await.unwrap();
         assert_eq!(*expected, &actual);
     }
 }
 
-#[test]
-fn website_github_enterprise_pages() {
+#[tokio::test]
+async fn website_github_enterprise_pages() {
     let mut env = empty_env();
     env.ghe_url_host = Some("yourcompany-github.com".to_string());
     env.https_proxy = https_proxy();
@@ -525,13 +525,13 @@ fn website_github_enterprise_pages() {
     ];
     for (url, expected) in testcases {
         let c = config(url, None, Some(env.clone()));
-        let actual = build_page_url(&OPEN_WEBSITE, &c).unwrap();
+        let actual = build_page_url(&OPEN_WEBSITE, &c).await.unwrap();
         assert_eq!(*expected, &actual);
     }
 }
 
-#[test]
-fn website_gitlab_pages() {
+#[tokio::test]
+async fn website_gitlab_pages() {
     let env = empty_env();
     let testcases = &[
         (
@@ -545,13 +545,13 @@ fn website_gitlab_pages() {
     ];
     for (url, expected) in testcases {
         let c = config(url, None, Some(env.clone()));
-        let actual = build_page_url(&OPEN_WEBSITE, &c).unwrap();
+        let actual = build_page_url(&OPEN_WEBSITE, &c).await.unwrap();
         assert_eq!(*expected, &actual);
     }
 }
 
-#[test]
-fn website_bitbucket_cloud() {
+#[tokio::test]
+async fn website_bitbucket_cloud() {
     let mut env = empty_env();
     env.https_proxy = https_proxy();
     let testcases = &[
@@ -566,55 +566,55 @@ fn website_bitbucket_cloud() {
     ];
     for (url, expected) in testcases {
         let c = config(url, None, Some(env.clone()));
-        let actual = build_page_url(&OPEN_WEBSITE, &c).unwrap();
+        let actual = build_page_url(&OPEN_WEBSITE, &c).await.unwrap();
         assert_eq!(*expected, &actual);
     }
 }
 
-#[test]
-fn pull_request_page_url_with_branch() {
+#[tokio::test]
+async fn pull_request_page_url_with_branch() {
     let cfg = config_for_pr(
         skip_if_no_token!(),
         "https://github.com/rust-lang/rust.vim.git",
         Some("async-contextual-keyword"),
     );
 
-    let url = build_page_url(&OPEN_PR, &cfg).unwrap();
+    let url = build_page_url(&OPEN_PR, &cfg).await.unwrap();
     assert_eq!(&url, "https://github.com/rust-lang/rust.vim/pull/290");
 }
 
-#[test]
-fn pull_request_create_page_url_at_own_repo() {
+#[tokio::test]
+async fn pull_request_create_page_url_at_own_repo() {
     let cfg = config_for_pr(
         skip_if_no_token!(),
         "https://github.com/rhysd/git-brws.git",
         Some("this-branch-never-existing"),
     );
 
-    let url = build_page_url(&OPEN_PR, &cfg).unwrap();
+    let url = build_page_url(&OPEN_PR, &cfg).await.unwrap();
     assert_eq!(
         &url,
         "https://github.com/rhysd/git-brws/compare/master...this-branch-never-existing"
     );
 }
 
-#[test]
-fn pull_request_create_page_url_at_parent_repo() {
+#[tokio::test]
+async fn pull_request_create_page_url_at_parent_repo() {
     let cfg = config_for_pr(
         skip_if_no_token!(),
         "https://github.com/rhysd/rust.vim.git",
         Some("this-branch-never-existing"),
     );
 
-    let url = build_page_url(&OPEN_PR, &cfg).unwrap();
+    let url = build_page_url(&OPEN_PR, &cfg).await.unwrap();
     assert_eq!(
         &url,
         "https://github.com/rust-lang/rust.vim/compare/master...rhysd:this-branch-never-existing"
     );
 }
 
-#[test]
-fn pull_request_page_url_retrieving_branch_from_git_dir() {
+#[tokio::test]
+async fn pull_request_page_url_retrieving_branch_from_git_dir() {
     let cfg = config_for_pr(
         skip_if_no_token!(),
         "https://github.com/rhysd/git-brws.git",
@@ -622,7 +622,7 @@ fn pull_request_page_url_retrieving_branch_from_git_dir() {
     );
 
     // Accept both error and page since current branch may be for pull request
-    match build_page_url(&OPEN_PR, &cfg) {
+    match build_page_url(&OPEN_PR, &cfg).await {
         Ok(url) => {
             assert!(
                 url.contains("git-brws"),
@@ -634,11 +634,11 @@ fn pull_request_page_url_retrieving_branch_from_git_dir() {
     }
 }
 
-#[test]
-fn pull_request_page_url_without_branch_outside_git_repo() {
+#[tokio::test]
+async fn pull_request_page_url_without_branch_outside_git_repo() {
     let mut cfg = config_for_pr(None, "ssh://git@github.com:22/rhysd/git-brws.git", None);
     cfg.git_dir = None;
-    match build_page_url(&OPEN_PR, &cfg).unwrap_err() {
+    match build_page_url(&OPEN_PR, &cfg).await.unwrap_err() {
         Error::NoLocalRepoFound { operation } => assert!(
             operation.contains("opening a pull request"),
             "Unexpected operation: {}",
@@ -648,8 +648,8 @@ fn pull_request_page_url_without_branch_outside_git_repo() {
     }
 }
 
-#[test]
-fn pull_request_unsupported_services() {
+#[tokio::test]
+async fn pull_request_unsupported_services() {
     let urls = &[
         "https://gitlab.com/foo/bar.git",
         "https://gitlab.yourcompany.com/foo/bar.git",
@@ -660,24 +660,24 @@ fn pull_request_unsupported_services() {
     ];
     for url in urls {
         let cfg = config_for_pr(None, url, None);
-        match build_page_url(&OPEN_PR, &cfg).unwrap_err() {
+        match build_page_url(&OPEN_PR, &cfg).await.unwrap_err() {
             Error::PullReqNotSupported { .. } => { /* OK */ }
             err => assert!(false, "Unexpected error for URL {}: {}", url, err),
         }
     }
 }
 
-#[test]
-fn pull_request_github_enterprise_with_no_token() {
+#[tokio::test]
+async fn pull_request_github_enterprise_with_no_token() {
     let cfg = config_for_pr(None, "https://github.yourcompany.com/foo/bar.git", None);
-    match build_page_url(&OPEN_PR, &cfg).unwrap_err() {
+    match build_page_url(&OPEN_PR, &cfg).await.unwrap_err() {
         Error::GheTokenRequired => { /* OK */ }
         err => assert!(false, "Unexpected error: {}", err),
     }
 }
 
-#[test]
-fn tab_page_for_github_and_gitlab() {
+#[tokio::test]
+async fn tab_page_for_github_and_gitlab() {
     let hosts = &[
         "github.com",
         "github.yourcompany.com",
@@ -695,14 +695,14 @@ fn tab_page_for_github_and_gitlab() {
             format!("ssh://git@{}:22/foo/bar.git", host),
         ] {
             let c = config(url, None, None);
-            let actual = build_page_url(&page, &c).unwrap();
+            let actual = build_page_url(&page, &c).await.unwrap();
             assert_eq!(actual, expected, "{}", url);
         }
     }
 }
 
-#[test]
-fn tab_page_for_bitbucket() {
+#[tokio::test]
+async fn tab_page_for_bitbucket() {
     let page = Page::Tag {
         tagname: "tag".to_string(),
         commit: "01234cdef".to_string(),
@@ -713,7 +713,7 @@ fn tab_page_for_bitbucket() {
         "ssh://git@bitbucket.org:22/user/repo.git",
     ] {
         let c = config(url, None, None);
-        let actual = build_page_url(&page, &c).unwrap();
+        let actual = build_page_url(&page, &c).await.unwrap();
         assert_eq!(actual, expected, "{}", url);
     }
 }
