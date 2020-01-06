@@ -1,3 +1,4 @@
+use crate::async_runtime;
 use crate::config::Config;
 use crate::error::{Error, Result};
 use crate::github_api::Client;
@@ -37,7 +38,7 @@ fn first_available_url<T: AsRef<str>>(
     if let Ok(client) = builder.build() {
         for mut candidate in candidates.iter_mut() {
             let req = client.head(candidate.as_str());
-            if let Ok(res) = req.send() {
+            if let Ok(res) = async_runtime::blocking(req.send()) {
                 let status = res.status();
                 if status == reqwest::StatusCode::OK {
                     return mem::replace(&mut candidate, String::new());
@@ -46,6 +47,21 @@ fn first_available_url<T: AsRef<str>>(
         }
     }
     fallback
+}
+
+fn fetch_homepage<T, P>(
+    endpoint: &str,
+    token: Option<T>,
+    https_proxy: &Option<P>,
+    user: &str,
+    repo: &str,
+) -> Result<Option<String>>
+where
+    T: ToString,
+    P: AsRef<str>,
+{
+    let client = Client::build(endpoint, token, https_proxy)?;
+    async_runtime::blocking(client.repo_homepage(user, repo))
 }
 
 fn build_github_like_url<S: AsRef<str>>(
@@ -61,14 +77,14 @@ fn build_github_like_url<S: AsRef<str>>(
             match host {
                 "github.com" => {
                     if let Some(endpoint) = api_endpoint {
-                        if let Ok(client) = Client::build(
+                        if let Ok(Some(homepage)) = fetch_homepage(
                             endpoint.as_ref(),
                             cfg.env.github_token.as_ref(),
                             &cfg.env.https_proxy,
+                            user,
+                            repo,
                         ) {
-                            if let Ok(Some(homepage)) = client.repo_homepage(user, repo) {
-                                return Ok(homepage);
-                            }
+                            return Ok(homepage);
                         }
                     }
                     let host = &host[0..host.len() - 4];
@@ -85,12 +101,14 @@ fn build_github_like_url<S: AsRef<str>>(
                     if let (Some(ref endpoint), Some(ref token)) =
                         (api_endpoint, &cfg.env.ghe_token)
                     {
-                        if let Ok(client) =
-                            Client::build(endpoint.as_ref(), Some(token), &cfg.env.https_proxy)
-                        {
-                            if let Ok(Some(homepage)) = client.repo_homepage(user, repo) {
-                                return Ok(homepage);
-                            }
+                        if let Ok(Some(homepage)) = fetch_homepage(
+                            endpoint.as_ref(),
+                            Some(token),
+                            &cfg.env.https_proxy,
+                            user,
+                            repo,
+                        ) {
+                            return Ok(homepage);
                         }
                     }
                     let with_subdomain = format!("https://pages.{}/{}/{}", host, user, repo);
@@ -107,7 +125,12 @@ fn build_github_like_url<S: AsRef<str>>(
             pull_request: true, ..
         } => {
             if let Some(endpoint) = api_endpoint {
-                match pull_request::find_page(endpoint.as_ref(), user, repo, cfg)? {
+                match async_runtime::blocking(pull_request::find_page(
+                    endpoint.as_ref(),
+                    user,
+                    repo,
+                    cfg,
+                ))? {
                     pull_request::Page::Existing { url } => Ok(url),
                     pull_request::Page::New {
                         author,

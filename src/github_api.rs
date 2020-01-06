@@ -1,5 +1,6 @@
 use crate::error::{Error, Result};
 use reqwest::{header, Proxy, StatusCode};
+use reqwest::{Client as ReqwestClient, RequestBuilder, Response};
 use std::mem;
 
 #[derive(Debug, Deserialize)]
@@ -42,7 +43,7 @@ struct RepoForHomepage {
 }
 
 pub struct Client {
-    client: reqwest::Client,
+    client: ReqwestClient,
     token: Option<String>,
     endpoint: String,
 }
@@ -54,7 +55,8 @@ impl Client {
         U: ToString,
         V: AsRef<str>,
     {
-        let mut b = reqwest::Client::builder();
+        // GitHub API requires user agent in headers: https://developer.github.com/v3/#user-agent-required
+        let mut b = ReqwestClient::builder().user_agent("git-brws");
 
         if let Some(ref p) = https_proxy {
             b = b.proxy(Proxy::https(p.as_ref())?);
@@ -67,13 +69,13 @@ impl Client {
         })
     }
 
-    pub fn send(&self, mut req: reqwest::RequestBuilder) -> Result<reqwest::Response> {
+    pub async fn send(&self, mut req: RequestBuilder) -> Result<Response> {
         req = req.header(header::ACCEPT, "application/vnd.github.v3+json");
         if let Some(token) = &self.token {
             req = req.bearer_auth(token);
         }
 
-        let mut res = req.send()?;
+        let res = req.send().await?;
 
         let status = res.status();
         if status == StatusCode::OK {
@@ -81,12 +83,12 @@ impl Client {
         } else {
             Err(Error::GitHubStatusFailure {
                 status,
-                msg: res.text().unwrap(),
+                msg: res.text().await.unwrap(),
             })
         }
     }
 
-    pub fn find_pr_url(
+    pub async fn find_pr_url(
         &self,
         branch: &str,
         owner: &str,
@@ -104,8 +106,8 @@ impl Client {
         let params = [("q", query.as_str()), ("sort", "updated")];
         let url = format!("https://{}/search/issues", self.endpoint);
         let req = self.client.get(url.as_str()).query(&params);
-        let mut res = self.send(req)?;
-        let mut issues: Issues = res.json()?;
+        let res = self.send(req).await?;
+        let mut issues: Issues = res.json().await?;
 
         if issues.items.is_empty() {
             Ok(None)
@@ -115,7 +117,7 @@ impl Client {
         }
     }
 
-    pub fn repo<S, T>(&self, author: S, repo: T) -> Result<Repo>
+    pub async fn repo<S, T>(&self, author: S, repo: T) -> Result<Repo>
     where
         S: AsRef<str>,
         T: AsRef<str>,
@@ -124,20 +126,20 @@ impl Client {
         let repo = repo.as_ref();
         let url = format!("https://{}/repos/{}/{}", self.endpoint, author, repo);
         let req = self.client.get(url.as_str());
-        let mut res = self.send(req)?;
-        let repo: Repo = res.json()?;
+        let res = self.send(req).await?;
+        let repo: Repo = res.json().await?;
         Ok(repo)
     }
 
-    pub fn most_popular_repo_by_name<S: AsRef<str>>(&self, name: S) -> Result<SearchedRepo> {
+    pub async fn most_popular_repo_by_name<S: AsRef<str>>(&self, name: S) -> Result<SearchedRepo> {
         // XXX: No query syntax for exact matching to repository name. Use `in:name` instead though
         // it's matching to substrings.
         let query = format!("{} in:name", name.as_ref());
         let params = [("q", query.as_str()), ("per_page", "1")];
         let url = format!("https://{}/search/repositories", self.endpoint);
         let req = self.client.get(&url).query(&params);
-        let mut res = self.send(req)?;
-        let mut results: SearchResults = res.json()?;
+        let res = self.send(req).await?;
+        let mut results: SearchResults = res.json().await?;
 
         if results.items.is_empty() {
             Err(Error::NoSearchResult { query })
@@ -146,7 +148,7 @@ impl Client {
         }
     }
 
-    pub fn repo_homepage<S: AsRef<str>, U: AsRef<str>>(
+    pub async fn repo_homepage<S: AsRef<str>, U: AsRef<str>>(
         &self,
         owner: S,
         repo: U,
@@ -155,8 +157,8 @@ impl Client {
         let repo = repo.as_ref();
         let url = format!("https://{}/repos/{}/{}", self.endpoint, owner, repo);
         let req = self.client.get(url.as_str());
-        let mut res = self.send(req)?;
-        let repo: RepoForHomepage = res.json()?;
+        let res = self.send(req).await?;
+        let repo: RepoForHomepage = res.json().await?;
         Ok(repo.homepage)
     }
 }
