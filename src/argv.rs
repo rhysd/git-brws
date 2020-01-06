@@ -1,3 +1,4 @@
+use crate::async_runtime;
 use crate::config::{Config, EnvConfig};
 use crate::error::{Error, Result};
 use crate::git;
@@ -66,8 +67,7 @@ fn normalize_repo_format(mut slug: String, env: &EnvConfig) -> Result<String> {
                 env.github_token.as_ref(),
                 &env.https_proxy,
             )?;
-            client
-                .most_popular_repo_by_name(&slug)
+            async_runtime::blocking(client.most_popular_repo_by_name(&slug))
                 .map(|repo| repo.clone_url)
         }
         _ => Err(Error::BrokenRepoFormat { input: slug }),

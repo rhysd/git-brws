@@ -1,7 +1,10 @@
 #[macro_use]
 extern crate serde_derive;
+#[macro_use]
+extern crate lazy_static;
 
 mod argv;
+mod async_runtime;
 mod config;
 mod error;
 mod git;

@@ -31,10 +31,12 @@ fn config(branch: Option<&str>, env: EnvConfig) -> Config {
     }
 }
 
-#[test]
-fn test_find_pr_within_orig_repo() {
+#[tokio::test]
+async fn test_find_pr_within_orig_repo() {
     let cfg = config(Some("async-eventloop"), env!());
-    let page = find_page("api.github.com", "rhysd", "vim.wasm", &cfg).unwrap();
+    let page = find_page("api.github.com", "rhysd", "vim.wasm", &cfg)
+        .await
+        .unwrap();
     assert_eq!(
         page,
         Page::Existing {
@@ -43,10 +45,12 @@ fn test_find_pr_within_orig_repo() {
     );
 }
 
-#[test]
-fn test_find_pr_from_fork_repo_url() {
+#[tokio::test]
+async fn test_find_pr_from_fork_repo_url() {
     let cfg = config(Some("async-contextual-keyword"), env!());
-    let page = find_page("api.github.com", "rhysd", "rust.vim", &cfg).unwrap();
+    let page = find_page("api.github.com", "rhysd", "rust.vim", &cfg)
+        .await
+        .unwrap();
     assert_eq!(
         page,
         Page::Existing {
@@ -55,10 +59,12 @@ fn test_find_pr_from_fork_repo_url() {
     );
 }
 
-#[test]
-fn test_find_pr_from_original_repo_url() {
+#[tokio::test]
+async fn test_find_pr_from_original_repo_url() {
     let cfg = config(Some("async-contextual-keyword"), env!());
-    let page = find_page("api.github.com", "rust-lang", "rust.vim", &cfg).unwrap();
+    let page = find_page("api.github.com", "rust-lang", "rust.vim", &cfg)
+        .await
+        .unwrap();
     assert_eq!(
         page,
         Page::Existing {
@@ -67,10 +73,13 @@ fn test_find_pr_from_original_repo_url() {
     );
 }
 
-#[test]
-fn test_no_pr_found_at_own_repo() {
+#[tokio::test]
+async fn test_no_pr_found_at_own_repo() {
     let cfg = config(Some("unknown-branch-which-does-not-exist-for-test"), env!());
-    match find_page("api.github.com", "rhysd", "git-brws", &cfg).unwrap() {
+    match find_page("api.github.com", "rhysd", "git-brws", &cfg)
+        .await
+        .unwrap()
+    {
         Page::New {
             author,
             repo,
@@ -86,10 +95,13 @@ fn test_no_pr_found_at_own_repo() {
     }
 }
 
-#[test]
-fn test_no_pr_found_at_parent_repo() {
+#[tokio::test]
+async fn test_no_pr_found_at_parent_repo() {
     let cfg = config(Some("unknown-branch-which-does-not-exist-for-test"), env!());
-    match find_page("api.github.com", "rhysd", "rust.vim", &cfg).unwrap() {
+    match find_page("api.github.com", "rhysd", "rust.vim", &cfg)
+        .await
+        .unwrap()
+    {
         Page::NewAtParent {
             author,
             repo,
