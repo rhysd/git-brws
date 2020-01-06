@@ -21,12 +21,12 @@ fn to_slash<S: AsRef<str>>(s: &S) -> &str {
 }
 
 // TODO: Omit fallback and return Result<String>
-async fn first_available_url<T: AsRef<str>>(
+fn first_available_url<T: AsRef<str>>(
     candidates: &mut [String],
     fallback: String,
     https_proxy: &Option<T>,
 ) -> String {
-    let mut builder = reqwest::Client::builder();
+    let mut builder = reqwest::blocking::Client::builder();
     if let Some(ref p) = https_proxy {
         if let Ok(p) = reqwest::Proxy::https(p.as_ref()) {
             builder = builder.proxy(p);
@@ -37,7 +37,7 @@ async fn first_available_url<T: AsRef<str>>(
     if let Ok(client) = builder.build() {
         for mut candidate in candidates.iter_mut() {
             let req = client.head(candidate.as_str());
-            if let Ok(res) = req.send().await {
+            if let Ok(res) = req.send() {
                 let status = res.status();
                 if status == reqwest::StatusCode::OK {
                     return mem::replace(&mut candidate, String::new());
@@ -48,7 +48,7 @@ async fn first_available_url<T: AsRef<str>>(
     fallback
 }
 
-async fn build_github_like_url<S: AsRef<str>>(
+fn build_github_like_url<S: AsRef<str>>(
     host: &str,
     user: &str,
     repo: &str,
@@ -66,7 +66,7 @@ async fn build_github_like_url<S: AsRef<str>>(
                             cfg.env.github_token.as_ref(),
                             &cfg.env.https_proxy,
                         ) {
-                            if let Ok(Some(homepage)) = client.repo_homepage(user, repo).await {
+                            if let Ok(Some(homepage)) = client.repo_homepage(user, repo) {
                                 return Ok(homepage);
                             }
                         }
@@ -88,7 +88,7 @@ async fn build_github_like_url<S: AsRef<str>>(
                         if let Ok(client) =
                             Client::build(endpoint.as_ref(), Some(token), &cfg.env.https_proxy)
                         {
-                            if let Ok(Some(homepage)) = client.repo_homepage(user, repo).await {
+                            if let Ok(Some(homepage)) = client.repo_homepage(user, repo) {
                                 return Ok(homepage);
                             }
                         }
@@ -99,8 +99,7 @@ async fn build_github_like_url<S: AsRef<str>>(
                         &mut [with_subdomain],
                         without_subdomain,
                         &cfg.env.https_proxy,
-                    )
-                    .await)
+                    ))
                 }
             }
         }
@@ -108,7 +107,7 @@ async fn build_github_like_url<S: AsRef<str>>(
             pull_request: true, ..
         } => {
             if let Some(endpoint) = api_endpoint {
-                match pull_request::find_page(endpoint.as_ref(), user, repo, cfg).await? {
+                match pull_request::find_page(endpoint.as_ref(), user, repo, cfg)? {
                     pull_request::Page::Existing { url } => Ok(url),
                     pull_request::Page::New {
                         author,
@@ -185,7 +184,7 @@ async fn build_github_like_url<S: AsRef<str>>(
     }
 }
 
-async fn build_gitlab_url(
+fn build_gitlab_url(
     host: &str,
     user: &str,
     repo: &str,
@@ -197,17 +196,21 @@ async fn build_gitlab_url(
             return Err(Error::GitLabDiffNotSupported);
         }
     }
-    build_github_like_url::<&str>(host, user, repo, None, cfg, page).await
+    build_github_like_url::<&str>(host, user, repo, None, cfg, page)
 }
 
-async fn build_bitbucket_url(user: &str, repo: &str, cfg: &Config, page: &Page) -> Result<String> {
+fn build_bitbucket_url(user: &str, repo: &str, cfg: &Config, page: &Page) -> Result<String> {
     match page {
         Page::Open { website: true, .. } => {
             // Build bitbucket cloud URL:
             //   https://confluence.atlassian.com/bitbucket/publishing-a-website-on-bitbucket-cloud-221449776.html
             let with_user = format!("https://{}.bitbucket.io/{}", user, repo);
             let without_user = format!("https://{}.bitbucket.io", user);
-            Ok(first_available_url(&mut [with_user], without_user, &cfg.env.https_proxy).await)
+            Ok(first_available_url(
+                &mut [with_user],
+                without_user,
+                &cfg.env.https_proxy,
+            ))
         }
         Page::Open {
             pull_request: true, ..
@@ -376,7 +379,7 @@ pub fn slug_from_path<'a>(path: &'a str) -> Result<(&'a str, &'a str)> {
 // Known URL formats
 //  1. https://hosting_service.com/user/repo.git
 //  2. git@hosting_service.com:user/repo.git (-> ssh://git@hosting_service.com:22/user/repo.git)
-pub async fn build_page_url(page: &Page, cfg: &Config) -> Result<String> {
+pub fn build_page_url(page: &Page, cfg: &Config) -> Result<String> {
     let repo_url = &cfg.repo_url;
     let url = Url::parse(&repo_url).map_err(|e| Error::BrokenUrl {
         url: repo_url.to_string(),
@@ -398,10 +401,10 @@ pub async fn build_page_url(page: &Page, cfg: &Config) -> Result<String> {
 
     match host {
         "github.com" => {
-            build_github_like_url(host, user, repo_name, Some("api.github.com"), cfg, page).await
+            build_github_like_url(host, user, repo_name, Some("api.github.com"), cfg, page)
         }
-        "gitlab.com" => build_gitlab_url(host, user, repo_name, cfg, page).await,
-        "bitbucket.org" => build_bitbucket_url(user, repo_name, cfg, page).await,
+        "gitlab.com" => build_gitlab_url(host, user, repo_name, cfg, page),
+        "bitbucket.org" => build_bitbucket_url(user, repo_name, cfg, page),
         "visualstudio.com" | "vs-ssh.visualstudio.com" | "dev.azure.com" | "ssh.dev.azure.com" => {
             build_azure_devops_url(user, repo_name, cfg, page)
         }
@@ -428,7 +431,7 @@ pub async fn build_page_url(page: &Page, cfg: &Config) -> Result<String> {
             };
 
             if is_gitlab {
-                build_gitlab_url(&host, user, repo_name, cfg, page).await
+                build_gitlab_url(&host, user, repo_name, cfg, page)
             } else {
                 build_github_like_url(
                     &host,
@@ -438,7 +441,6 @@ pub async fn build_page_url(page: &Page, cfg: &Config) -> Result<String> {
                     cfg,
                     page,
                 )
-                .await
             }
         }
     }
