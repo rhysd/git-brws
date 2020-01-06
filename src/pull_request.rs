@@ -39,7 +39,7 @@ async fn find_github_pr_url_for_branch<'a, 'b, B: AsRef<str>>(
         }
         &env.ghe_token
     };
-    let client = github_api::Client::build(endpoint, token.as_ref(), &env.https_proxy)?;
+    let client = github_api::Client::build(endpoint, &token, &env.https_proxy)?;
 
     let (pr_url, fetched_repo) = futures::join!(
         // Note: Search pull request URL in the case where the repository is an original, not a

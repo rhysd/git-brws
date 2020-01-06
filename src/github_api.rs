@@ -42,19 +42,14 @@ struct RepoForHomepage {
     homepage: Option<String>,
 }
 
-pub struct Client {
+pub struct Client<'a> {
     client: ReqwestClient,
-    token: Option<String>,
-    endpoint: String,
+    token: Option<&'a str>,
+    endpoint: &'a str,
 }
 
-impl Client {
-    pub fn build<T, U, V>(endpoint: &T, token: Option<U>, https_proxy: &Option<V>) -> Result<Self>
-    where
-        T: ToString + ?Sized,
-        U: ToString,
-        V: AsRef<str>,
-    {
+impl<'a> Client<'a> {
+    pub fn build<T: AsRef<str>, U: AsRef<str>>(endpoint: &'a str, token: &'a Option<T>, https_proxy: &Option<U>) -> Result<Self> {
         // GitHub API requires user agent in headers: https://developer.github.com/v3/#user-agent-required
         let mut b = ReqwestClient::builder().user_agent("git-brws");
 
@@ -64,8 +59,8 @@ impl Client {
 
         Ok(Self {
             client: b.build()?,
-            token: token.map(|s| s.to_string()),
-            endpoint: endpoint.to_string(),
+            token: token.as_ref().map(AsRef::as_ref),
+            endpoint,
         })
     }
 

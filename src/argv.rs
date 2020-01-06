@@ -62,11 +62,7 @@ fn normalize_repo_format(mut slug: String, env: &EnvConfig) -> Result<String> {
         1 => Ok(format!("https://github.com/{}.git", slug)),
         2 => Ok(format!("https://{}.git", slug)),
         0 => {
-            let client = Client::build(
-                "api.github.com",
-                env.github_token.as_ref(),
-                &env.https_proxy,
-            )?;
+            let client = Client::build("api.github.com", &env.github_token, &env.https_proxy)?;
             async_runtime::blocking(client.most_popular_repo_by_name(&slug))
                 .map(|repo| repo.clone_url)
         }

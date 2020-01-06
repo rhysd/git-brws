@@ -49,18 +49,14 @@ fn first_available_url<T: AsRef<str>>(
     fallback
 }
 
-fn fetch_homepage<T, P>(
+fn fetch_homepage<T: AsRef<str>>(
     endpoint: &str,
-    token: Option<T>,
-    https_proxy: &Option<P>,
+    token: Option<&str>,
+    https_proxy: &Option<T>,
     user: &str,
     repo: &str,
-) -> Result<Option<String>>
-where
-    T: ToString,
-    P: AsRef<str>,
-{
-    let client = Client::build(endpoint, token, https_proxy)?;
+) -> Result<Option<String>> {
+    let client = Client::build(endpoint, &token, https_proxy)?;
     async_runtime::blocking(client.repo_homepage(user, repo))
 }
 
@@ -79,7 +75,7 @@ fn build_github_like_url<S: AsRef<str>>(
                     if let Some(endpoint) = api_endpoint {
                         if let Ok(Some(homepage)) = fetch_homepage(
                             endpoint.as_ref(),
-                            cfg.env.github_token.as_ref(),
+                            cfg.env.github_token.as_ref().map(String::as_str),
                             &cfg.env.https_proxy,
                             user,
                             repo,
