@@ -109,7 +109,10 @@ async fn homepage() {
 #[tokio::test]
 async fn homepage_not_found() {
     let client = Client::build("api.github.com", skip_if_no_token!(), &https_proxy()).unwrap();
-    let url = client.repo_homepage("rhysd", "filter-with-state").await.unwrap();
+    let url = client
+        .repo_homepage("rhysd", "filter-with-state")
+        .await
+        .unwrap();
     match url {
         None => { /* OK */ }
         url => assert!(false, "Unexpected url: {:?}", url),

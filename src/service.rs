@@ -99,7 +99,8 @@ async fn build_github_like_url<S: AsRef<str>>(
                         &mut [with_subdomain],
                         without_subdomain,
                         &cfg.env.https_proxy,
-                    ).await)
+                    )
+                    .await)
                 }
             }
         }
@@ -206,11 +207,7 @@ async fn build_bitbucket_url(user: &str, repo: &str, cfg: &Config, page: &Page) 
             //   https://confluence.atlassian.com/bitbucket/publishing-a-website-on-bitbucket-cloud-221449776.html
             let with_user = format!("https://{}.bitbucket.io/{}", user, repo);
             let without_user = format!("https://{}.bitbucket.io", user);
-            Ok(first_available_url(
-                &mut [with_user],
-                without_user,
-                &cfg.env.https_proxy,
-            ).await)
+            Ok(first_available_url(&mut [with_user], without_user, &cfg.env.https_proxy).await)
         }
         Page::Open {
             pull_request: true, ..
@@ -440,7 +437,8 @@ pub async fn build_page_url(page: &Page, cfg: &Config) -> Result<String> {
                     Some(format!("{}/api/v3", host)),
                     cfg,
                     page,
-                ).await
+                )
+                .await
             }
         }
     }

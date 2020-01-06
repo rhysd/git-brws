@@ -30,7 +30,10 @@ async fn args_with_no_option() {
         r => assert!(false, "Failed to parse args with no option: {:?}", r),
     };
 
-    match Parsed::from_iter(&["git-brws", "foo", "bar"]).await.unwrap() {
+    match Parsed::from_iter(&["git-brws", "foo", "bar"])
+        .await
+        .unwrap()
+    {
         Parsed::OpenPage(c) => {
             assert_eq!(c.args.len(), 2);
         }
@@ -150,7 +153,10 @@ async fn valid_remote_name() {
 
 #[tokio::test]
 async fn invalid_remote_name() {
-    match Parsed::from_iter(&["git-brws", "-R", "this-remote-is-never-existing"]).await.unwrap_err() {
+    match Parsed::from_iter(&["git-brws", "-R", "this-remote-is-never-existing"])
+        .await
+        .unwrap_err()
+    {
         Error::GitObjectNotFound { kind, object, .. } => {
             assert_eq!(kind, "remote");
             assert_eq!(&object, "this-remote-is-never-existing");
@@ -188,7 +194,10 @@ async fn unknown_options() {
 async fn detect_git_dir() {
     let current = fs::canonicalize(env::current_dir().unwrap()).unwrap();
     let p = current.join("src").join("test");
-    match Parsed::from_iter(&["git-brws", "-d", p.to_str().unwrap()]).await.unwrap() {
+    match Parsed::from_iter(&["git-brws", "-d", p.to_str().unwrap()])
+        .await
+        .unwrap()
+    {
         Parsed::OpenPage(c) => {
             let expected = Some(current.join(".git"));
             assert_eq!(c.git_dir, expected);
@@ -219,7 +228,10 @@ async fn no_git_dir() {
         git_dir
     );
 
-    match Parsed::from_iter(&["git-brws", "-d", root.to_str().unwrap(), "-r", "foo/bar"]).await.unwrap() {
+    match Parsed::from_iter(&["git-brws", "-d", root.to_str().unwrap(), "-r", "foo/bar"])
+        .await
+        .unwrap()
+    {
         Parsed::OpenPage(c) => {
             assert_eq!(c.git_dir, None);
             assert_eq!(&c.repo_url, "https://github.com/foo/bar.git");
@@ -234,7 +246,9 @@ async fn search_repo_from_github_by_name() {
 
     // Add user:rhysd to ensure to get expected result. But actually repository name is usually
     // passed like `-r react` as use case.
-    let parsed = Parsed::from_iter(&["git-brws", "-r", "user:rhysd vim.wasm"]).await.unwrap();
+    let parsed = Parsed::from_iter(&["git-brws", "-r", "user:rhysd vim.wasm"])
+        .await
+        .unwrap();
     match parsed {
         Parsed::OpenPage(c) => {
             assert_eq!(&c.repo_url, "https://github.com/rhysd/vim.wasm.git");
@@ -245,7 +259,9 @@ async fn search_repo_from_github_by_name() {
 
 #[tokio::test]
 async fn repo_specified_but_argument_is_not_empty() {
-    let err = Parsed::from_iter(&["git-brws", "-r", "foo", "HEAD"]).await.unwrap_err();
+    let err = Parsed::from_iter(&["git-brws", "-r", "foo", "HEAD"])
+        .await
+        .unwrap_err();
     match err {
         Error::ArgsNotAllowed { ref args, .. } => {
             assert!(format!("{}", err).contains("\"HEAD\""), "{:?}", args);

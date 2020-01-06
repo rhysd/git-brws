@@ -63,8 +63,9 @@ async fn find_github_pr_url_for_branch<'a, 'b, B: AsRef<str>>(
 
         // Note: Search pull request URL in the case where the repository was forked from original.
         // Author should be set since other person may create another pull request with the same branch name.
-        if let Some(url) =
-            client.find_pr_url(branch, owner.as_str(), repo.as_str(), Some(author)).await?
+        if let Some(url) = client
+            .find_pr_url(branch, owner.as_str(), repo.as_str(), Some(author))
+            .await?
         {
             Ok(Page::Existing { url })
         } else {
@@ -102,7 +103,8 @@ pub async fn find_page<'a, 'b>(
                     author,
                     repo,
                     &cfg.env,
-                ).await
+                )
+                .await
             } else {
                 Err(Error::NoLocalRepoFound {
                     operation: "opening a pull request without specifying branch".to_string(),

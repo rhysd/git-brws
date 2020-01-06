@@ -211,7 +211,11 @@ impl Parsed {
                 }
                 // In this case, `.git` directory is optional. So user can use this command
                 // outside Git repository
-                (normalize_repo_format(repo, &env).await?, git_dir.ok(), remote)
+                (
+                    normalize_repo_format(repo, &env).await?,
+                    git_dir.ok(),
+                    remote,
+                )
             }
             (None, remote) => {
                 // In this case, `.git` directory is required because remote URL is retrieved

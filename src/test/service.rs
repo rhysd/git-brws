@@ -387,7 +387,10 @@ async fn customized_ssh_port() {
         ),
     ] {
         let c = config(repo, None, Some(env.clone()));
-        assert_eq!(build_page_url(&OPEN, &c).await.unwrap(), expected.to_string(),);
+        assert_eq!(
+            build_page_url(&OPEN, &c).await.unwrap(),
+            expected.to_string(),
+        );
     }
 }
 
@@ -406,7 +409,10 @@ async fn customized_ghe_host() {
             None,
             Some(env.clone()),
         );
-        assert_eq!(build_page_url(&OPEN, &c).await.unwrap(), expected.to_string(),);
+        assert_eq!(
+            build_page_url(&OPEN, &c).await.unwrap(),
+            expected.to_string(),
+        );
     }
 }
 
