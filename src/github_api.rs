@@ -49,7 +49,11 @@ pub struct Client<'a> {
 }
 
 impl<'a> Client<'a> {
-    pub fn build<T: AsRef<str>, U: AsRef<str>>(endpoint: &'a str, token: &'a Option<T>, https_proxy: &Option<U>) -> Result<Self> {
+    pub fn build<T: AsRef<str>, U: AsRef<str>>(
+        endpoint: &'a str,
+        token: &'a Option<T>,
+        https_proxy: &Option<U>,
+    ) -> Result<Self> {
         // GitHub API requires user agent in headers: https://developer.github.com/v3/#user-agent-required
         let mut b = ReqwestClient::builder().user_agent("git-brws");
 
