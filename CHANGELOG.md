@@ -1,7 +1,18 @@
+<a name="v0.11.6"></a>
+# [v0.11.6](https://github.com/rhysd/git-brws/releases/tag/v0.11.6) - 16 Jan 2020
+
+- **Improve:** `reqwest` crate was updated to 0.10
+  - Number of dependencies and build time were 1.5x reduced
+  - Binary size gets 1.3~1.4x smaller
+- **Improve:** `--pr` is now faster by sending multiple GitHub API requests at the same time. Thanks to the `async-await` feature of latest Rust
+
+[Changes][v0.11.6]
+
+
 <a name="0.11.5"></a>
 # [0.11.5](https://github.com/rhysd/git-brws/releases/tag/0.11.5) - 21 Nov 2019
 
-- **Fix:** Opening file or directory is slow when remote repository has so many (~1000) branches (#19)
+- **Fix:** Opening file or directory is slow when remote repository has so many (1000~) branches (#19)
 - **Improve:** More accurately convert abbreviated notation of SSH URL
 
 [Changes][0.11.5]
@@ -204,6 +215,7 @@ First binaries release for Linux (32bit/64bit) and macOS (64bit) using Travis CI
 [Changes][v0.4.2]
 
 
+[v0.11.6]: https://github.com/rhysd/git-brws/compare/0.11.5...v0.11.6
 [0.11.5]: https://github.com/rhysd/git-brws/compare/0.11.3...0.11.5
 [0.11.3]: https://github.com/rhysd/git-brws/compare/0.11.2...0.11.3
 [0.11.2]: https://github.com/rhysd/git-brws/compare/0.11.1...0.11.2
