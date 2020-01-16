@@ -48,10 +48,10 @@ gem install ronn
 
 To update [Homebrew][homebrew] formula file, please use `HomebrewFormula/update.sh`.
 
-For example, when updating to 0.9.2:
+For example, when updating to 0.11.6:
 
 ```sh
-./HomebrewFormula/update.sh 0.9.2
+./HomebrewFormula/update.sh v0.11.6
 ```
 
 

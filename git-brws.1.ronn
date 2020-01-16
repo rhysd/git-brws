@@ -156,6 +156,7 @@ In addition to '..', diff with '...' is supported.
     $ git brws branchA...branchB
 
 *Note:* If you don't know the difference between '..' and '...', please read 'git diff --help'.
+
 *Note:* Only GitHub and GitHub Enterprise support '...'. For GitLab, only '...' is available.
 
 ### Pull request page of current branch of current repository.
