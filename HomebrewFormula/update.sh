@@ -8,7 +8,7 @@ if [ ! -d '.git' ]; then
 fi
 
 if [[ "$1" == "" ]]; then
-    echo 'Usage: update.sh {version}' 2>&1
+    echo 'Usage: update.sh {tag name}' 2>&1
     exit 1
 fi
 
@@ -38,7 +38,7 @@ echo "Linux sha256: ${LINUX_SHA}"
 sed -i '' -E "s/    sha256 '[0-9a-f]*' # linux/    sha256 '${LINUX_SHA}' # linux/" git-brws.rb
 
 echo "Version: ${VERSION}"
-sed -i '' -E "s/  version '[0-9][0-9]*\.[0-9][0-9]*\.[0-9][0-9]*'/  version '${VERSION}'/" git-brws.rb
+sed -i '' -E "s/  version '[0-9][0-9]*\.[0-9][0-9]*\.[0-9][0-9]*'/  version '${VERSION#v}'/" git-brws.rb
 
 echo "Clean up zip files"
 rm -rf ./*.zip
