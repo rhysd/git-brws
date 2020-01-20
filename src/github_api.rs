@@ -58,7 +58,10 @@ impl<'a> Client<'a> {
         let mut b = ReqwestClient::builder().user_agent("git-brws");
 
         if let Some(ref p) = https_proxy {
-            b = b.proxy(Proxy::https(p.as_ref())?);
+            let p = p.as_ref();
+            if !p.is_empty() {
+                b = b.proxy(Proxy::https(p)?);
+            }
         }
 
         Ok(Self {

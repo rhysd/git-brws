@@ -29,10 +29,13 @@ fn first_available_url<T: AsRef<str>>(
 ) -> String {
     let mut builder = reqwest::Client::builder();
     if let Some(ref p) = https_proxy {
-        if let Ok(p) = reqwest::Proxy::https(p.as_ref()) {
-            builder = builder.proxy(p);
-        } else {
-            return fallback;
+        let p = p.as_ref();
+        if !p.is_empty() {
+            if let Ok(p) = reqwest::Proxy::https(p) {
+                builder = builder.proxy(p);
+            } else {
+                return fallback;
+            }
         }
     }
     if let Ok(client) = builder.build() {
