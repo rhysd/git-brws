@@ -4,6 +4,8 @@ use crate::test::helper::get_root_dir;
 use std::env;
 use std::path::Path;
 
+// TODO: This test only consider the repository name 'rhysd/git-brws.git'
+
 #[test]
 fn args_with_no_option() {
     match Parsed::from_iter(&["git-brws"]).unwrap() {
@@ -13,6 +15,8 @@ fn args_with_no_option() {
                     "https://github.com/rhysd/git-brws.git",
                     "ssh://git@github.com:22/rhysd/git-brws.git",
                     "git@github.com:rhysd/git-brws.git",
+                    // On GitHub, omitting '.git' is ok for Git URLs
+                    "https://github.com/rhysd/git-brws",
                 ]
                 .contains(&c.repo_url.as_str()),
                 "{:?}",
@@ -138,11 +142,11 @@ fn valid_remote_name() {
         Parsed::OpenPage(c) => assert!(
             [
                 "https://github.com/rhysd/git-brws.git",
+                // On GitHub, omitting '.git' is ok for Git URLs
+                "https://github.com/rhysd/git-brws",
                 "ssh://git@github.com:22/rhysd/git-brws.git"
             ]
-            .iter()
-            .find(|u| *u == &c.repo_url)
-            .is_some(),
+            .contains(&c.repo_url.as_str()),
             "Unexpected remote URL for 'origin' remote: {}. For pull request, please ignore this test is failing",
             c.repo_url,
         ),
