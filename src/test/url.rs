@@ -17,7 +17,7 @@ fn executable_path(cmd: &str) -> String {
         .unwrap()
         .parent()
         .unwrap()
-        .join(format!("windows_asset\\{}.exe", cmd))
+        .join(format!("..\\..\\testdata\\{}.exe", cmd))
         .to_str()
         .unwrap()
         .to_string()
@@ -58,8 +58,6 @@ fn smoke() {
 #[test]
 fn browse_url_with_user_command() {
     let exe = executable_path("true");
-    let exe = exe[4..].to_string();
-    println!("EXE: {}", exe);
     let env = browse_env_config(exe);
     url::browse("https://example.com", &env).unwrap();
 }
