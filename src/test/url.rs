@@ -5,9 +5,27 @@ use crate::url;
 use std::env;
 use std::path::Path;
 
-fn browse_env_config<S: ToString>(cmd: S) -> EnvConfig {
+#[cfg(not(target_os = "windows"))]
+fn executable_path(cmd: &str) -> String {
+    cmd.to_string()
+}
+
+#[cfg(target_os = "windows")]
+fn executable_path(cmd: &str) -> String {
+    Path::new(file!())
+        .canonicalize()
+        .unwrap()
+        .parent()
+        .unwrap()
+        .join(format!("windows_asset\\{}.exe", cmd))
+        .to_str()
+        .unwrap()
+        .to_string()
+}
+
+fn browse_env_config(cmd: String) -> EnvConfig {
     let mut env = empty_env();
-    env.browse_command = Some(cmd.to_string());
+    env.browse_command = Some(cmd);
     env
 }
 
@@ -39,16 +57,20 @@ fn smoke() {
 
 #[test]
 fn browse_url_with_user_command() {
-    let env = browse_env_config("true");
+    let exe = executable_path("true");
+    let exe = exe[4..].to_string();
+    println!("EXE: {}", exe);
+    let env = browse_env_config(exe);
     url::browse("https://example.com", &env).unwrap();
 }
 
 #[test]
 fn fail_to_browse_url_with_user_command() {
-    let env = browse_env_config("false");
+    let exe = executable_path("false");
+    let env = browse_env_config(exe.clone());
     match url::browse("https://example.com", &env) {
         Err(Error::UserBrowseCommandFailed { cmd, url, .. }) => {
-            assert_eq!(cmd, "false");
+            assert_eq!(cmd, exe);
             assert_eq!(url, "https://example.com");
         }
         r => assert!(false, "Unexpected result: {:?}", r),
@@ -57,7 +79,7 @@ fn fail_to_browse_url_with_user_command() {
 
 #[test]
 fn browse_command_is_not_found() {
-    let env = browse_env_config("this-command-is-not-existing-yeah");
+    let env = browse_env_config("this-command-is-not-existing-yeah".to_string());
     match url::browse("https://example.com", &env) {
         Err(Error::IoError { .. }) => { /* ok */ }
         r => assert!(false, "Unexpected result: {:?}", r),
