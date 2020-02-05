@@ -44,9 +44,8 @@ script:
     if [[ "${LINT}" == "false" ]]; then
         if [[ "${TARGET}" != "i686-unknown-linux-gnu" ]]; then
             git fetch --prune --unshallow
-            git fetch origin master
-            git checkout master
-            git checkout -
+            git fetch origin master:master
+            git fetch --prune origin '+refs/heads/master:refs/remotes/origin/master'
             git rev-parse HEAD
             cargo test --verbose
         fi

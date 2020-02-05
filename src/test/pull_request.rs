@@ -5,7 +5,7 @@ use crate::test::helper;
 macro_rules! env {
     () => {{
         let mut e = helper::empty_env();
-        e.github_token = skip_if_no_token!();
+        e.github_token = skip_if_no_token_for_search!();
         e.https_proxy = helper::https_proxy();
         e
     }};

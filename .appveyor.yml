@@ -15,12 +15,12 @@ environment:
   CARGO_TARGET_DIR: "c:\\git-brws\\target"
   global:
     RUST_BACKTRACE: full
+    GIT_BRWS_CI_SKIP_TEST_FOR_SEARCH_API: true
   matrix:
     - TARGET: x86_64-pc-windows-msvc
       BITS: 64
     - TARGET: i686-pc-windows-msvc
       BITS: 32
-      GIT_BRWS_CI_SKIP_TEST_FOR_SEARCH_API: true
 
 # Install Rust and Cargo
 # (Based on from https://github.com/rust-lang/libc/blob/master/appveyor.yml)

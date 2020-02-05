@@ -205,7 +205,7 @@ fn specify_repo_outside_repository() {
 
 #[test]
 fn search_repo_from_github_by_name() {
-    skip_if_no_token!();
+    skip_if_no_token_for_search!();
 
     // Add user:rhysd to ensure to get expected result. But actually repository name is usually
     // passed like `-r react` as use case.
