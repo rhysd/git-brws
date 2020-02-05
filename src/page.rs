@@ -253,11 +253,10 @@ pub fn parse_page(cfg: &Config) -> Result<Page> {
         });
     }
 
-    let git = cfg.git().ok_or_else(|| Error::NoLocalRepoFound {
-        operation: format!("opening URL with options {:?}", cfg.args),
-    })?;
-
-    let parser = BrowsePageParser { cfg, git };
+    let parser = BrowsePageParser {
+        cfg,
+        git: cfg.git(),
+    };
 
     match parser.try_parse_issue_number() {
         Ok(p) => return Ok(p),

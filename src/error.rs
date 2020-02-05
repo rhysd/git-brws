@@ -64,7 +64,8 @@ pub enum Error {
         msg: String,
     },
     GitRootDirNotFound {
-        git_dir: PathBuf,
+        cwd: PathBuf,
+        stderr: String,
     },
     WrongNumberOfArgs {
         expected: ExpectedNumberOfArgs,
@@ -106,6 +107,9 @@ pub enum Error {
         url: String,
         msg: String,
     },
+    SpecifiedDirNotExist {
+        dir: String,
+    },
 }
 
 impl fmt::Display for Error {
@@ -138,7 +142,7 @@ impl fmt::Display for Error {
             }
             Error::GitObjectNotFound{kind, object, msg} if msg.is_empty() => write!(f, "Git could not find {} '{}'", kind, object),
             Error::GitObjectNotFound{kind, object, msg} => write!(f, "Git could not find {} '{}': {}", kind, object, msg),
-            Error::GitRootDirNotFound{git_dir} => write!(f, "Cannot locate root directory from GIT_DIR {:?}", git_dir),
+            Error::GitRootDirNotFound{cwd, stderr} => write!(f, "Cannot locate root directory at {:?}: {}", cwd, stderr),
             Error::UnexpectedRemoteName(name) => write!(f, "Tracking name must be remote-url/branch-name: {}", name),
             Error::WrongNumberOfArgs{expected, actual, kind} => write!(f, "Invalid number of arguments for {}. {} is expected but given {}", kind, expected, actual),
             Error::DiffDotsNotFound => write!(f, "'..' or '...' must be contained for diff"),
@@ -161,6 +165,7 @@ impl fmt::Display for Error {
             Error::BlameWithoutFilePath => write!(f, "File path is not given to blame"),
             Error::CannotBlameDirectory{dir} => write!(f, "Cannot blame directory '{}'. Please specify file path", dir),
             Error::UserBrowseCommandFailed{cmd, url, msg} => write!(f, "Command '{}' failed to open URL {}. Please check $GIT_BRWS_BROWSE_COMMAND. stderr: {}", cmd, url, msg),
+            Error::SpecifiedDirNotExist{dir} => write!(f, "Specified directory '{}' with -d option does not exist", dir),
         }
     }
 }

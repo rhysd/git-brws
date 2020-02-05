@@ -8,14 +8,14 @@ use std::str;
 
 pub struct Git<'a> {
     command: &'a str,
-    git_dir: &'a Path,
+    cwd: &'a Path,
 }
 
 impl<'a> Git<'a> {
     pub fn command<S: AsRef<OsStr> + Debug>(&self, args: &[S]) -> Result<String> {
         let out = Command::new(&self.command)
-            .arg("--git-dir")
-            .arg(self.git_dir)
+            .arg("-C")
+            .arg(self.cwd)
             .args(args)
             .output()?;
         if out.status.success() {
@@ -92,18 +92,14 @@ impl<'a> Git<'a> {
     }
 
     pub fn root_dir(&self) -> Result<PathBuf> {
-        // XXX:
-        // `git rev-parse` can't be used with --git-dir arguments.
-        // `git --git-dir ../.git rev-parse --show-toplevel` always returns
-        // current working directory.
-        // So here root directory is calculated from git-dir.
-        let p = self
-            .git_dir
-            .parent()
-            .ok_or_else(|| Error::GitRootDirNotFound {
-                git_dir: self.git_dir.to_owned(),
-            })?;
-        Ok(p.to_owned())
+        match self.command(&["rev-parse", "--show-toplevel"]) {
+            Ok(stdout) => Ok(fs::canonicalize(stdout)?),
+            Err(Error::GitCommandError { stderr, .. }) => Err(Error::GitRootDirNotFound {
+                cwd: self.cwd.to_owned(),
+                stderr: stderr,
+            }),
+            Err(e) => Err(e),
+        }
     }
 
     pub fn current_branch(&self) -> Result<String> {
@@ -145,38 +141,7 @@ impl<'a> Git<'a> {
 }
 
 impl<'a> Git<'a> {
-    pub fn new(dir: &'a Path, command: &'a str) -> Git<'a> {
-        Git {
-            command,
-            git_dir: dir,
-        }
+    pub fn new(cwd: &'a Path, command: &'a str) -> Git<'a> {
+        Git { command, cwd }
     }
-}
-
-pub fn git_dir<P: AsRef<Path>>(dir: Option<P>, git_cmd: &str) -> Result<PathBuf> {
-    let mut cmd = Command::new(if git_cmd != "" { git_cmd } else { "git" });
-    cmd.arg("rev-parse").arg("--absolute-git-dir");
-    if let Some(d) = dir {
-        cmd.current_dir(fs::canonicalize(&d)?);
-    }
-
-    let out = cmd.output()?;
-    if !out.status.success() {
-        return Err(Error::GitCommandError {
-            stderr: String::from_utf8_lossy(&out.stderr)
-                .trim()
-                .replace('\n', " "),
-            args: vec![
-                OsStr::new(git_cmd).to_os_string(),
-                OsStr::new("rev-parse").to_os_string(),
-                OsStr::new("--absolute-git-dir").to_os_string(),
-            ],
-        });
-    }
-
-    let stdout = str::from_utf8(&out.stdout)
-        .expect("Invalid UTF-8 sequence in stdout of git command")
-        .trim();
-
-    Ok(Path::new(stdout).canonicalize()?)
 }

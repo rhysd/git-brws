@@ -1,12 +1,13 @@
 use crate::async_runtime;
 use crate::config::{Config, EnvConfig};
 use crate::error::{Error, Result};
-use crate::git;
 use crate::git::Git;
 use crate::github_api::Client;
 use getopts::Options;
 use std::env;
 use std::ffi::OsStr;
+use std::fs;
+use std::path::PathBuf;
 
 fn fix_ssh_url(mut url: String) -> String {
     if url.starts_with("git@") {
@@ -67,6 +68,18 @@ fn normalize_repo_format(mut slug: String, env: &EnvConfig) -> Result<String> {
                 .map(|repo| repo.clone_url)
         }
         _ => Err(Error::BrokenRepoFormat { input: slug }),
+    }
+}
+
+fn get_cwd(specified: Option<String>) -> Result<PathBuf> {
+    if let Some(dir) = specified {
+        let p = fs::canonicalize(&dir)?;
+        if !p.exists() {
+            return Err(Error::SpecifiedDirNotExist { dir });
+        }
+        Ok(p)
+    } else {
+        Ok(env::current_dir()?.canonicalize()?)
     }
 }
 
@@ -194,9 +207,9 @@ impl Parsed {
         }
 
         let env = EnvConfig::from_iter(env::vars())?.with_global_env();
-        let git_dir = git::git_dir(matches.opt_str("d"), env.git_command.as_str());
+        let cwd = get_cwd(matches.opt_str("d"))?;
         let branch = matches.opt_str("b");
-        let (repo_url, git_dir, remote) = match (matches.opt_str("r"), matches.opt_str("R")) {
+        let (repo_url, remote) = match (matches.opt_str("r"), matches.opt_str("R")) {
             (Some(repo), remote) => {
                 if !matches.free.is_empty() {
                     return Err(Error::ArgsNotAllowed {
@@ -204,21 +217,16 @@ impl Parsed {
                         args: matches.free,
                     });
                 }
-                // In this case, `.git` directory is optional. So user can use this command
-                // outside Git repository
-                (normalize_repo_format(repo, &env)?, git_dir.ok(), remote)
+                (normalize_repo_format(repo, &env)?, remote)
             }
             (None, remote) => {
-                // In this case, `.git` directory is required because remote URL is retrieved
-                // from Git configuration.
-                let git_dir = git_dir?;
-                let git = Git::new(&git_dir, &env.git_command);
+                let git = Git::new(&cwd, &env.git_command);
                 let (url, remote) = if let Some(remote) = remote {
                     (git.remote_url(&remote)?, remote)
                 } else {
                     git.tracking_remote_url(&branch)?
                 };
-                (url, Some(git_dir), Some(remote))
+                (url, Some(remote))
             }
         };
 
@@ -227,7 +235,7 @@ impl Parsed {
         Ok(Parsed::OpenPage(Config {
             repo_url,
             branch,
-            git_dir,
+            cwd,
             stdout: matches.opt_present("u"),
             pull_request: matches.opt_present("p"),
             website: matches.opt_present("w"),

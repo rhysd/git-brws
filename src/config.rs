@@ -7,7 +7,7 @@ use std::path::PathBuf;
 pub struct Config {
     pub repo_url: String,
     pub branch: Option<String>,
-    pub git_dir: Option<PathBuf>,
+    pub cwd: PathBuf,
     pub args: Vec<String>,
     pub stdout: bool,
     pub pull_request: bool,
@@ -18,10 +18,8 @@ pub struct Config {
 }
 
 impl Config {
-    pub fn git(&self) -> Option<Git<'_>> {
-        self.git_dir
-            .as_ref()
-            .map(|git_dir| Git::new(git_dir, &self.env.git_command))
+    pub fn git(&self) -> Git<'_> {
+        Git::new(&self.cwd, &self.env.git_command)
     }
 }
 
