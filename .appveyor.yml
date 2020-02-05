@@ -15,6 +15,7 @@ environment:
   CARGO_TARGET_DIR: "c:\\git-brws\\target"
   global:
     RUST_BACKTRACE: full
+    GIT_BRWS_CI_SKIP_TEST_FOR_SEARCH_API: true
   matrix:
     - TARGET: x86_64-pc-windows-msvc
       BITS: 64

@@ -1,18 +1,15 @@
 use crate::config::Config;
 use crate::error::Error;
 use crate::page::{parse_page, DiffOp, Line, Page};
-use crate::test::helper::empty_env;
-use std::fs;
+use crate::test::helper::{empty_env, get_root_dir};
+use std::env;
 use std::path::{Path, PathBuf};
 
 fn config(repo: &str, branch: Option<&str>, args: Vec<&str>) -> Config {
-    let mut dir = std::env::current_dir().unwrap();
-    dir.push(Path::new(".git"));
-    let dir = fs::canonicalize(dir).unwrap();
     Config {
         repo_url: repo.to_string(),
         branch: branch.map(|s| s.to_string()),
-        git_dir: Some(dir),
+        cwd: env::current_dir().unwrap(),
         args: args.into_iter().map(String::from).collect(),
         stdout: false,
         pull_request: false,
@@ -35,7 +32,7 @@ fn parse_empty_args() {
     }
 
     // It still works even if .git was not found (#9)
-    c.git_dir = None;
+    c.cwd = get_root_dir();
     match parse_page(&c).unwrap() {
         Page::Open {
             website: false,

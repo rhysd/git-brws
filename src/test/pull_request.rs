@@ -1,26 +1,21 @@
 use crate::config::{Config, EnvConfig};
 use crate::pull_request::{find_page, Page};
 use crate::test::helper;
-use std::fs;
-use std::path::Path;
 
 macro_rules! env {
     () => {{
         let mut e = helper::empty_env();
-        e.github_token = skip_if_no_token!();
+        e.github_token = skip_if_no_token_for_search!();
         e.https_proxy = helper::https_proxy();
         e
     }};
 }
 
 fn config(branch: Option<&str>, env: EnvConfig) -> Config {
-    let mut dir = std::env::current_dir().unwrap();
-    dir.push(Path::new(".git"));
-    let dir = fs::canonicalize(dir).unwrap();
     Config {
         repo_url: "dummy url not used".to_string(),
         branch: branch.map(|s| s.to_string()),
-        git_dir: Some(dir),
+        cwd: std::env::current_dir().unwrap(),
         args: vec![],        // Unused
         stdout: false,       // Unused
         pull_request: false, // Unused

@@ -96,20 +96,14 @@ pub async fn find_page<'a, 'b>(
     match cfg.branch {
         Some(ref b) => find_github_pr_url_for_branch(b, endpoint, author, repo, &cfg.env).await,
         None => {
-            if let Some(git) = cfg.git() {
-                find_github_pr_url_for_branch(
-                    git.current_branch()?,
-                    endpoint,
-                    author,
-                    repo,
-                    &cfg.env,
-                )
-                .await
-            } else {
-                Err(Error::NoLocalRepoFound {
-                    operation: "opening a pull request without specifying branch".to_string(),
-                })
-            }
+            find_github_pr_url_for_branch(
+                cfg.git().current_branch()?,
+                endpoint,
+                author,
+                repo,
+                &cfg.env,
+            )
+            .await
         }
     }
 }
