@@ -9,7 +9,7 @@ env:
 matrix:
   include:
     - os: osx
-      env: TARGET=x86_64-apple-darwin LINT=false
+      env: TARGET=x86_64-apple-darwin LINT=false GIT_BRWS_CI_SKIP_TEST_FOR_SEARCH_API=true
     - os: linux
       env: TARGET=x86_64-unknown-linux-gnu LINT=false
       addons:
@@ -18,7 +18,7 @@ matrix:
             - libssl-dev
           update: true
     - os: linux
-      env: TARGET=i686-unknown-linux-gnu LINT=false
+      env: TARGET=i686-unknown-linux-gnu LINT=false GIT_BRWS_CI_SKIP_TEST_FOR_SEARCH_API=true
       addons:
         apt:
           packages:
@@ -27,7 +27,7 @@ matrix:
             - libssl-dev:i386
           update: true
     - os: linux
-      env: TARGET=x86_64-unknown-linux-gnu LINT=true
+      env: TARGET=x86_64-unknown-linux-gnu LINT=true GIT_BRWS_CI_SKIP_TEST_FOR_SEARCH_API=true
 
 before_script:
   - rustc -V

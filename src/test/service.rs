@@ -566,7 +566,7 @@ fn website_bitbucket_cloud() {
 #[test]
 fn pull_request_page_url_with_branch() {
     let cfg = config_for_pr(
-        skip_if_no_token!(),
+        skip_if_no_token_for_search!(),
         "https://github.com/rust-lang/rust.vim.git",
         Some("async-contextual-keyword"),
     );
@@ -578,7 +578,7 @@ fn pull_request_page_url_with_branch() {
 #[test]
 fn pull_request_create_page_url_at_own_repo() {
     let cfg = config_for_pr(
-        skip_if_no_token!(),
+        skip_if_no_token_for_search!(),
         "https://github.com/rhysd/git-brws.git",
         Some("this-branch-never-existing"),
     );
@@ -593,7 +593,7 @@ fn pull_request_create_page_url_at_own_repo() {
 #[test]
 fn pull_request_create_page_url_at_parent_repo() {
     let cfg = config_for_pr(
-        skip_if_no_token!(),
+        skip_if_no_token_for_search!(),
         "https://github.com/rhysd/rust.vim.git",
         Some("this-branch-never-existing"),
     );
@@ -608,7 +608,7 @@ fn pull_request_create_page_url_at_parent_repo() {
 #[test]
 fn pull_request_page_url_retrieving_branch_inside_repo() {
     let cfg = config_for_pr(
-        skip_if_no_token!(),
+        skip_if_no_token_for_search!(),
         "https://github.com/rhysd/git-brws.git",
         None,
     );
