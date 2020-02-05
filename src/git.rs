@@ -96,7 +96,7 @@ impl<'a> Git<'a> {
             Ok(stdout) => Ok(fs::canonicalize(stdout)?),
             Err(Error::GitCommandError { stderr, .. }) => Err(Error::GitRootDirNotFound {
                 cwd: self.cwd.to_owned(),
-                stderr: stderr,
+                stderr,
             }),
             Err(e) => Err(e),
         }
