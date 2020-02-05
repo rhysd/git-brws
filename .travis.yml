@@ -41,12 +41,12 @@ script:
   - export PKG_CONFIG_ALLOW_CROSS=1
   - cargo build --target $TARGET && file target/${TARGET}/debug/git-brws
   - |
-    if [[ "LINT" == "false" ]]; then
+    if [[ "${LINT}" == "false" ]]; then
         if [[ "${TARGET}" != "i686-unknown-linux-gnu" ]]; then
-            git fetch --unshallow
+            git fetch --prune --unshallow
             git fetch origin master
-            git checkout -b master || true
-            git checkout $TRAVIS_BRANCH
+            git checkout master
+            git checkout -
             git rev-parse HEAD
             cargo test --verbose
         fi
