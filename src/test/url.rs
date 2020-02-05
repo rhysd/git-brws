@@ -11,15 +11,18 @@ fn executable_path(cmd: &str) -> String {
 
 #[cfg(target_os = "windows")]
 fn executable_path(cmd: &str) -> String {
-    Path::new(file!())
-        .canonicalize()
-        .unwrap()
-        .parent()
-        .unwrap()
-        .join(format!("..\\..\\testdata\\{}.exe", cmd))
-        .to_str()
-        .unwrap()
-        .to_string()
+    // Note: Do not use .canonicalize() since the path converts a file path into extended length
+    // path form like '\\?\D:\...'. But the form is not available to exec a command (it says command
+    // not found even the \\? path exists). This error only occurs on x86_64 Windows CI on Appveyor
+    // or GitHub Actions (seems related to some OS configuration).
+    use std::path::PathBuf;
+    let mut p = PathBuf::from(file!());
+    p.pop(); // git-brws/src/test
+    p.pop(); // git-brws/src
+    p.pop(); // git-brws
+    p.push("testdata"); // git-brws/testdata
+    p.push(format!("{}.exe", cmd)); // git-brws/testdata/true.exe
+    p.to_str().unwrap().to_string()
 }
 
 fn browse_env_config(cmd: String) -> EnvConfig {

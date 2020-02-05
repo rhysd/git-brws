@@ -23,7 +23,7 @@ fn args_with_no_option() {
                 c.repo_url,
             );
             assert_eq!(c.branch, None);
-            assert_eq!(c.cwd, env::current_dir().unwrap());
+            assert_eq!(c.cwd, env::current_dir().unwrap().canonicalize().unwrap());
             assert!(c.args.is_empty());
             assert!(!c.stdout);
             assert!(!c.website);
