@@ -1,7 +1,8 @@
 use crate::argv::*;
 use crate::error::Error;
+use crate::test::helper::get_root_dir;
 use std::env;
-use std::fs;
+use std::path::Path;
 
 #[test]
 fn args_with_no_option() {
@@ -18,10 +19,7 @@ fn args_with_no_option() {
                 c.repo_url,
             );
             assert_eq!(c.branch, None);
-            match c.git_dir {
-                Some(ref d) => assert!(d.ends_with(".git"), "{:?}", d),
-                None => assert!(false, ".git was not found"),
-            }
+            assert_eq!(c.cwd, env::current_dir().unwrap());
             assert!(c.args.is_empty());
             assert!(!c.stdout);
             assert!(!c.website);
@@ -40,18 +38,25 @@ fn args_with_no_option() {
 
 #[test]
 fn multiple_options() {
+    let dir = Path::new(file!()).parent().unwrap();
     match Parsed::from_iter(&[
-        "git-brws", "-u", "-r", "foo/bar", "--dir", ".", "-b", "dev", "-w", "--blame",
+        "git-brws",
+        "-u",
+        "-r",
+        "foo/bar",
+        "--dir",
+        dir.to_str().unwrap(),
+        "-b",
+        "dev",
+        "-w",
+        "--blame",
     ])
     .unwrap()
     {
         Parsed::OpenPage(c) => {
             assert_eq!(c.repo_url, "https://github.com/foo/bar.git");
             assert_eq!(c.branch, Some("dev".to_string()));
-            match c.git_dir {
-                Some(ref d) => assert!(d.ends_with(".git"), "{:?}", d),
-                None => assert!(false, ".git was not found"),
-            }
+            assert_eq!(c.cwd, dir.canonicalize().unwrap());
             assert_eq!(c.args.len(), 0);
             assert!(c.stdout);
             assert!(c.website);
@@ -181,44 +186,13 @@ fn unknown_options() {
     assert!(Parsed::from_iter(&["git-brws", "--unknown"]).is_err());
 }
 
-#[test]
-fn detect_git_dir() {
-    let current = fs::canonicalize(env::current_dir().unwrap()).unwrap();
-    let p = current.join("src").join("test");
-    match Parsed::from_iter(&["git-brws", "-d", p.to_str().unwrap()]).unwrap() {
-        Parsed::OpenPage(c) => {
-            let expected = Some(current.join(".git"));
-            assert_eq!(c.git_dir, expected);
-        }
-        p => assert!(false, "{:?}", p),
-    }
-}
-
 // For checking #9
 #[test]
-fn no_git_dir() {
-    let mut root = fs::canonicalize(env::current_dir().unwrap())
-        .unwrap()
-        .clone();
-    loop {
-        let prev = root.clone();
-        root.pop();
-        if prev == root {
-            break;
-        }
-    }
-    let root = root;
-
-    let git_dir = root.join(".git");
-    assert!(
-        !git_dir.exists(),
-        "{:?} should not exist as precondition of this test case",
-        git_dir
-    );
-
+fn specify_repo_outside_repository() {
+    let root = get_root_dir();
     match Parsed::from_iter(&["git-brws", "-d", root.to_str().unwrap(), "-r", "foo/bar"]).unwrap() {
         Parsed::OpenPage(c) => {
-            assert_eq!(c.git_dir, None);
+            assert_eq!(c.cwd, root);
             assert_eq!(&c.repo_url, "https://github.com/foo/bar.git");
         }
         p => assert!(false, "{:?}", p),

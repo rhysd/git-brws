@@ -3,7 +3,6 @@ use crate::error::Error;
 use crate::test::helper::empty_env;
 use crate::url;
 use std::env;
-use std::path::Path;
 
 #[cfg(not(target_os = "windows"))]
 fn executable_path(cmd: &str) -> String {
@@ -31,12 +30,10 @@ fn browse_env_config(cmd: String) -> EnvConfig {
 
 #[test]
 fn smoke() {
-    let mut d = env::current_dir().unwrap();
-    d.push(Path::new(".git"));
     let c = Config {
         repo_url: "ssh://git@github.com:22/rhysd/git-brws.git".to_string(),
         branch: None,
-        git_dir: Some(d),
+        cwd: env::current_dir().unwrap(),
         args: vec![],
         stdout: false,
         pull_request: false,

@@ -2,8 +2,7 @@ use crate::config::{Config, EnvConfig};
 use crate::error::Error;
 use crate::page::{DiffOp, Line, Page};
 use crate::service::build_page_url;
-use crate::test::helper::{empty_env, https_proxy};
-use std::fs;
+use crate::test::helper::{empty_env, get_root_dir, https_proxy};
 use std::path::Path;
 
 const OPEN: Page = Page::Open {
@@ -20,13 +19,10 @@ const OPEN_PR: Page = Page::Open {
 };
 
 fn config(repo: &str, branch: Option<&str>, env: Option<EnvConfig>) -> Config {
-    let mut dir = std::env::current_dir().unwrap();
-    dir.push(Path::new(".git"));
-    let dir = fs::canonicalize(dir).unwrap();
     Config {
         repo_url: repo.to_string(),
         branch: branch.map(|s| s.to_string()),
-        git_dir: Some(dir),
+        cwd: std::env::current_dir().unwrap(),
         args: vec![],
         stdout: false,
         pull_request: false,
@@ -38,10 +34,6 @@ fn config(repo: &str, branch: Option<&str>, env: Option<EnvConfig>) -> Config {
 }
 
 fn config_for_pr(token: Option<String>, repo: &str, branch: Option<&str>) -> Config {
-    let mut dir = std::env::current_dir().unwrap();
-    dir.push(Path::new(".git"));
-    let dir = fs::canonicalize(dir).unwrap();
-
     let mut env = empty_env();
     env.github_token = token;
     env.https_proxy = https_proxy();
@@ -50,7 +42,7 @@ fn config_for_pr(token: Option<String>, repo: &str, branch: Option<&str>) -> Con
     Config {
         repo_url: repo.to_string(),
         branch: branch.map(|b| b.to_string()),
-        git_dir: Some(dir),
+        cwd: std::env::current_dir().unwrap(),
         args: vec![],
         stdout: false,
         pull_request: true,
@@ -614,7 +606,7 @@ fn pull_request_create_page_url_at_parent_repo() {
 }
 
 #[test]
-fn pull_request_page_url_retrieving_branch_from_git_dir() {
+fn pull_request_page_url_retrieving_branch_inside_repo() {
     let cfg = config_for_pr(
         skip_if_no_token!(),
         "https://github.com/rhysd/git-brws.git",
@@ -637,14 +629,10 @@ fn pull_request_page_url_retrieving_branch_from_git_dir() {
 #[test]
 fn pull_request_page_url_without_branch_outside_git_repo() {
     let mut cfg = config_for_pr(None, "ssh://git@github.com:22/rhysd/git-brws.git", None);
-    cfg.git_dir = None;
+    cfg.cwd = get_root_dir();
     match build_page_url(&OPEN_PR, &cfg).unwrap_err() {
-        Error::NoLocalRepoFound { operation } => assert!(
-            operation.contains("opening a pull request"),
-            "Unexpected operation: {}",
-            operation
-        ),
-        err => assert!(false, "Unexpected error: {}", err),
+        Error::GitCommandError { .. } => { /* OK */ }
+        err => assert!(false, "Unexpected error: {} at {:?}", err, &cfg.cwd),
     }
 }
 

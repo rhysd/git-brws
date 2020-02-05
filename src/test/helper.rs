@@ -1,5 +1,7 @@
 use crate::config::EnvConfig;
 use std::env;
+use std::fs;
+use std::path::PathBuf;
 
 pub fn empty_env() -> EnvConfig {
     EnvConfig {
@@ -29,4 +31,18 @@ macro_rules! skip_if_no_token {
             Err(_) => return,
         }
     };
+}
+
+pub fn get_root_dir() -> PathBuf {
+    let mut root = fs::canonicalize(env::current_dir().unwrap())
+        .unwrap()
+        .clone();
+    loop {
+        let prev = root.clone();
+        root.pop();
+        if prev == root {
+            break;
+        }
+    }
+    root
 }
