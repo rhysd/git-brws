@@ -23,8 +23,8 @@ pub enum Page<'a, 'b> {
     },
 }
 
-async fn find_github_pr_url_for_branch<'a, 'b, B: AsRef<str>>(
-    branch: B,
+async fn find_github_pr_url_for_branch<'a, 'b>(
+    branch: impl AsRef<str>,
     endpoint: &str,
     author: &'a str,
     repo: &'b str,

@@ -57,10 +57,7 @@ impl EnvConfig {
 
 impl EnvConfig {
     // Note: Using `from_env` is not good in terms of testing.
-    pub fn from_iter<I>(iter: I) -> Result<EnvConfig>
-    where
-        I: IntoIterator<Item = (String, String)>,
-    {
+    pub fn from_iter(iter: impl IntoIterator<Item = (String, String)>) -> Result<EnvConfig> {
         Ok(envy::prefixed("GIT_BRWS_").from_iter(iter)?)
     }
 }

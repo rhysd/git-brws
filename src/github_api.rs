@@ -49,10 +49,10 @@ pub struct Client<'a> {
 }
 
 impl<'a> Client<'a> {
-    pub fn build<T: AsRef<str>, U: AsRef<str>>(
+    pub fn build(
         endpoint: &'a str,
-        token: &'a Option<T>,
-        https_proxy: &Option<U>,
+        token: &'a Option<impl AsRef<str>>,
+        https_proxy: &Option<impl AsRef<str>>,
     ) -> Result<Self> {
         // GitHub API requires user agent in headers: https://developer.github.com/v3/#user-agent-required
         let mut b = ReqwestClient::builder().user_agent("git-brws");
@@ -119,11 +119,7 @@ impl<'a> Client<'a> {
         }
     }
 
-    pub async fn repo<S, T>(&self, author: S, repo: T) -> Result<Repo>
-    where
-        S: AsRef<str>,
-        T: AsRef<str>,
-    {
+    pub async fn repo(&self, author: impl AsRef<str>, repo: impl AsRef<str>) -> Result<Repo> {
         let author = author.as_ref();
         let repo = repo.as_ref();
         let url = format!("https://{}/repos/{}/{}", self.endpoint, author, repo);
@@ -133,7 +129,7 @@ impl<'a> Client<'a> {
         Ok(repo)
     }
 
-    pub async fn most_popular_repo_by_name<S: AsRef<str>>(&self, name: S) -> Result<SearchedRepo> {
+    pub async fn most_popular_repo_by_name(&self, name: impl AsRef<str>) -> Result<SearchedRepo> {
         // XXX: No query syntax for exact matching to repository name. Use `in:name` instead though
         // it's matching to substrings.
         let query = format!("{} in:name", name.as_ref());
@@ -150,10 +146,10 @@ impl<'a> Client<'a> {
         }
     }
 
-    pub async fn repo_homepage<S: AsRef<str>, U: AsRef<str>>(
+    pub async fn repo_homepage(
         &self,
-        owner: S,
-        repo: U,
+        owner: impl AsRef<str>,
+        repo: impl AsRef<str>,
     ) -> Result<Option<String>> {
         let owner = owner.as_ref();
         let repo = repo.as_ref();

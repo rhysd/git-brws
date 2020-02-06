@@ -30,7 +30,7 @@ impl<'a> Git<'a> {
         }
     }
 
-    pub fn hash<S: AsRef<str>>(&self, commit: S) -> Result<String> {
+    pub fn hash(&self, commit: impl AsRef<str>) -> Result<String> {
         self.command(&["rev-parse", commit.as_ref()])
             .map_err(|err| Error::GitObjectNotFound {
                 kind: "commit",
@@ -39,7 +39,7 @@ impl<'a> Git<'a> {
             })
     }
 
-    pub fn tag_hash<S: AsRef<str>>(&self, tagname: S) -> Result<String> {
+    pub fn tag_hash(&self, tagname: impl AsRef<str>) -> Result<String> {
         let tagname = tagname.as_ref();
         let stdout = self
             .command(&["show-ref", "--tags", tagname])
@@ -52,7 +52,7 @@ impl<'a> Git<'a> {
         Ok(stdout.splitn(2, ' ').next().unwrap().to_string())
     }
 
-    pub fn remote_url<S: AsRef<str>>(&self, name: S) -> Result<String> {
+    pub fn remote_url(&self, name: impl AsRef<str>) -> Result<String> {
         // XXX:
         // `git remote get-url {name}` is not available because it's added recently (at 2.6.1).
         // Note that git installed in Ubuntu 14.04 is 1.9.1.
@@ -65,10 +65,10 @@ impl<'a> Git<'a> {
             })
     }
 
-    pub fn tracking_remote_url<S>(&self, branch: &Option<S>) -> Result<(String, String)>
-    where
-        S: AsRef<str>,
-    {
+    pub fn tracking_remote_url(
+        &self,
+        branch: &Option<impl AsRef<str>>,
+    ) -> Result<(String, String)> {
         let rev = match branch {
             Some(b) => format!("{}@{{u}}", b.as_ref()),
             None => "@{u}".to_string(),
@@ -106,11 +106,11 @@ impl<'a> Git<'a> {
         self.command(&["rev-parse", "--abbrev-ref", "--symbolic", "HEAD"])
     }
 
-    pub fn remote_contains<S, T>(&self, spec: S, remote_branch: T) -> Result<bool>
-    where
-        S: AsRef<str>,
-        T: AsRef<str>,
-    {
+    pub fn remote_contains(
+        &self,
+        spec: impl AsRef<str>,
+        remote_branch: impl AsRef<str>,
+    ) -> Result<bool> {
         self.command(&[
             "branch",
             "--remote",
@@ -122,10 +122,10 @@ impl<'a> Git<'a> {
     }
 
     // Returns {remote}/{branch}
-    pub fn remote_branch<S: AsRef<str>, T: AsRef<str>>(
+    pub fn remote_branch(
         &self,
-        remote_name: &Option<S>,
-        local_branch: &Option<T>,
+        remote_name: &Option<impl AsRef<str>>,
+        local_branch: &Option<impl AsRef<str>>,
     ) -> Result<String> {
         let remote = match remote_name {
             Some(r) => r.as_ref(),

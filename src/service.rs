@@ -9,23 +9,23 @@ use std::mem;
 use url::Url;
 
 #[cfg(target_os = "windows")]
-fn to_slash<S: AsRef<str>>(s: &S) -> String {
+fn to_slash(s: &str) -> String {
     use path_slash::PathExt;
     use std::path::Path;
-    Path::new(s.as_ref()).to_slash_lossy()
+    Path::new(s).to_slash_lossy()
 }
 
 // Do nothing on Windows
 #[cfg(not(target_os = "windows"))]
-fn to_slash<S: AsRef<str>>(s: &S) -> &str {
-    s.as_ref()
+fn to_slash(s: &str) -> &str {
+    s
 }
 
 // TODO: Omit fallback and return Result<String>
-fn first_available_url<T: AsRef<str>>(
+fn first_available_url(
     candidates: &mut [String],
     fallback: String,
-    https_proxy: &Option<T>,
+    https_proxy: &Option<impl AsRef<str>>,
 ) -> String {
     let mut builder = reqwest::Client::builder();
     if let Some(ref p) = https_proxy {
@@ -52,10 +52,10 @@ fn first_available_url<T: AsRef<str>>(
     fallback
 }
 
-fn fetch_homepage<T: AsRef<str>>(
+fn fetch_homepage(
     endpoint: &str,
     token: Option<&str>,
-    https_proxy: &Option<T>,
+    https_proxy: &Option<impl AsRef<str>>,
     user: &str,
     repo: &str,
 ) -> Result<Option<String>> {
@@ -63,11 +63,11 @@ fn fetch_homepage<T: AsRef<str>>(
     async_runtime::blocking(client.repo_homepage(user, repo))
 }
 
-fn build_github_like_url<S: AsRef<str>>(
+fn build_github_like_url(
     host: &str,
     user: &str,
     repo: &str,
-    api_endpoint: Option<S>,
+    api_endpoint: Option<impl AsRef<str>>,
     cfg: &Config,
     page: &Page,
 ) -> Result<String> {
@@ -218,7 +218,7 @@ fn build_gitlab_url(
             return Err(Error::GitLabDiffNotSupported);
         }
     }
-    build_github_like_url::<&str>(host, user, repo, None, cfg, page)
+    build_github_like_url(host, user, repo, Option::<&str>::None, cfg, page)
 }
 
 fn build_bitbucket_url(user: &str, repo: &str, cfg: &Config, page: &Page) -> Result<String> {
