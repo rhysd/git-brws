@@ -326,10 +326,6 @@ Some environment variables are available to customize behavior of `git-brws`.
 - [open-browser-github.vim](https://github.com/tyru/open-browser-github.vim)
 - [git browse](https://github.com/albertyw/git-browse)
 
-## License
-
-Distributed under [the MIT license](LICENSE.txt).
-
 ## TODOs
 
 Please see [the project page](https://github.com/rhysd/git-brws/projects/1).
@@ -337,6 +333,10 @@ Please see [the project page](https://github.com/rhysd/git-brws/projects/1).
 ## Development
 
 Please see [CONTRIBUTING.md](https://github.com/rhysd/git-brws/blob/master/CONTRIBUTING.md).
+
+## License
+
+Distributed under [the MIT license](LICENSE.txt).
 
 [crate-badge]: https://img.shields.io/crates/v/git-brws.svg
 [crate]: https://crates.io/crates/git-brws

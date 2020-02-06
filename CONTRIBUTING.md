@@ -32,6 +32,10 @@ git checkout -b new-branch
 git push -u origin new-branch --no-verify
 ```
 
+**Note:** When `$GITHUB_TOKEN` environment variable is set, some tests call `GET /search/*` GitHub
+APIs. They have special rate limit 30/min. Running all unit tests more than twice within 1 minute
+would hit the rate limit.
+
 
 ## Prepare manpage
 
