@@ -31,6 +31,7 @@ tokio = { version = "0.2", default-features = false }
 lazy_static = "1.4.0"
 # Only for futures::join!
 futures = { version = "0.3", default-features = false, features = ["std", "async-await"] }
+thiserror = "1.0.10"
 
 # For tokio::test
 [dev-dependencies.tokio]

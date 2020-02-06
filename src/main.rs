@@ -19,6 +19,7 @@ mod test;
 
 use crate::argv::Parsed;
 use std::env::args;
+use std::error::Error;
 use std::process::exit;
 
 fn run() -> error::Result<()> {
@@ -31,10 +32,24 @@ fn run() -> error::Result<()> {
     Ok(())
 }
 
+fn print_error(err: impl Error) {
+    fn print_causes(err: &dyn Error) {
+        eprint!(": {}", err);
+        if let Some(err) = err.source() {
+            print_causes(err);
+        }
+    }
+    eprint!("Error: {}", err);
+    if let Some(cause) = err.source() {
+        print_causes(cause);
+    }
+    eprintln!();
+}
+
 // Note: fn main() -> error::Result<()> is not available since it uses {:?} for error message.
 fn main() {
-    if let Err(e) = run() {
-        eprintln!("Error: {}", e);
+    if let Err(err) = run() {
+        print_error(err);
         exit(3);
     }
 }

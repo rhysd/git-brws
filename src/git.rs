@@ -21,12 +21,15 @@ impl<'a> Git<'a> {
         if out.status.success() {
             Ok(String::from_utf8_lossy(&out.stdout).trim().to_string())
         } else {
-            Err(Error::GitCommandError {
-                stderr: String::from_utf8_lossy(&out.stderr)
-                    .trim()
-                    .replace('\n', " "),
-                args: args.iter().map(|a| a.as_ref().to_owned()).collect(),
-            })
+            let stderr = String::from_utf8_lossy(&out.stderr)
+                .trim()
+                .replace('\n', " ");
+            let mut cmdline = format!("-C {:?}", self.cwd);
+            for arg in args.iter() {
+                cmdline.push(' ');
+                cmdline.push_str(arg.as_ref().to_string_lossy().as_ref());
+            }
+            Err(Error::GitCommandError { stderr, cmdline })
         }
     }
 

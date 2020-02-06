@@ -1,5 +1,5 @@
 use crate::config::Config;
-use crate::error::{Error, ExpectedNumberOfArgs, Result};
+use crate::error::{Error, ExpectedNumberOfArgs, FailedParseAttempts, Result};
 use crate::git::Git;
 use std::fmt;
 use std::fs;
@@ -287,7 +287,7 @@ pub fn parse_page(cfg: &Config) -> Result<Page> {
     }
 
     Err(Error::PageParseError {
-        args: cfg.args.clone(),
-        attempts,
+        cmdline: cfg.args.join(" "),
+        attempts: FailedParseAttempts(attempts),
     })
 }
