@@ -1,6 +1,6 @@
 use crate::async_runtime;
 use crate::config::Config;
-use crate::error::{Error, Result};
+use crate::error::{Error, ErrorKind, Result};
 use crate::github_api::Client;
 use crate::page::{DiffOp, Line, Page};
 use crate::pull_request;
@@ -152,7 +152,7 @@ fn build_github_like_url(
                     )),
                 }
             } else {
-                Err(Error::PullReqNotSupported {
+                Error::err(ErrorKind::PullReqNotSupported {
                     service: host.to_string(),
                 })
             }
@@ -215,7 +215,7 @@ fn build_gitlab_url(
 ) -> Result<String> {
     if let Page::Diff { op, .. } = page {
         if *op == DiffOp::TwoDots {
-            return Err(Error::GitLabDiffNotSupported);
+            return Error::err(ErrorKind::GitLabDiffNotSupported);
         }
     }
     build_github_like_url(host, user, repo, Option::<&str>::None, cfg, page)
@@ -236,7 +236,7 @@ fn build_bitbucket_url(user: &str, repo: &str, cfg: &Config, page: &Page) -> Res
         }
         Page::Open {
             pull_request: true, ..
-        } => Err(Error::PullReqNotSupported {
+        } => Error::err(ErrorKind::PullReqNotSupported {
             service: "bitbucket.org".to_string(),
         }),
         Page::Open { .. } => {
@@ -249,7 +249,7 @@ fn build_bitbucket_url(user: &str, repo: &str, cfg: &Config, page: &Page) -> Res
                 Ok(format!("https://bitbucket.org/{}/{}", user, repo))
             }
         }
-        Page::Diff { .. } => Err(Error::BitbucketDiffNotSupported),
+        Page::Diff { .. } => Error::err(ErrorKind::BitbucketDiffNotSupported),
         Page::Commit { ref hash } => Ok(format!(
             "https://bitbucket.org/{}/{}/commits/{}",
             user, repo, hash,
@@ -293,7 +293,7 @@ fn build_azure_devops_url(team: &str, repo: &str, cfg: &Config, page: &Page) -> 
             if let Some(ref b) = cfg.branch {
                 Ok(format!("https://dev.azure.com/{}/_git/{}/pullrequestcreate?sourceRef={}&targetRef=master", team, repo, b))
             } else {
-                Err(Error::NoLocalRepoFound {
+                Error::err(ErrorKind::NoLocalRepoFound {
                     operation: "opening a pull request without specifying branch".to_string(),
                 })
             }
@@ -333,7 +333,7 @@ fn build_azure_devops_url(team: &str, repo: &str, cfg: &Config, page: &Page) -> 
             "https://dev.azure.com/{}/{}/_workitems/edit/{}",
             team, repo, number
         )),
-        _ => Err(Error::AzureDevOpsNotSupported),
+        _ => Error::err(ErrorKind::AzureDevOpsNotSupported),
     }
 }
 
@@ -351,8 +351,10 @@ fn is_azure_devops_host(host: &str) -> bool {
 pub fn azure_devops_slug_from_path<'a>(path: &'a str) -> Result<(&'a str, &'a str)> {
     let mut split = path.split('/').skip_while(|s| s.is_empty());
 
-    let mut team = split.next().ok_or_else(|| Error::NoUserInPath {
-        path: path.to_string(),
+    let mut team = split.next().ok_or_else(|| {
+        Error::new(ErrorKind::NoUserInPath {
+            path: path.to_string(),
+        })
     })?;
 
     // Strip off v3 from Azure DevOps ssh:// paths.
@@ -361,18 +363,24 @@ pub fn azure_devops_slug_from_path<'a>(path: &'a str) -> Result<(&'a str, &'a st
     // Example: ssh://git@ssh.dev.azure.com:v3/team/repo/repo
     //
     if team == "v3" {
-        team = split.next().ok_or_else(|| Error::NoRepoInPath {
-            path: path.to_string(),
+        team = split.next().ok_or_else(|| {
+            Error::new(ErrorKind::NoRepoInPath {
+                path: path.to_string(),
+            })
         })?;
     }
 
-    let mut repo = split.next().ok_or_else(|| Error::NoRepoInPath {
-        path: path.to_string(),
+    let mut repo = split.next().ok_or_else(|| {
+        Error::new(ErrorKind::NoRepoInPath {
+            path: path.to_string(),
+        })
     })?;
 
     if repo.ends_with("_git") {
-        repo = split.next().ok_or_else(|| Error::NoRepoInPath {
-            path: path.to_string(),
+        repo = split.next().ok_or_else(|| {
+            Error::new(ErrorKind::NoRepoInPath {
+                path: path.to_string(),
+            })
         })?;
     }
 
@@ -382,12 +390,16 @@ pub fn azure_devops_slug_from_path<'a>(path: &'a str) -> Result<(&'a str, &'a st
 // Note: Parse '/user/repo.git' or '/user/repo' or 'user/repo' into 'user' and 'repo'
 pub fn slug_from_path<'a>(path: &'a str) -> Result<(&'a str, &'a str)> {
     let mut split = path.split('/').skip_while(|s| s.is_empty());
-    let user = split.next().ok_or_else(|| Error::NoUserInPath {
-        path: path.to_string(),
+    let user = split.next().ok_or_else(|| {
+        Error::new(ErrorKind::NoUserInPath {
+            path: path.to_string(),
+        })
     })?;
 
-    let mut repo = split.next().ok_or_else(|| Error::NoRepoInPath {
-        path: path.to_string(),
+    let mut repo = split.next().ok_or_else(|| {
+        Error::new(ErrorKind::NoRepoInPath {
+            path: path.to_string(),
+        })
     })?;
 
     if repo.ends_with(".git") {
@@ -403,16 +415,20 @@ pub fn slug_from_path<'a>(path: &'a str) -> Result<(&'a str, &'a str)> {
 //  2. git@hosting_service.com:user/repo.git (-> ssh://git@hosting_service.com:22/user/repo.git)
 pub fn build_page_url(page: &Page, cfg: &Config) -> Result<String> {
     let repo_url = &cfg.repo_url;
-    let url = Url::parse(&repo_url).map_err(|e| Error::BrokenUrl {
-        url: repo_url.to_string(),
-        msg: format!("{}", e),
+    let url = Url::parse(&repo_url).map_err(|e| {
+        Error::new(ErrorKind::BrokenUrl {
+            url: repo_url.to_string(),
+            msg: format!("{}", e),
+        })
     })?;
     let env = &cfg.env;
 
     let path = url.path();
-    let host = url.host_str().ok_or_else(|| Error::BrokenUrl {
-        url: repo_url.to_string(),
-        msg: "No host in URL".to_string(),
+    let host = url.host_str().ok_or_else(|| {
+        Error::new(ErrorKind::BrokenUrl {
+            url: repo_url.to_string(),
+            msg: "No host in URL".to_string(),
+        })
     })?;
 
     let (user, repo_name) = if is_azure_devops_host(host) {
@@ -440,7 +456,7 @@ pub fn build_page_url(page: &Page, cfg: &Config) -> Result<String> {
                 match env.ghe_url_host {
                     Some(ref v) if v == host => env.ghe_ssh_port,
                     _ => {
-                        return Err(Error::UnknownHostingService {
+                        return Error::err(ErrorKind::UnknownHostingService {
                             url: repo_url.to_string(),
                         });
                     }

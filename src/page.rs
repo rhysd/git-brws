@@ -1,5 +1,5 @@
 use crate::config::Config;
-use crate::error::{Error, ExpectedNumberOfArgs, Result};
+use crate::error::{Error, ErrorKind, ExpectedNumberOfArgs, Result};
 use crate::git::Git;
 use std::fmt;
 use std::fs;
@@ -61,7 +61,7 @@ struct BrowsePageParser<'a> {
 
 impl<'a> BrowsePageParser<'a> {
     fn wrong_number_of_args(&self, expected: ExpectedNumberOfArgs, kind: &str) -> Result<Page> {
-        Err(Error::WrongNumberOfArgs {
+        Error::err(ErrorKind::WrongNumberOfArgs {
             expected,
             actual: self.cfg.args.len(),
             kind: kind.to_string(),
@@ -100,7 +100,7 @@ impl<'a> BrowsePageParser<'a> {
         } else if arg.contains("..") {
             ".."
         } else {
-            return Err(Error::DiffDotsNotFound);
+            return Error::err(ErrorKind::DiffDotsNotFound);
         };
 
         let mut split = arg.splitn(2, dots);
@@ -108,7 +108,7 @@ impl<'a> BrowsePageParser<'a> {
         let rhs = split.next().unwrap();
 
         if lhs.is_empty() || rhs.is_empty() {
-            return Err(Error::DiffHandIsEmpty {
+            return Error::err(ErrorKind::DiffHandIsEmpty {
                 input: arg.to_string(),
             });
         }
@@ -174,21 +174,23 @@ impl<'a> BrowsePageParser<'a> {
 
         if path.is_dir() {
             if self.cfg.blame {
-                return Err(Error::CannotBlameDirectory {
+                return Error::err(ErrorKind::CannotBlameDirectory {
                     dir: path.to_string_lossy().into(),
                 });
             }
             if line.is_some() {
-                return Err(Error::LineSpecifiedForDir(path));
+                return Error::err(ErrorKind::LineSpecifiedForDir(path));
             }
         }
 
         let repo_root = self.git.root_dir()?;
         let relative_path = path
             .strip_prefix(&repo_root)
-            .map_err(|_| Error::FileDirNotInRepo {
-                repo_root: repo_root.to_owned(),
-                path: path.clone(),
+            .map_err(|_| {
+                Error::new(ErrorKind::FileDirNotInRepo {
+                    repo_root: repo_root.to_owned(),
+                    path: path.clone(),
+                })
             })?
             .to_str()
             .expect("Failed to convert path into UTF-8 string")
@@ -230,10 +232,12 @@ impl<'a> BrowsePageParser<'a> {
 
         let arg = &self.cfg.args[0];
         if !arg.starts_with('#') {
-            return Err(Error::InvalidIssueNumberFormat);
+            return Error::err(ErrorKind::InvalidIssueNumberFormat);
         }
         let arg = &arg[1..];
-        let number: usize = arg.parse().map_err(|_| Error::InvalidIssueNumberFormat)?;
+        let number: usize = arg
+            .parse()
+            .map_err(|_| Error::new(ErrorKind::InvalidIssueNumberFormat))?;
         Ok(Page::Issue { number })
     }
 }
@@ -244,7 +248,7 @@ pub fn parse_page(cfg: &Config) -> Result<Page> {
     // Note: Ignore any arguments when opening a website
     if cfg.args.is_empty() || cfg.website || cfg.pull_request {
         if cfg.blame {
-            return Err(Error::BlameWithoutFilePath);
+            return Error::err(ErrorKind::BlameWithoutFilePath);
         }
 
         return Ok(Page::Open {
@@ -266,9 +270,11 @@ pub fn parse_page(cfg: &Config) -> Result<Page> {
     // Note: Early return for --blame
     match parser.try_parse_file_or_dir() {
         Ok(p) => return Ok(p),
-        err @ Err(Error::CannotBlameDirectory { .. }) => return err,
-        Err(..) if cfg.blame => return Err(Error::BlameWithoutFilePath),
-        Err(e) => attempts.push(("File or dir", e)),
+        Err(err) => match err.kind() {
+            ErrorKind::CannotBlameDirectory { .. } => return Err(err),
+            _ if cfg.blame => return Error::err(ErrorKind::BlameWithoutFilePath),
+            _ => attempts.push(("File or dir", err)),
+        },
     }
 
     match parser.try_parse_diff() {
@@ -286,7 +292,7 @@ pub fn parse_page(cfg: &Config) -> Result<Page> {
         Err(e) => attempts.push(("Commit", e)),
     }
 
-    Err(Error::PageParseError {
+    Error::err(ErrorKind::PageParseError {
         args: cfg.args.clone(),
         attempts,
     })
