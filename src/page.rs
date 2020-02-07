@@ -264,7 +264,7 @@ pub fn parse_page(cfg: &Config) -> Result<Page> {
 
     match parser.try_parse_issue_number() {
         Ok(p) => return Ok(p),
-        Err(e) => attempts.push(("Issue number", e)),
+        Err(e) => attempts.push(("Issue number", *e)),
     }
 
     // Note: Early return for --blame
@@ -273,23 +273,23 @@ pub fn parse_page(cfg: &Config) -> Result<Page> {
         Err(err) => match err.kind() {
             ErrorKind::CannotBlameDirectory { .. } => return Err(err),
             _ if cfg.blame => return Error::err(ErrorKind::BlameWithoutFilePath),
-            _ => attempts.push(("File or dir", err)),
+            _ => attempts.push(("File or dir", *err)),
         },
     }
 
     match parser.try_parse_diff() {
         Ok(p) => return Ok(p),
-        Err(e) => attempts.push(("Diff", e)),
+        Err(e) => attempts.push(("Diff", *e)),
     }
 
     match parser.try_parse_tag() {
         Ok(p) => return Ok(p),
-        Err(e) => attempts.push(("Tag", e)),
+        Err(e) => attempts.push(("Tag", *e)),
     }
 
     match parser.try_parse_commit() {
         Ok(p) => return Ok(p),
-        Err(e) => attempts.push(("Commit", e)),
+        Err(e) => attempts.push(("Commit", *e)),
     }
 
     Error::err(ErrorKind::PageParseError {

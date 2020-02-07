@@ -18,15 +18,16 @@ impl fmt::Display for ExpectedNumberOfArgs {
     }
 }
 
+// TODO: Add backtrace when std::backtrace is stabilized
 #[derive(Debug)]
 pub struct Error {
-    kind: ErrorKind, // TODO: Add backtrace when std::backtrace is stabilized
+    kind: ErrorKind,
 }
 
 impl Error {
-    pub fn new(kind: ErrorKind) -> Error {
+    pub fn new(kind: ErrorKind) -> Box<Error> {
         // TODO: Capture backtrace when std::backtrace is stabilized
-        Error { kind }
+        Box::new(Error { kind })
     }
 
     pub fn err<T>(kind: ErrorKind) -> Result<T> {
@@ -200,8 +201,8 @@ impl fmt::Display for ErrorKind {
 
 macro_rules! error_from {
     ($cause:ty, $kind:ident) => {
-        impl From<$cause> for Error {
-            fn from(err: $cause) -> Error {
+        impl From<$cause> for Box<Error> {
+            fn from(err: $cause) -> Box<Error> {
                 Error::new(ErrorKind::$kind(err))
             }
         }
@@ -213,4 +214,4 @@ error_from!(reqwest::Error, HttpClientError);
 error_from!(getopts::Fail, CliParseFail);
 error_from!(envy::Error, EnvLoadError);
 
-pub type Result<T> = ::std::result::Result<T, Error>;
+pub type Result<T> = ::std::result::Result<T, Box<Error>>;
