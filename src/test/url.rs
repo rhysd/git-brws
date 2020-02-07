@@ -1,5 +1,5 @@
 use crate::config::{Config, EnvConfig};
-use crate::error::Error;
+use crate::error::ErrorKind;
 use crate::test::helper::empty_env;
 use crate::url;
 use std::env;
@@ -66,20 +66,20 @@ fn browse_url_with_user_command() {
 fn fail_to_browse_url_with_user_command() {
     let exe = executable_path("false");
     let env = browse_env_config(exe.clone());
-    match url::browse("https://example.com", &env) {
-        Err(Error::UserBrowseCommandFailed { cmd, url, .. }) => {
-            assert_eq!(cmd, exe);
+    match url::browse("https://example.com", &env).unwrap_err().kind() {
+        ErrorKind::UserBrowseCommandFailed { cmd, url, .. } => {
+            assert_eq!(cmd, &exe);
             assert_eq!(url, "https://example.com");
         }
-        r => assert!(false, "Unexpected result: {:?}", r),
+        e => assert!(false, "Unexpected error: {:?}", e),
     }
 }
 
 #[test]
 fn browse_command_is_not_found() {
     let env = browse_env_config("this-command-is-not-existing-yeah".to_string());
-    match url::browse("https://example.com", &env) {
-        Err(Error::IoError { .. }) => { /* ok */ }
-        r => assert!(false, "Unexpected result: {:?}", r),
+    match url::browse("https://example.com", &env).unwrap_err().kind() {
+        ErrorKind::IoError { .. } => { /* ok */ }
+        e => assert!(false, "Unexpected error: {:?}", e),
     }
 }

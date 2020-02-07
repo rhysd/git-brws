@@ -1,5 +1,5 @@
 use crate::config::{Config, EnvConfig};
-use crate::error::Error;
+use crate::error::ErrorKind;
 use crate::page::{DiffOp, Line, Page};
 use crate::service::build_page_url;
 use crate::test::helper::{empty_env, get_root_dir, https_proxy};
@@ -410,9 +410,9 @@ fn broken_repo_url() {
         "https://foo bar",      // invalid domain character
     ] {
         let c = config(url, None, Some(env.clone()));
-        match build_page_url(&OPEN, &c) {
-            Err(Error::BrokenUrl { .. }) => { /* ok */ }
-            v => assert!(false, "Unexpected error or success: {:?}", v),
+        match build_page_url(&OPEN, &c).unwrap_err().kind() {
+            ErrorKind::BrokenUrl { .. } => { /* ok */ }
+            e => assert!(false, "Unexpected error: {:?}", e),
         }
     }
 }
@@ -456,15 +456,15 @@ fn unknown_github_enterprise_url() {
         None,
         Some(env),
     );
-    match build_page_url(&OPEN, &c).unwrap_err() {
-        Error::UnknownHostingService { .. } => { /* OK */ }
+    match build_page_url(&OPEN, &c).unwrap_err().kind() {
+        ErrorKind::UnknownHostingService { .. } => { /* OK */ }
         err => assert!(false, "Unexpected error: {}", err),
     }
 
     let mut c = config_for_pr(None, "https://github-othercompany.com/foo/bar.git", None);
     c.env.ghe_url_host = Some("github-yourcompany.com".to_string());
-    match build_page_url(&OPEN_PR, &c).unwrap_err() {
-        Error::UnknownHostingService { .. } => { /* OK */ }
+    match build_page_url(&OPEN_PR, &c).unwrap_err().kind() {
+        ErrorKind::UnknownHostingService { .. } => { /* OK */ }
         err => assert!(false, "Unexpected error: {}", err),
     }
 }
@@ -630,8 +630,8 @@ fn pull_request_page_url_retrieving_branch_inside_repo() {
 fn pull_request_page_url_without_branch_outside_git_repo() {
     let mut cfg = config_for_pr(None, "ssh://git@github.com:22/rhysd/git-brws.git", None);
     cfg.cwd = get_root_dir();
-    match build_page_url(&OPEN_PR, &cfg).unwrap_err() {
-        Error::GitCommandError { .. } => { /* OK */ }
+    match build_page_url(&OPEN_PR, &cfg).unwrap_err().kind() {
+        ErrorKind::GitCommandError { .. } => { /* OK */ }
         err => assert!(false, "Unexpected error: {} at {:?}", err, &cfg.cwd),
     }
 }
@@ -648,8 +648,8 @@ fn pull_request_unsupported_services() {
     ];
     for url in urls {
         let cfg = config_for_pr(None, url, None);
-        match build_page_url(&OPEN_PR, &cfg).unwrap_err() {
-            Error::PullReqNotSupported { .. } => { /* OK */ }
+        match build_page_url(&OPEN_PR, &cfg).unwrap_err().kind() {
+            ErrorKind::PullReqNotSupported { .. } => { /* OK */ }
             err => assert!(false, "Unexpected error for URL {}: {}", url, err),
         }
     }
@@ -658,8 +658,8 @@ fn pull_request_unsupported_services() {
 #[test]
 fn pull_request_github_enterprise_with_no_token() {
     let cfg = config_for_pr(None, "https://github.yourcompany.com/foo/bar.git", None);
-    match build_page_url(&OPEN_PR, &cfg).unwrap_err() {
-        Error::GheTokenRequired => { /* OK */ }
+    match build_page_url(&OPEN_PR, &cfg).unwrap_err().kind() {
+        ErrorKind::GheTokenRequired => { /* OK */ }
         err => assert!(false, "Unexpected error: {}", err),
     }
 }

@@ -1,5 +1,5 @@
 use crate::argv::*;
-use crate::error::Error;
+use crate::error::ErrorKind;
 use crate::test::helper::get_root_dir;
 use std::env;
 use std::path::Path;
@@ -156,10 +156,13 @@ fn valid_remote_name() {
 
 #[test]
 fn invalid_remote_name() {
-    match Parsed::from_iter(&["git-brws", "-R", "this-remote-is-never-existing"]).unwrap_err() {
-        Error::GitObjectNotFound { kind, object, .. } => {
-            assert_eq!(kind, "remote");
-            assert_eq!(&object, "this-remote-is-never-existing");
+    match Parsed::from_iter(&["git-brws", "-R", "this-remote-is-never-existing"])
+        .unwrap_err()
+        .kind()
+    {
+        ErrorKind::GitObjectNotFound { kind, object, .. } => {
+            assert_eq!(*kind, "remote");
+            assert_eq!(object, "this-remote-is-never-existing");
         }
         e => assert!(false, "Unexpected error: {}", e),
     }
@@ -221,8 +224,8 @@ fn search_repo_from_github_by_name() {
 #[test]
 fn repo_specified_but_argument_is_not_empty() {
     let err = Parsed::from_iter(&["git-brws", "-r", "foo", "HEAD"]).unwrap_err();
-    match err {
-        Error::ArgsNotAllowed { ref args, .. } => {
+    match err.kind() {
+        ErrorKind::ArgsNotAllowed { ref args, .. } => {
             assert!(format!("{}", err).contains("\"HEAD\""), "{:?}", args);
         }
         e => assert!(false, "Unexpected error: {}", e),
