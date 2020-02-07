@@ -78,12 +78,10 @@ async fn test_no_pr_found_at_own_repo() {
         Page::New {
             author,
             repo,
-            default_branch,
             branch,
         } => {
             assert_eq!(author, "rhysd");
             assert_eq!(repo, "git-brws");
-            assert_eq!(default_branch, "master");
             assert_eq!(branch, "unknown-branch-which-does-not-exist-for-test")
         }
         p => assert!(false, "{:?}", p),
@@ -101,13 +99,11 @@ async fn test_no_pr_found_at_parent_repo() {
             author,
             repo,
             fork_author,
-            default_branch,
             branch,
         } => {
             assert_eq!(author, "rust-lang");
             assert_eq!(repo, "rust.vim");
             assert_eq!(fork_author, "rhysd");
-            assert_eq!(default_branch, "master");
             assert_eq!(branch, "unknown-branch-which-does-not-exist-for-test")
         }
         p => assert!(false, "{:?}", p),

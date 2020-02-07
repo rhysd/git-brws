@@ -134,21 +134,19 @@ fn build_github_like_url(
                     pull_request::Page::New {
                         author,
                         repo,
-                        default_branch,
                         branch,
                     } => Ok(format!(
-                        "https://{}/{}/{}/compare/{}...{}",
-                        host, author, repo, default_branch, branch,
+                        "https://{}/{}/{}/compare/{}?expand=1",
+                        host, author, repo, branch,
                     )),
                     pull_request::Page::NewAtParent {
                         author,
                         repo,
                         fork_author,
-                        default_branch,
                         branch,
                     } => Ok(format!(
-                        "https://{}/{}/{}/compare/{}...{}:{}",
-                        host, author, repo, default_branch, fork_author, branch,
+                        "https://{}/{}/{}/compare/{}:{}?expand=1",
+                        host, author, repo, fork_author, branch,
                     )),
                 }
             } else {

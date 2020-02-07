@@ -586,7 +586,7 @@ fn pull_request_create_page_url_at_own_repo() {
     let url = build_page_url(&OPEN_PR, &cfg).unwrap();
     assert_eq!(
         &url,
-        "https://github.com/rhysd/git-brws/compare/master...this-branch-never-existing"
+        "https://github.com/rhysd/git-brws/compare/this-branch-never-existing?expand=1"
     );
 }
 
@@ -601,7 +601,7 @@ fn pull_request_create_page_url_at_parent_repo() {
     let url = build_page_url(&OPEN_PR, &cfg).unwrap();
     assert_eq!(
         &url,
-        "https://github.com/rust-lang/rust.vim/compare/master...rhysd:this-branch-never-existing"
+        "https://github.com/rust-lang/rust.vim/compare/rhysd:this-branch-never-existing?expand=1"
     );
 }
 

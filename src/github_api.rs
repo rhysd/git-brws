@@ -11,12 +11,10 @@ pub struct ParentRepoOwner {
 pub struct ParentRepo {
     pub name: String,
     pub owner: ParentRepoOwner,
-    pub default_branch: String,
 }
 #[derive(Debug, Deserialize)]
 pub struct Repo {
     pub parent: Option<ParentRepo>,
-    pub default_branch: String,
 }
 
 #[derive(Debug, Deserialize)]

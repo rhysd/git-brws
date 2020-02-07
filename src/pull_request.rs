@@ -11,14 +11,12 @@ pub enum Page<'a, 'b> {
     New {
         author: Cow<'a, str>,
         repo: Cow<'b, str>,
-        default_branch: String,
         branch: String,
     },
     NewAtParent {
         author: Cow<'a, str>,
         repo: Cow<'b, str>,
         fork_author: &'a str,
-        default_branch: String,
         branch: String,
     },
 }
@@ -73,7 +71,6 @@ async fn find_github_pr_url_for_branch<'a, 'b>(
                 author: Cow::Owned(owner),
                 repo: Cow::Owned(repo),
                 fork_author: author,
-                default_branch: parent.default_branch,
                 branch: branch.to_string(),
             })
         }
@@ -81,7 +78,6 @@ async fn find_github_pr_url_for_branch<'a, 'b>(
         Ok(Page::New {
             author: Cow::Borrowed(author),
             repo: Cow::Borrowed(repo),
-            default_branch: fetched_repo.default_branch,
             branch: branch.to_string(),
         })
     }

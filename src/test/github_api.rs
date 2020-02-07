@@ -53,7 +53,6 @@ async fn find_parent() {
     let parent = repo.parent.unwrap();
     assert_eq!(parent.name, "rust.vim");
     assert_eq!(parent.owner.login, "rust-lang");
-    assert_eq!(parent.default_branch, "master");
 }
 
 #[tokio::test]
