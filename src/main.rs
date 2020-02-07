@@ -34,7 +34,7 @@ fn run() -> error::Result<()> {
 // Note: fn main() -> error::Result<()> is not available since it uses {:?} for error message.
 fn main() {
     if let Err(e) = run() {
-        eprintln!("Error: {}", e);
+        e.eprintln();
         exit(3);
     }
 }
