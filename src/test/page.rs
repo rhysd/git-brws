@@ -1,5 +1,5 @@
 use crate::config::Config;
-use crate::error::Error;
+use crate::error::ErrorKind;
 use crate::page::{parse_page, DiffOp, Line, Page};
 use crate::test::helper::{empty_env, get_root_dir};
 use std::env;
@@ -266,17 +266,17 @@ fn wrong_num_of_args() {
         None,
         vec!["foo", "bar", "piyo", "blah"],
     );
-    match parse_page(&c) {
-        Err(Error::PageParseError { attempts, .. }) => {
+    match parse_page(&c).unwrap_err().kind() {
+        ErrorKind::PageParseError { attempts, .. } => {
             assert!(!attempts.is_empty());
             for (_, err) in attempts {
-                match err {
-                    Error::WrongNumberOfArgs { actual, .. } => assert_eq!(actual, 4),
+                match err.kind() {
+                    ErrorKind::WrongNumberOfArgs { actual, .. } => assert_eq!(*actual, 4),
                     err => assert!(false, "Unexpected error: {}", err),
                 }
             }
         }
-        v => assert!(false, "Unexpected success or error: {:?}", v),
+        e => assert!(false, "Unexpected error: {:?}", e),
     }
 }
 
@@ -332,17 +332,17 @@ fn issue_number() {
 fn line_cannot_be_set_to_dir() {
     for arg in &["src#123", "src#12-23"] {
         let c = config("https://github.com/user/repo.git", None, vec![arg]);
-        match parse_page(&c) {
-            Err(Error::PageParseError { attempts, .. }) => assert!(
-                attempts.iter().any(|(_, err)| match err {
-                    Error::LineSpecifiedForDir(path) => format!("{:?}", path).contains("src"),
+        match parse_page(&c).unwrap_err().kind() {
+            ErrorKind::PageParseError { attempts, .. } => assert!(
+                attempts.iter().any(|(_, err)| match err.kind() {
+                    ErrorKind::LineSpecifiedForDir(path) => format!("{:?}", path).contains("src"),
                     _ => false,
                 }),
                 "{:?} for {}",
                 attempts,
                 arg,
             ),
-            v => assert!(false, "Unexpected result {:?} for {}", v, arg),
+            e => assert!(false, "Unexpected error {:?} for {}", e, arg),
         }
     }
 }
@@ -422,9 +422,9 @@ fn parse_blame_without_file_path() {
         c.blame = true;
         let c = c;
 
-        match parse_page(&c) {
-            Err(Error::BlameWithoutFilePath) => { /* ok */ }
-            r => assert!(false, "Unexpected result: {:?}", r),
+        match parse_page(&c).unwrap_err().kind() {
+            ErrorKind::BlameWithoutFilePath => { /* ok */ }
+            e => assert!(false, "Unexpected error: {:?}", e),
         }
     }
 }
@@ -435,10 +435,10 @@ fn parse_blame_directory() {
     c.blame = true;
     let c = c;
 
-    match parse_page(&c).unwrap_err() {
-        Error::CannotBlameDirectory { dir } => {
+    match parse_page(&c).unwrap_err().kind() {
+        ErrorKind::CannotBlameDirectory { dir } => {
             assert!(dir.ends_with("src"), "{:?}", dir);
         }
-        e => assert!(false, "Unexpected parse e: {:?}", e),
+        e => assert!(false, "Unexpected parse error: {:?}", e),
     }
 }

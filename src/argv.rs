@@ -1,6 +1,6 @@
 use crate::async_runtime;
 use crate::config::{Config, EnvConfig};
-use crate::error::{Error, Result};
+use crate::error::{Error, ErrorKind, Result};
 use crate::git::Git;
 use crate::github_api::Client;
 use getopts::Options;
@@ -45,7 +45,7 @@ pub enum Parsed {
 
 fn normalize_repo_format(mut slug: String, env: &EnvConfig) -> Result<String> {
     if slug.is_empty() {
-        return Err(Error::BrokenRepoFormat { input: slug });
+        return Error::err(ErrorKind::BrokenRepoFormat { input: slug });
     }
 
     if slug.starts_with("git@")
@@ -67,7 +67,7 @@ fn normalize_repo_format(mut slug: String, env: &EnvConfig) -> Result<String> {
             async_runtime::blocking(client.most_popular_repo_by_name(&slug))
                 .map(|repo| repo.clone_url)
         }
-        _ => Err(Error::BrokenRepoFormat { input: slug }),
+        _ => Error::err(ErrorKind::BrokenRepoFormat { input: slug }),
     }
 }
 
@@ -75,7 +75,7 @@ fn get_cwd(specified: Option<String>) -> Result<PathBuf> {
     if let Some(dir) = specified {
         let p = fs::canonicalize(&dir)?;
         if !p.exists() {
-            return Err(Error::SpecifiedDirNotExist { dir });
+            return Error::err(ErrorKind::SpecifiedDirNotExist { dir });
         }
         Ok(p)
     } else {
@@ -212,7 +212,7 @@ impl Parsed {
         let (repo_url, remote) = match (matches.opt_str("r"), matches.opt_str("R")) {
             (Some(repo), remote) => {
                 if !matches.free.is_empty() {
-                    return Err(Error::ArgsNotAllowed {
+                    return Error::err(ErrorKind::ArgsNotAllowed {
                         flag: "--repo {repo}",
                         args: matches.free,
                     });

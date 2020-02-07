@@ -1,5 +1,5 @@
 use crate::config::{Config, EnvConfig};
-use crate::error::{Error, Result};
+use crate::error::{Error, ErrorKind, Result};
 use crate::page::parse_page;
 use crate::service;
 use std::process::{Command, Stdio};
@@ -17,7 +17,7 @@ fn browse_with_cmd(url: &str, cmd: &str) -> Result<()> {
     if out.status.success() {
         Ok(())
     } else {
-        Err(Error::UserBrowseCommandFailed {
+        Error::err(ErrorKind::UserBrowseCommandFailed {
             cmd: cmd.to_string(),
             url: url.to_string(),
             msg: String::from_utf8_lossy(&out.stderr)
@@ -41,9 +41,9 @@ pub fn browse(url: &str, env: &EnvConfig) -> Result<()> {
             } else {
                 "Error on opening URL {}: Command terminated by signal".to_string()
             };
-            Err(Error::OpenUrlFailure { url, msg })
+            Error::err(ErrorKind::OpenUrlFailure { url, msg })
         }
-        Err(e) => Err(Error::OpenUrlFailure {
+        Err(e) => Error::err(ErrorKind::OpenUrlFailure {
             url: url.to_string(),
             msg: format!("{}", e),
         }),

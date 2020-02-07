@@ -1,4 +1,4 @@
-use crate::error::Error;
+use crate::error::ErrorKind;
 use crate::github_api::Client;
 use crate::test::helper::https_proxy;
 
@@ -68,10 +68,9 @@ async fn parent_not_found() {
 async fn request_failure() {
     let client =
         Client::build("unknown.endpoint.example.com", &None::<&str>, &None::<&str>).unwrap();
-    match client.repo("rhysd", "git-brws").await {
-        Ok(_) => assert!(false, "request succeeded"),
-        Err(Error::HttpClientError(..)) => { /* ok */ }
-        Err(e) => assert!(false, "unexpected error: {}", e),
+    match client.repo("rhysd", "git-brws").await.unwrap_err().kind() {
+        ErrorKind::HttpClientError(..) => { /* ok */ }
+        e => assert!(false, "unexpected error: {}", e),
     }
 }
 
@@ -94,8 +93,8 @@ async fn most_popular_repo_not_found() {
         .most_popular_repo_by_name("user:rhysd this-repository-will-never-exist")
         .await
         .unwrap_err();
-    match err {
-        Error::NoSearchResult { .. } => { /* ok */ }
+    match err.kind() {
+        ErrorKind::NoSearchResult { .. } => { /* ok */ }
         err => assert!(false, "Unexpected error: {}", err),
     }
 }

@@ -1,4 +1,4 @@
-use crate::error::Error;
+use crate::error::ErrorKind;
 use crate::git::Git;
 use std::env;
 
@@ -32,9 +32,9 @@ fn git_get_commit_hash() {
 fn git_get_invalid_hash() {
     let cwd = env::current_dir().unwrap();
     let g = Git::new(&cwd, "git");
-    match g.hash("HEAD~114514") {
-        Err(Error::GitObjectNotFound { kind, .. }) => assert_eq!(kind, "commit"),
-        r => assert!(false, "Unexpected result: {:?}", r),
+    match g.hash("HEAD~114514").unwrap_err().kind() {
+        ErrorKind::GitObjectNotFound { kind, .. } => assert_eq!(*kind, "commit"),
+        e => assert!(false, "Unexpected error: {:?}", e),
     }
 }
 
@@ -50,9 +50,9 @@ fn git_get_tag_hash() {
 fn git_get_invalid_tag_hash() {
     let cwd = env::current_dir().unwrap();
     let g = Git::new(&cwd, "git");
-    match g.tag_hash("this-tag-is-not-existing") {
-        Err(Error::GitObjectNotFound { kind, .. }) => assert_eq!(kind, "tag name"),
-        r => assert!(false, "Unexpected result: {:?}", r),
+    match g.tag_hash("this-tag-is-not-existing").unwrap_err().kind() {
+        ErrorKind::GitObjectNotFound { kind, .. } => assert_eq!(*kind, "tag name"),
+        e => assert!(false, "Unexpected error: {:?}", e),
     }
 }
 
@@ -74,9 +74,13 @@ fn git_get_remote_url() {
 fn git_get_invalid_remote_url() {
     let cwd = env::current_dir().unwrap();
     let g = Git::new(&cwd, "git");
-    match g.remote_url("this-remote-is-not-existing") {
-        Err(Error::GitObjectNotFound { kind, .. }) => assert_eq!(kind, "remote"),
-        r => assert!(false, "Unexpected result: {:?}", r),
+    match g
+        .remote_url("this-remote-is-not-existing")
+        .unwrap_err()
+        .kind()
+    {
+        ErrorKind::GitObjectNotFound { kind, .. } => assert_eq!(*kind, "remote"),
+        e => assert!(false, "Unexpected error: {:?}", e),
     }
 }
 

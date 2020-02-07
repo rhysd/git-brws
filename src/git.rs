@@ -1,4 +1,4 @@
-use crate::error::{Error, Result};
+use crate::error::{Error, ErrorKind, Result};
 use std::ffi::OsStr;
 use std::fmt::Debug;
 use std::fs;
@@ -21,7 +21,7 @@ impl<'a> Git<'a> {
         if out.status.success() {
             Ok(String::from_utf8_lossy(&out.stdout).trim().to_string())
         } else {
-            Err(Error::GitCommandError {
+            Error::err(ErrorKind::GitCommandError {
                 stderr: String::from_utf8_lossy(&out.stderr)
                     .trim()
                     .replace('\n', " "),
@@ -32,10 +32,12 @@ impl<'a> Git<'a> {
 
     pub fn hash(&self, commit: impl AsRef<str>) -> Result<String> {
         self.command(&["rev-parse", commit.as_ref()])
-            .map_err(|err| Error::GitObjectNotFound {
-                kind: "commit",
-                object: commit.as_ref().to_string(),
-                msg: format!("{}", err),
+            .map_err(|err| {
+                Error::new(ErrorKind::GitObjectNotFound {
+                    kind: "commit",
+                    object: commit.as_ref().to_string(),
+                    msg: format!("{}", err),
+                })
             })
     }
 
@@ -43,10 +45,12 @@ impl<'a> Git<'a> {
         let tagname = tagname.as_ref();
         let stdout = self
             .command(&["show-ref", "--tags", tagname])
-            .map_err(|err| Error::GitObjectNotFound {
-                kind: "tag name",
-                object: tagname.to_string(),
-                msg: format!("{}", err),
+            .map_err(|err| {
+                Error::new(ErrorKind::GitObjectNotFound {
+                    kind: "tag name",
+                    object: tagname.to_string(),
+                    msg: format!("{}", err),
+                })
             })?;
         // Output must be in format '{rev} {ref name}'
         Ok(stdout.splitn(2, ' ').next().unwrap().to_string())
@@ -58,10 +62,12 @@ impl<'a> Git<'a> {
         // Note that git installed in Ubuntu 14.04 is 1.9.1.
         let name = name.as_ref();
         self.command(&["config", "--get", &format!("remote.{}.url", name)])
-            .map_err(|err| Error::GitObjectNotFound {
-                kind: "remote",
-                object: name.to_string(),
-                msg: format!("{}", err),
+            .map_err(|err| {
+                Error::new(ErrorKind::GitObjectNotFound {
+                    kind: "remote",
+                    object: name.to_string(),
+                    msg: format!("{}", err),
+                })
             })
     }
 
@@ -76,29 +82,35 @@ impl<'a> Git<'a> {
 
         let out = match self.command(&["rev-parse", "--abbrev-ref", "--symbolic", rev.as_str()]) {
             Ok(stdout) => stdout,
-            Err(Error::GitCommandError { ref stderr, .. })
-                if stderr.contains("does not point to a branch") =>
-            {
-                return Ok((self.remote_url("origin")?, "origin".to_string()));
-            }
-            Err(err) => return Err(err),
+            Err(err) => match err.kind() {
+                ErrorKind::GitCommandError { ref stderr, .. }
+                    if stderr.contains("does not point to a branch") =>
+                {
+                    return Ok((self.remote_url("origin")?, "origin".to_string()));
+                }
+                _ => return Err(err),
+            },
         };
 
         // out is formatted as '{remote-name}/{branch-name}'
         match out.splitn(2, '/').next() {
             Some(u) => Ok((self.remote_url(u)?, u.to_string())),
-            None => Err(Error::UnexpectedRemoteName(out.clone())),
+            None => Error::err(ErrorKind::UnexpectedRemoteName(out.clone())),
         }
     }
 
     pub fn root_dir(&self) -> Result<PathBuf> {
         match self.command(&["rev-parse", "--show-toplevel"]) {
             Ok(stdout) => Ok(fs::canonicalize(stdout)?),
-            Err(Error::GitCommandError { stderr, .. }) => Err(Error::GitRootDirNotFound {
-                cwd: self.cwd.to_owned(),
-                stderr,
-            }),
-            Err(e) => Err(e),
+            Err(err) => match err.kind() {
+                ErrorKind::GitCommandError { stderr, .. } => {
+                    Error::err(ErrorKind::GitRootDirNotFound {
+                        cwd: self.cwd.to_owned(),
+                        stderr: stderr.clone(),
+                    })
+                }
+                _ => Err(err),
+            },
         }
     }
 

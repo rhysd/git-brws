@@ -1,4 +1,4 @@
-use crate::error::{Error, Result};
+use crate::error::{Error, ErrorKind, Result};
 use reqwest::{header, Proxy, StatusCode};
 use reqwest::{Client as ReqwestClient, RequestBuilder, Response};
 use std::mem;
@@ -83,7 +83,7 @@ impl<'a> Client<'a> {
         if status == StatusCode::OK {
             Ok(res)
         } else {
-            Err(Error::GitHubStatusFailure {
+            Error::err(ErrorKind::GitHubStatusFailure {
                 status,
                 msg: res.text().await.unwrap(),
             })
@@ -140,7 +140,7 @@ impl<'a> Client<'a> {
         let mut results: SearchResults = res.json().await?;
 
         if results.items.is_empty() {
-            Err(Error::NoSearchResult { query })
+            Error::err(ErrorKind::NoSearchResult { query })
         } else {
             Ok(mem::replace(&mut results.items[0], SearchedRepo::default()))
         }

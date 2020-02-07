@@ -1,5 +1,5 @@
 use crate::config::{Config, EnvConfig};
-use crate::error::{Error, Result};
+use crate::error::{Error, ErrorKind, Result};
 use crate::github_api;
 use std::borrow::Cow;
 
@@ -35,7 +35,7 @@ async fn find_github_pr_url_for_branch<'a, 'b>(
         &env.github_token
     } else {
         if env.ghe_token.is_none() {
-            return Err(Error::GheTokenRequired);
+            return Error::err(ErrorKind::GheTokenRequired);
         }
         &env.ghe_token
     };
