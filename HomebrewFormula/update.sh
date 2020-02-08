@@ -3,18 +3,23 @@
 set -e
 
 if [ ! -d '.git' ]; then
-    echo 'This script must be run at root of the repository' 2>&1
+    echo 'This script must be run at root of the repository' >&2
     exit 1
 fi
 
 if [[ "$1" == "" ]]; then
-    echo 'Usage: update.sh {tag name}' 2>&1
+    echo 'Usage: update.sh {tag name}' >&2
     exit 1
 fi
 
 cd ./HomebrewFormula
 
 VERSION="$1"
+
+if [[ ! "$VERSION" =~ ^v\d+\.\d+\.\d+$ ]]; then
+    echo 'Version number in first argument must match to ^v\d+\.\d+\.\d+$ like v1.2.3' >&2
+    exit 1
+fi
 
 echo "Update formula to version ${VERSION}"
 
