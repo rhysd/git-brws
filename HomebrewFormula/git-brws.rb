@@ -5,10 +5,10 @@ class GitBrws < Formula
 
   if OS.mac?
     url "https://github.com/rhysd/git-brws/releases/download/v#{version}/git-brws-v#{version}-x86_64-apple-darwin.zip"
-    sha256 '0019dfc4b32d63c1392aa264aed2253c1e0c2fb09216f8e2cc269bbfb8bb49b5' # mac
+    sha256 '81836e709ac78a82f46081e2b3b2476d44f43dfaf16adc1c70646b41e6844778' # mac
   elsif OS.linux?
     url "https://github.com/rhysd/git-brws/releases/download/v#{version}/git-brws-v#{version}-x86_64-unknown-linux-gnu.zip"
-    sha256 '0019dfc4b32d63c1392aa264aed2253c1e0c2fb09216f8e2cc269bbfb8bb49b5' # linux
+    sha256 'e1421dbe0d472b185a67b8693e8e889731b84b525600f5bdeb137eb24009863d' # linux
   end
 
   def install
