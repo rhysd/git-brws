@@ -1,3 +1,16 @@
+<a name="v0.11.7"></a>
+# [v0.11.7](https://github.com/rhysd/git-brws/releases/tag/v0.11.7) - 08 Feb 2020
+
+- **Improve:** `-C` is used instead of `--git-dir` for executing `git` commands to avoid weird gitdir issue on Windows
+- **Improve:** `?expand=1` is added to 'Create pull request' page when opening a repository with `--pr` and a pull request is not yet created. It opens a text form for pull request description automatically
+- **Improve:** Dependencies were updated
+- **Fix:** Setting empty string to `$https_proxy` did not work
+- **Dev:** CI for Windows was fixed. It failed due to weird reason
+- **Dev:** Use `std::error::Error` trait to handle nested errors
+
+[Changes][v0.11.7]
+
+
 <a name="v0.11.6"></a>
 # [v0.11.6](https://github.com/rhysd/git-brws/releases/tag/v0.11.6) - 16 Jan 2020
 
@@ -215,6 +228,7 @@ First binaries release for Linux (32bit/64bit) and macOS (64bit) using Travis CI
 [Changes][v0.4.2]
 
 
+[v0.11.7]: https://github.com/rhysd/git-brws/compare/v0.11.6...v0.11.7
 [v0.11.6]: https://github.com/rhysd/git-brws/compare/0.11.5...v0.11.6
 [0.11.5]: https://github.com/rhysd/git-brws/compare/0.11.3...0.11.5
 [0.11.3]: https://github.com/rhysd/git-brws/compare/0.11.2...0.11.3
