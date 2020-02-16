@@ -32,6 +32,9 @@ lazy_static = "1.4.0"
 # Only for futures::join!
 futures = { version = "0.3", default-features = false, features = ["async-await"] }
 
+[dev-dependencies]
+criterion = "0.3"
+
 # For tokio::test
 [dev-dependencies.tokio]
 version = "0.2"
@@ -46,3 +49,7 @@ features = ["run-for-all", "prepush-hook", "run-cargo-test", "run-cargo-clippy",
 [profile.release]
 lto = true
 panic = "abort"
+
+[[bench]]
+name = "benchmark"
+harness = false
