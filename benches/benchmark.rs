@@ -1,38 +1,35 @@
 use criterion::{black_box, criterion_group, criterion_main, Criterion};
 use git_brws::argv::Parsed;
-use git_brws::config::{Config, EnvConfig};
 use git_brws::url::build_url;
-use std::env::current_dir;
+use std::ffi::OsStr;
 
-fn empty_config() -> Config {
-    let env = EnvConfig {
-        git_command: "git".to_string(),
-        ghe_ssh_port: None,
-        ghe_url_host: None,
-        gitlab_ssh_port: None,
-        github_token: None,
-        ghe_token: None,
-        https_proxy: None,
-        browse_command: None,
-    };
-    Config {
-        repo_url: "https://github.com/rhysd/git-brws.git".to_string(),
-        branch: None,
-        cwd: current_dir().unwrap(),
-        args: vec![],
-        stdout: true,
-        pull_request: false,
-        website: false,
-        blame: false,
-        remote: None,
-        env,
+struct DummyArgs<'a>(Vec<&'a OsStr>);
+
+impl<'a> DummyArgs<'a> {
+    fn new(args: &'a [&'a str]) -> DummyArgs<'a> {
+        DummyArgs(args.iter().map(AsRef::as_ref).collect())
+    }
+}
+
+impl<'a> IntoIterator for DummyArgs<'a> {
+    type Item = &'a OsStr;
+    type IntoIter = std::vec::IntoIter<Self::Item>;
+
+    fn into_iter(self) -> Self::IntoIter {
+        self.0.into_iter()
     }
 }
 
 fn criterion_benchmark(c: &mut Criterion) {
-    let cfg = empty_config();
     c.bench_function("no argument", |b| {
-        b.iter(|| build_url(black_box(&cfg.clone())))
+        b.iter(|| {
+            let args = DummyArgs::new(&[]);
+            if let Parsed::OpenPage(cfg) = Parsed::from_iter(args).unwrap() {
+                build_url(black_box(&cfg)).unwrap();
+            } else {
+                assert!(false);
+            }
+        })
     });
 }
 
