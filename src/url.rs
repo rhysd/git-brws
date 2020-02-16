@@ -39,7 +39,8 @@ pub fn browse(url: &str, env: &EnvConfig) -> Result<()> {
             let msg = if let Some(code) = status.code() {
                 format!("Command exited with non-zero status {}", code)
             } else {
-                "Error on opening URL {}: Command terminated by signal".to_string()
+                // TODO: Add signal on target == *nix using ExitStatusExt
+                "Command terminated by signal".to_string()
             };
             Error::err(ErrorKind::OpenUrlFailure { url, msg })
         }
