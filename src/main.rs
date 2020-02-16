@@ -1,23 +1,5 @@
-#[macro_use]
-extern crate serde_derive;
-#[macro_use]
-extern crate lazy_static;
-
-mod argv;
-mod async_runtime;
-mod config;
-mod error;
-mod git;
-mod github_api;
-mod page;
-mod pull_request;
-mod service;
-mod url;
-
-#[cfg(test)]
-mod test;
-
-use crate::argv::Parsed;
+use git_brws::argv::Parsed;
+use git_brws::{error, url};
 use std::env::args;
 use std::process::exit;
 

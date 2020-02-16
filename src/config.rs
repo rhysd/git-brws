@@ -3,7 +3,7 @@ use crate::git::Git;
 use std::env;
 use std::path::PathBuf;
 
-#[derive(Debug)]
+#[derive(Debug, Clone)]
 pub struct Config {
     pub repo_url: String,
     pub branch: Option<String>,
