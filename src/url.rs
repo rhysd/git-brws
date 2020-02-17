@@ -2,7 +2,7 @@ use crate::config::{Config, EnvConfig};
 use crate::error::{Error, ErrorKind, Result};
 use crate::page::parse_page;
 use crate::service;
-use std::process::{Command, Stdio};
+use std::process::{Command, ExitStatus, Stdio};
 
 pub fn build_url(cfg: &Config) -> Result<String> {
     let page = parse_page(&cfg)?;
@@ -27,6 +27,21 @@ fn browse_with_cmd(url: &str, cmd: &str) -> Result<()> {
     }
 }
 
+#[cfg(unix)]
+fn error_without_status(status: ExitStatus) -> String {
+    use std::os::unix::process::ExitStatusExt;
+    if let Some(sig) = status.signal() {
+        format!("Command terminated by signal {}", sig)
+    } else {
+        "Command terminated by signal".to_string()
+    }
+}
+
+#[cfg(not(unix))]
+fn error_without_status(status: ExitStatus) -> String {
+    "Command terminated by signal".to_string()
+}
+
 pub fn browse(url: &str, env: &EnvConfig) -> Result<()> {
     if let Some(ref cmd) = env.browse_command {
         return browse_with_cmd(url, cmd);
@@ -38,15 +53,8 @@ pub fn browse(url: &str, env: &EnvConfig) -> Result<()> {
             let url = url.to_string();
             let msg = if let Some(code) = status.code() {
                 format!("Command exited with non-zero status {}", code)
-            } else if cfg!(unix) {
-                use std::os::unix::process::ExitStatusExt;
-                if let Some(sig) = status.signal() {
-                    format!("Command terminated by signal {}", sig)
-                } else {
-                    "Command terminated by signal".to_string()
-                }
             } else {
-                "Command terminated by signal".to_string()
+                error_without_status(status)
             };
             Error::err(ErrorKind::OpenUrlFailure { url, msg })
         }
