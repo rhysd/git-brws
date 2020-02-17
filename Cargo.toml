@@ -18,6 +18,9 @@ travis-ci = { repository = "rhysd/git-brws" }
 appveyor = { repository = "rhysd/git-brws" }
 maintenance = { status = "actively-developed" }
 
+[[bin]]
+name = "git-brws"
+
 [dependencies]
 getopts = "0.2"
 url = "2.1"
@@ -31,6 +34,9 @@ tokio = { version = "0.2", default-features = false }
 lazy_static = "1.4.0"
 # Only for futures::join!
 futures = { version = "0.3", default-features = false, features = ["async-await"] }
+
+[dev-dependencies]
+criterion = "0.3"
 
 # For tokio::test
 [dev-dependencies.tokio]
@@ -46,3 +52,7 @@ features = ["run-for-all", "prepush-hook", "run-cargo-test", "run-cargo-clippy",
 [profile.release]
 lto = true
 panic = "abort"
+
+[[bench]]
+name = "benchmark"
+harness = false
