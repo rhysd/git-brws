@@ -1,10 +1,18 @@
 use crate::error::{Error, ErrorKind, Result};
 use std::ffi::OsStr;
-use std::fmt::Debug;
+use std::fmt::{Debug, Display};
 use std::fs;
 use std::path::{Path, PathBuf};
 use std::process::Command;
 use std::str;
+
+fn object_not_found(kind: &'static str, inner: impl Display, object: impl ToString) -> Box<Error> {
+    Error::new(ErrorKind::GitObjectNotFound {
+        kind,
+        object: object.to_string(),
+        msg: format!("{}", inner),
+    })
+}
 
 pub struct Git<'a> {
     command: &'a str,
@@ -31,27 +39,16 @@ impl<'a> Git<'a> {
     }
 
     pub fn hash(&self, commit: impl AsRef<str>) -> Result<String> {
-        self.command(&["rev-parse", commit.as_ref()])
-            .map_err(|err| {
-                Error::new(ErrorKind::GitObjectNotFound {
-                    kind: "commit",
-                    object: commit.as_ref().to_string(),
-                    msg: format!("{}", err),
-                })
-            })
+        let commit = commit.as_ref();
+        self.command(&["rev-parse", commit])
+            .map_err(|e| object_not_found("commit", e, commit))
     }
 
     pub fn tag_hash(&self, tagname: impl AsRef<str>) -> Result<String> {
         let tagname = tagname.as_ref();
         let stdout = self
             .command(&["show-ref", "--tags", tagname])
-            .map_err(|err| {
-                Error::new(ErrorKind::GitObjectNotFound {
-                    kind: "tag name",
-                    object: tagname.to_string(),
-                    msg: format!("{}", err),
-                })
-            })?;
+            .map_err(|e| object_not_found("tag name", e, tagname))?;
         // Output must be in format '{rev} {ref name}'
         Ok(stdout.splitn(2, ' ').next().unwrap().to_string())
     }
@@ -62,13 +59,7 @@ impl<'a> Git<'a> {
         // Note that git installed in Ubuntu 14.04 is 1.9.1.
         let name = name.as_ref();
         self.command(&["config", "--get", &format!("remote.{}.url", name)])
-            .map_err(|err| {
-                Error::new(ErrorKind::GitObjectNotFound {
-                    kind: "remote",
-                    object: name.to_string(),
-                    msg: format!("{}", err),
-                })
-            })
+            .map_err(|e| object_not_found("remote", e, name))
     }
 
     pub fn tracking_remote_url(
@@ -83,7 +74,7 @@ impl<'a> Git<'a> {
         let out = match self.command(&["rev-parse", "--abbrev-ref", "--symbolic", rev.as_str()]) {
             Ok(stdout) => stdout,
             Err(err) => match err.kind() {
-                ErrorKind::GitCommandError { ref stderr, .. }
+                ErrorKind::GitCommandError { stderr, .. }
                     if stderr.contains("does not point to a branch") =>
                 {
                     return Ok((self.remote_url("origin")?, "origin".to_string()));
