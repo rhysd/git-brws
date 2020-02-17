@@ -4,7 +4,7 @@ use std::env::args;
 use std::process::exit;
 
 fn run() -> error::Result<()> {
-    match Parsed::from_iter(args())? {
+    match Parsed::parse_iter(args())? {
         Parsed::Help(usage) => eprintln!("{}", usage),
         Parsed::Version(version) => println!("{}", version),
         Parsed::OpenPage(ref opts) if opts.stdout => println!("{}", url::build_url(opts)?),

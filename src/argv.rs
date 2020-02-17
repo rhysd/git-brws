@@ -150,7 +150,7 @@ Examples:
     $ git brws '#8'";
 
 impl Parsed {
-    pub fn from_iter<I>(argv: I) -> Result<Parsed>
+    pub fn parse_iter<I>(argv: I) -> Result<Parsed>
     where
         I: IntoIterator,
         I::Item: AsRef<OsStr>,

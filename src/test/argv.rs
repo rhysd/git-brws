@@ -8,7 +8,7 @@ use std::path::Path;
 
 #[test]
 fn args_with_no_option() {
-    match Parsed::from_iter(&["git-brws"]).unwrap() {
+    match Parsed::parse_iter(&["git-brws"]).unwrap() {
         Parsed::OpenPage(c) => {
             assert!(
                 &[
@@ -32,7 +32,7 @@ fn args_with_no_option() {
         r => assert!(false, "Failed to parse args with no option: {:?}", r),
     };
 
-    match Parsed::from_iter(&["git-brws", "foo", "bar"]).unwrap() {
+    match Parsed::parse_iter(&["git-brws", "foo", "bar"]).unwrap() {
         Parsed::OpenPage(c) => {
             assert_eq!(c.args.len(), 2);
         }
@@ -43,7 +43,7 @@ fn args_with_no_option() {
 #[test]
 fn multiple_options() {
     let dir = Path::new(file!()).parent().unwrap();
-    match Parsed::from_iter(&[
+    match Parsed::parse_iter(&[
         "git-brws",
         "-u",
         "-r",
@@ -106,7 +106,7 @@ fn fix_ssh_repo_url() {
             "ssh://git@github.somewhere.com:123/user/repo.git",
         ),
     ] {
-        match Parsed::from_iter(&["git-brws", "-r", url]).unwrap() {
+        match Parsed::parse_iter(&["git-brws", "-r", url]).unwrap() {
             Parsed::OpenPage(c) => {
                 assert_eq!(c.repo_url, *expected);
             }
@@ -121,7 +121,7 @@ fn fix_ssh_repo_url() {
 
 #[test]
 fn repo_formatting() {
-    let p = |r| Parsed::from_iter(&["git-brws", "-r", r]).unwrap();
+    let p = |r| Parsed::parse_iter(&["git-brws", "-r", r]).unwrap();
     match p("bitbucket.org/foo/bar") {
         Parsed::OpenPage(c) => assert_eq!(c.repo_url, "https://bitbucket.org/foo/bar.git"),
         p => assert!(false, "{:?}", p),
@@ -138,7 +138,7 @@ fn repo_formatting() {
 
 #[test]
 fn valid_remote_name() {
-    match Parsed::from_iter(&["git-brws", "-R", "origin"]).unwrap() {
+    match Parsed::parse_iter(&["git-brws", "-R", "origin"]).unwrap() {
         Parsed::OpenPage(c) => assert!(
             [
                 "https://github.com/rhysd/git-brws.git",
@@ -156,7 +156,7 @@ fn valid_remote_name() {
 
 #[test]
 fn invalid_remote_name() {
-    match Parsed::from_iter(&["git-brws", "-R", "this-remote-is-never-existing"])
+    match Parsed::parse_iter(&["git-brws", "-R", "this-remote-is-never-existing"])
         .unwrap_err()
         .kind()
     {
@@ -170,7 +170,7 @@ fn invalid_remote_name() {
 
 #[test]
 fn help_option() {
-    match Parsed::from_iter(&["git-brws", "-h"]).unwrap() {
+    match Parsed::parse_iter(&["git-brws", "-h"]).unwrap() {
         Parsed::Help(s) => {
             assert!(s.starts_with("Usage:"));
         }
@@ -180,7 +180,7 @@ fn help_option() {
 
 #[test]
 fn version_option() {
-    match Parsed::from_iter(&["git-brws", "-v"]).unwrap() {
+    match Parsed::parse_iter(&["git-brws", "-v"]).unwrap() {
         Parsed::Version(s) => {
             assert!(!s.is_empty());
         }
@@ -190,14 +190,15 @@ fn version_option() {
 
 #[test]
 fn unknown_options() {
-    assert!(Parsed::from_iter(&["git-brws", "--unknown"]).is_err());
+    assert!(Parsed::parse_iter(&["git-brws", "--unknown"]).is_err());
 }
 
 // For checking #9
 #[test]
 fn specify_repo_outside_repository() {
     let root = get_root_dir();
-    match Parsed::from_iter(&["git-brws", "-d", root.to_str().unwrap(), "-r", "foo/bar"]).unwrap() {
+    match Parsed::parse_iter(&["git-brws", "-d", root.to_str().unwrap(), "-r", "foo/bar"]).unwrap()
+    {
         Parsed::OpenPage(c) => {
             assert_eq!(c.cwd, root);
             assert_eq!(&c.repo_url, "https://github.com/foo/bar.git");
@@ -212,7 +213,7 @@ fn search_repo_from_github_by_name() {
 
     // Add user:rhysd to ensure to get expected result. But actually repository name is usually
     // passed like `-r react` as use case.
-    let parsed = Parsed::from_iter(&["git-brws", "-r", "user:rhysd vim.wasm"]).unwrap();
+    let parsed = Parsed::parse_iter(&["git-brws", "-r", "user:rhysd vim.wasm"]).unwrap();
     match parsed {
         Parsed::OpenPage(c) => {
             assert_eq!(&c.repo_url, "https://github.com/rhysd/vim.wasm.git");
@@ -223,7 +224,7 @@ fn search_repo_from_github_by_name() {
 
 #[test]
 fn repo_specified_but_argument_is_not_empty() {
-    let err = Parsed::from_iter(&["git-brws", "-r", "foo", "HEAD"]).unwrap_err();
+    let err = Parsed::parse_iter(&["git-brws", "-r", "foo", "HEAD"]).unwrap_err();
     match err.kind() {
         ErrorKind::ArgsNotAllowed { ref args, .. } => {
             assert!(format!("{}", err).contains("\"HEAD\""), "{:?}", args);

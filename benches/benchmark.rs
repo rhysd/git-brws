@@ -7,7 +7,7 @@ fn criterion_benchmark(c: &mut Criterion) {
         ($bench_name:expr, $args:expr) => {
             c.bench_function($bench_name, |b| {
                 b.iter(|| {
-                    let parsed = Parsed::from_iter($args.iter()).unwrap();
+                    let parsed = Parsed::parse_iter($args.iter()).unwrap();
                     if let Parsed::OpenPage(cfg) = parsed {
                         build_url(&cfg).unwrap();
                     } else {
