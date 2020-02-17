@@ -52,7 +52,7 @@ script:
     else
         rustup component add clippy
         rustup component add rustfmt
-        cargo clippy
+        cargo clippy -- -D warnings
         cargo fmt -- --check
     fi
 
