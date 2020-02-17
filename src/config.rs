@@ -1,5 +1,6 @@
 use crate::error::Result;
 use crate::git::Git;
+use serde_derive::Deserialize;
 use std::env;
 use std::path::PathBuf;
 

@@ -1,8 +1,3 @@
-#[macro_use]
-extern crate serde_derive;
-#[macro_use]
-extern crate lazy_static;
-
 mod async_runtime;
 mod config;
 mod git;

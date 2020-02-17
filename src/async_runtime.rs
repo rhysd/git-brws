@@ -1,3 +1,4 @@
+use lazy_static::lazy_static;
 use std::future::Future;
 use std::sync::Mutex;
 use tokio::runtime::{Builder, Runtime};

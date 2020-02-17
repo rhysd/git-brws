@@ -1,6 +1,7 @@
 use crate::error::{Error, ErrorKind, Result};
 use reqwest::{header, Proxy, StatusCode};
 use reqwest::{Client as ReqwestClient, RequestBuilder, Response};
+use serde_derive::Deserialize;
 use std::mem;
 
 #[derive(Debug, Deserialize)]
