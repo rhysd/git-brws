@@ -38,7 +38,7 @@ fn error_without_status(status: ExitStatus) -> String {
 }
 
 #[cfg(not(unix))]
-fn error_without_status(status: ExitStatus) -> String {
+fn error_without_status(_status: ExitStatus) -> String {
     "Command terminated by signal".to_string()
 }
 
