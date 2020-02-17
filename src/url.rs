@@ -38,8 +38,14 @@ pub fn browse(url: &str, env: &EnvConfig) -> Result<()> {
             let url = url.to_string();
             let msg = if let Some(code) = status.code() {
                 format!("Command exited with non-zero status {}", code)
+            } else if cfg!(unix) {
+                use std::os::unix::process::ExitStatusExt;
+                if let Some(sig) = status.signal() {
+                    format!("Command terminated by signal {}", sig)
+                } else {
+                    "Command terminated by signal".to_string()
+                }
             } else {
-                // TODO: Add signal on target == *nix using ExitStatusExt
                 "Command terminated by signal".to_string()
             };
             Error::err(ErrorKind::OpenUrlFailure { url, msg })
