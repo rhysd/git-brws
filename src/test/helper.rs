@@ -8,6 +8,7 @@ pub fn empty_env() -> EnvConfig {
         git_command: "git".to_string(),
         ghe_ssh_port: None,
         ghe_url_host: None,
+        gitlab_url_host: None,
         gitlab_ssh_port: None,
         github_token: None,
         ghe_token: None,

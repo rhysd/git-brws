@@ -35,6 +35,7 @@ pub struct EnvConfig {
     pub git_command: String,
     pub ghe_ssh_port: Option<u16>,
     pub ghe_url_host: Option<String>,
+    pub gitlab_url_host: Option<String>,
     pub gitlab_ssh_port: Option<u16>,
     pub github_token: Option<String>,
     pub ghe_token: Option<String>,

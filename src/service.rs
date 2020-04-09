@@ -445,7 +445,10 @@ pub fn build_page_url(page: &Page, cfg: &Config) -> Result<String> {
             build_azure_devops_url(user, repo_name, cfg, page)
         }
         _ => {
-            let is_gitlab = host.starts_with("gitlab.");
+            let is_gitlab = match &env.gitlab_url_host {
+                Some(h) if host == h => true,
+                _ => host.starts_with("gitlab."),
+            };
             let port = if host.starts_with("github.") {
                 env.ghe_ssh_port
             } else if is_gitlab {

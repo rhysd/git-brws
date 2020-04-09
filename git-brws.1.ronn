@@ -231,6 +231,12 @@ the command may not open a pull request page you want.
     When you set a number to it, the number will be used for the ssh port for GitHub Enterprise
     URLs.
 
+  * `$GIT_BRWS_GITLAB_URL_HOST`:
+    When you use self-hosted GitLab instance, you can specify its host to this variable. By default,
+    **git-brws** detects host matching to '^gitlab\.' as GitLab. If your GitLab URL host does not
+    match it, please specify this variable. If your repository is hosted at
+    'https://your-code.net/user/repo', 'your-code.net' should be set.
+
   * `$GIT_BRWS_GITLAB_SSH_PORT`:
     When you set a number to it, the number will be used for the ssh port for self-hosted GitLab
     URLs. This is useful when your environment hosts GitLab to non-trivial ssh port URL.

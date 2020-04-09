@@ -403,6 +403,22 @@ fn customized_ghe_host() {
 }
 
 #[test]
+fn customized_gitlab_host() {
+    let mut env = empty_env();
+    env.gitlab_url_host = Some("my-gitlab.example.com".to_string());
+
+    let c = config(
+        "https://my-gitlab.example.com/user/repo.git",
+        None,
+        Some(env),
+    );
+    assert_eq!(
+        build_page_url(&OPEN, &c).unwrap(),
+        "https://my-gitlab.example.com/user/repo"
+    );
+}
+
+#[test]
 fn broken_repo_url() {
     let env = &empty_env();
     for &url in &[
