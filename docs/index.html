@@ -313,6 +313,10 @@ match it, please specify this variable. If your repository is
 'https://example-repo.org/user/repo', 'example-repo.org' should be set.</p></dd>
 <dt><code>$GIT_BRWS_GHE_SSH_PORT</code></dt><dd><p>When you set a number to it, the number will be used for the ssh port for GitHub Enterprise
 URLs.</p></dd>
+<dt><code>$GIT_BRWS_GITLAB_URL_HOST</code></dt><dd><p>When you use self-hosted GitLab instance, you can specify its host to this variable. By default,
+<strong>git-brws</strong> detects host matching to '^gitlab.' as GitLab. If your GitLab URL host does not
+match it, please specify this variable. If your repository is hosted at
+'https://your-code.net/user/repo', 'your-code.net' should be set.</p></dd>
 <dt><code>$GIT_BRWS_GITLAB_SSH_PORT</code></dt><dd><p>When you set a number to it, the number will be used for the ssh port for self-hosted GitLab
 URLs. This is useful when your environment hosts GitLab to non-trivial ssh port URL.</p></dd>
 <dt><code>$GIT_BRWS_GITHUB_TOKEN</code></dt><dd><p>This variable is used for '--pr' (or '-p') only. API access token for github.com. They are
@@ -357,7 +361,7 @@ proxy.</p></dd>
 
   <ol class='man-decor man-foot man foot'>
     <li class='tl'></li>
-    <li class='tc'>January 2020</li>
+    <li class='tc'>April 2020</li>
     <li class='tr'>git-brws(1)</li>
   </ol>
 

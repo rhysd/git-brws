@@ -1,7 +1,7 @@
 .\" generated with Ronn/v0.7.3
 .\" http://github.com/rtomayko/ronn/tree/0.7.3
 .
-.TH "GIT\-BRWS" "1" "January 2020" "" ""
+.TH "GIT\-BRWS" "1" "April 2020" "" ""
 .
 .SH "NAME"
 \fBgit\-brws\fR \- open a repository, file, commit, diff, pull request or issue in your web browser
@@ -382,6 +382,10 @@ When you use your own GitHub Enterprise repository, you can specify its host to 
 .TP
 \fB$GIT_BRWS_GHE_SSH_PORT\fR
 When you set a number to it, the number will be used for the ssh port for GitHub Enterprise URLs\.
+.
+.TP
+\fB$GIT_BRWS_GITLAB_URL_HOST\fR
+When you use self\-hosted GitLab instance, you can specify its host to this variable\. By default, \fBgit\-brws\fR detects host matching to \'^gitlab\.\' as GitLab\. If your GitLab URL host does not match it, please specify this variable\. If your repository is hosted at \'https://your\-code\.net/user/repo\', \'your\-code\.net\' should be set\.
 .
 .TP
 \fB$GIT_BRWS_GITLAB_SSH_PORT\fR
