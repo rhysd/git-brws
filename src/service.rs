@@ -78,7 +78,7 @@ fn build_github_like_url(
                     if let Some(endpoint) = api_endpoint {
                         if let Ok(Some(homepage)) = fetch_homepage(
                             endpoint.as_ref(),
-                            cfg.env.github_token.as_ref().map(String::as_str),
+                            cfg.env.github_token.as_deref(),
                             &cfg.env.https_proxy,
                             user,
                             repo,

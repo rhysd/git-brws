@@ -141,7 +141,7 @@ impl<'a> Client<'a> {
         if results.items.is_empty() {
             Error::err(ErrorKind::NoSearchResult { query })
         } else {
-            Ok(mem::replace(&mut results.items[0], SearchedRepo::default()))
+            Ok(mem::take(&mut results.items[0]))
         }
     }
 
