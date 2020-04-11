@@ -1,3 +1,13 @@
+<a name="v0.11.8"></a>
+# [v0.11.8](https://github.com/rhysd/git-brws/releases/tag/v0.11.8) - 11 Apr 2020
+
+- **New:** Add `$GIT_BRWS_GITLAB_URL_HOST` to specify URL host for self-hosted GitLab instance. Please see README.md or `man` manual for more details
+- **Fix:** Windows build was broken
+- **Improve:** Better error message
+
+[Changes][v0.11.8]
+
+
 <a name="v0.11.7"></a>
 # [v0.11.7](https://github.com/rhysd/git-brws/releases/tag/v0.11.7) - 08 Feb 2020
 
@@ -228,6 +238,7 @@ First binaries release for Linux (32bit/64bit) and macOS (64bit) using Travis CI
 [Changes][v0.4.2]
 
 
+[v0.11.8]: https://github.com/rhysd/git-brws/compare/v0.11.7...v0.11.8
 [v0.11.7]: https://github.com/rhysd/git-brws/compare/v0.11.6...v0.11.7
 [v0.11.6]: https://github.com/rhysd/git-brws/compare/0.11.5...v0.11.6
 [0.11.5]: https://github.com/rhysd/git-brws/compare/0.11.3...0.11.5
