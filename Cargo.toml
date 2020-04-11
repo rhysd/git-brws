@@ -56,3 +56,4 @@ panic = "abort"
 [[bench]]
 name = "benchmark"
 harness = false
+path = "benches/benchmark.rs"
