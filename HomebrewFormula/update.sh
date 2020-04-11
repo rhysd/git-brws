@@ -16,7 +16,8 @@ cd ./HomebrewFormula
 
 VERSION="$1"
 
-if [[ ! "$VERSION" =~ ^v\d+\.\d+\.\d+$ ]]; then
+# \d was not available
+if [[ ! "$VERSION" =~ ^v[0-9]+\.[0-9]+\.[0-9]+$ ]]; then
     echo 'Version number in first argument must match to ^v\d+\.\d+\.\d+$ like v1.2.3' >&2
     exit 1
 fi
