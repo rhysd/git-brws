@@ -19,6 +19,7 @@ fn with_global_env() {
     let iter = [
         ("GIT_BRWS_GHE_TOKEN", "token for ghe"),
         ("GIT_BRWS_GITHUB_TOKEN", "token for github"),
+        ("GIT_BRWS_SHORT_COMMIT_HASH", "true"),
     ]
     .iter()
     .map(|(k, v)| (k.to_string(), v.to_string()));
@@ -27,6 +28,7 @@ fn with_global_env() {
     assert_eq!(env.git_command, "git");
     assert_eq!(env.gitlab_ssh_port, None);
     assert_eq!(env.ghe_token.unwrap(), "token for ghe");
+    assert!(env.short_commit_hash);
 
     // $GITHUB_TOKEN is never used since $GIT_BRWS_GITHUB_TOKEN is prioritized
     //

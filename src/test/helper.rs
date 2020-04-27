@@ -14,6 +14,7 @@ pub fn empty_env() -> EnvConfig {
         ghe_token: None,
         https_proxy: None,
         browse_command: None,
+        short_commit_hash: false,
     }
 }
 

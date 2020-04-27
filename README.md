@@ -318,14 +318,15 @@ Some environment variables are available to customize behavior of `git-brws`.
 | `$GITHUB_TOKEN` | Ditto. When `GIT_BRWS_GITHUB_TOKEN` is not set, `GITHUB_TOKEN` is looked. |
 | `$GIT_BRWS_GHE_TOKEN` | This variable is used for `--pr` (or `-p`) only. API access token for GitHub Enterprise instance. It is sometimes mandatory (depending on your GHE instance configuration). Please generate a token from `https://{YOUR GHE HOST}/settings/tokens/new`. |
 | `$GIT_BRWS_BROWSE_COMMAND` | Command to open URL. If this value is specified, the command is executed with URL as first argument to browse the URL. |
+| `$GIT_BRWS_SHORT_COMMIT_HASH` | Setting `true` will use 7-letters short commit hash like `78fbce6` for URLs. |
 | `$https_proxy` | This variable is used for `--pr` (or `-p`) only. A HTTPS Proxy server URL if you use a web proxy. |
 
 ## Related Projects
 
-- [hub browse](https://hub.github.com/)
-- [git open](https://github.com/paulirish/git-open)
+- [hub (`hub browse`)](https://hub.github.com/)
+- [git-open](https://github.com/paulirish/git-open)
 - [open-browser-github.vim](https://github.com/tyru/open-browser-github.vim)
-- [git browse](https://github.com/albertyw/git-browse)
+- [git-browse](https://github.com/albertyw/git-browse)
 
 ## TODOs
 
