@@ -1,3 +1,12 @@
+<a name="v0.11.9"></a>
+# [v0.11.9](https://github.com/rhysd/git-brws/releases/tag/v0.11.9) - 27 Apr 2020
+
+- **New:** Add `$GIT_BRWS_SHORT_COMMIT_HASH` environment variable. When this value is set, `git-brws` will use 7-letters short commit hash like `78fbce6` for URLs. ([#22](https://github.com/rhysd/git-brws/issues/22))
+- **Improve:** Update dependencies
+
+[Changes][v0.11.9]
+
+
 <a name="v0.11.8"></a>
 # [v0.11.8](https://github.com/rhysd/git-brws/releases/tag/v0.11.8) - 11 Apr 2020
 
@@ -238,6 +247,7 @@ First binaries release for Linux (32bit/64bit) and macOS (64bit) using Travis CI
 [Changes][v0.4.2]
 
 
+[v0.11.9]: https://github.com/rhysd/git-brws/compare/v0.11.8...v0.11.9
 [v0.11.8]: https://github.com/rhysd/git-brws/compare/v0.11.7...v0.11.8
 [v0.11.7]: https://github.com/rhysd/git-brws/compare/v0.11.6...v0.11.7
 [v0.11.6]: https://github.com/rhysd/git-brws/compare/0.11.5...v0.11.6
