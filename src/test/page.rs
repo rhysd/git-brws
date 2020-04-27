@@ -442,3 +442,52 @@ fn parse_blame_directory() {
         e => assert!(false, "Unexpected parse error: {:?}", e),
     }
 }
+
+#[test]
+fn shorten_commit_hash() {
+    fn cfg(args: Vec<&str>) -> Config {
+        let mut c = config("https://github.com/rhysd/git-brws.git", None, args);
+        c.env.short_commit_hash = true;
+        c
+    }
+
+    // hash
+    let c = cfg(vec!["dbb66be9b78ecddef734d2f9cf8c2c7a2836145b"]);
+    let p = parse_page(&c).unwrap();
+    assert!(
+        matches!(&p, Page::Commit{ hash } if hash == "dbb66be"),
+        "{:?}",
+        p,
+    );
+
+    // diff
+    let c = cfg(vec!["499edbb...bc869a1"]);
+    match parse_page(&c).unwrap() {
+        Page::Diff { lhs, rhs, .. } => {
+            assert_eq!(lhs, "499edbb");
+            assert_eq!(rhs, "bc869a1");
+        }
+        p => panic!("did not match: {:?}", p),
+    }
+
+    // tag
+    let c = cfg(vec!["0.10.0"]);
+    let p = parse_page(&c).unwrap();
+    assert!(
+        matches!(&p, Page::Tag{ commit, .. } if commit == "0b412dc"),
+        "{:?}",
+        p,
+    );
+
+    // path
+    let c = cfg(vec![
+        "README.md",
+        "dbb66be9b78ecddef734d2f9cf8c2c7a2836145b",
+    ]);
+    let p = parse_page(&c).unwrap();
+    assert!(
+        matches!(&p, Page::FileOrDir{ hash, .. } if hash == "dbb66be"),
+        "{:?}",
+        p,
+    );
+}
