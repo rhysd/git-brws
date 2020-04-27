@@ -73,11 +73,12 @@ changelog-from-release
 ## Release process
 
 1. Run `export GITHUB_TOKEN=...`
+2. Ensure documentation is up-to-date by `bash ./docs/gen.sh`
 2. Run `cargo release` which will create a new tag and push it to remote
 3. CI services will prepare binaries
 4. Write release note at https://github.com/rhysd/git-brws/releases
-5. Update changelog
-6. Update Homebrew formula
+5. Update changelog by `changelog-from-release > CHANGELOG.md`
+6. Update Homebrew formula by `./HomebrewFormula/update.sh {ver}`
 
 [github-repo]: https://github.com/rhysd/git-brws
 [cargo-husky]: https://github.com/rhysd/cargo-husky
