@@ -86,11 +86,12 @@ fn get_cwd(specified: Option<String>) -> Result<PathBuf> {
 const USAGE: &str = "\
 Usage: git brws [Options] {Args}
 
-  Open a repository, file, commit, diff or pull request in your web browser from
-  command line. GitHub, Bitbucket, GitLab, GitHub Enterprise, Azure DevOps are
-  supported as hosting service.
+  Open a repository, file, commit, diff or pull request, issue or project's
+  website in your web browser from command line.
+  GitHub, Bitbucket, GitLab, GitHub Enterprise, Azure DevOps are supported as
+  hosting service.
   git-brws looks some environment variables for configuration. Please see
-  https://github.com/rhysd/git-brws for more detail.
+  https://github.com/rhysd/git-brws#readme for more details.
 
 Examples:
   - Current repository:
