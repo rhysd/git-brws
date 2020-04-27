@@ -60,6 +60,13 @@ struct BrowsePageParser<'a> {
 }
 
 impl<'a> BrowsePageParser<'a> {
+    fn shorten_hash(&self, mut hash: String) -> String {
+        if self.cfg.env.short_commit_hash {
+            hash.truncate(7);
+        }
+        hash
+    }
+
     fn wrong_number_of_args(&self, expected: ExpectedNumberOfArgs, kind: &str) -> Result<Page> {
         Error::err(ErrorKind::WrongNumberOfArgs {
             expected,
@@ -73,7 +80,9 @@ impl<'a> BrowsePageParser<'a> {
             self.wrong_number_of_args(ExpectedNumberOfArgs::Single(1), "commit")
         } else {
             let hash = self.git.hash(&self.cfg.args[0])?;
-            Ok(Page::Commit { hash })
+            Ok(Page::Commit {
+                hash: self.shorten_hash(hash),
+            })
         }
     }
 
@@ -84,7 +93,7 @@ impl<'a> BrowsePageParser<'a> {
             let hash = self.git.tag_hash(&self.cfg.args[0])?;
             Ok(Page::Tag {
                 tagname: self.cfg.args[0].clone(),
-                commit: hash,
+                commit: self.shorten_hash(hash),
             })
         }
     }
@@ -113,9 +122,11 @@ impl<'a> BrowsePageParser<'a> {
             });
         }
 
+        let lhs = self.git.hash(&lhs)?;
+        let rhs = self.git.hash(&rhs)?;
         Ok(Page::Diff {
-            lhs: self.git.hash(&lhs)?,
-            rhs: self.git.hash(&rhs)?,
+            lhs: self.shorten_hash(lhs),
+            rhs: self.shorten_hash(rhs),
             op: if dots == ".." {
                 DiffOp::TwoDots
             } else {
@@ -215,6 +226,9 @@ impl<'a> BrowsePageParser<'a> {
                 Some(b) => b.clone(),
                 None => self.git.current_branch()?,
             };
+        } else {
+            // Use full-length hash for Git::remote_contains()
+            hash = self.shorten_hash(hash);
         };
 
         Ok(Page::FileOrDir {

@@ -41,6 +41,8 @@ pub struct EnvConfig {
     pub ghe_token: Option<String>,
     pub https_proxy: Option<String>,
     pub browse_command: Option<String>,
+    #[serde(default)]
+    pub short_commit_hash: bool,
 }
 
 impl EnvConfig {
