@@ -176,8 +176,7 @@ impl<'a> BrowsePageParser<'a> {
     fn try_parse_file_or_dir(&self) -> Result<Page> {
         let len = self.cfg.args.len();
         if len != 1 && len != 2 {
-            return self
-                .wrong_number_of_args(ExpectedNumberOfArgs::Range(1, 2), "file or directory");
+            return self.wrong_number_of_args(ExpectedNumberOfArgs::Range(1, 2), "file path");
         }
 
         let (path, line) = self.parse_path_and_line();
@@ -287,7 +286,7 @@ pub fn parse_page(cfg: &Config) -> Result<Page> {
         Err(err) => match err.kind() {
             ErrorKind::CannotBlameDirectory { .. } => return Err(err),
             _ if cfg.blame => return Error::err(ErrorKind::BlameWithoutFilePath),
-            _ => attempts.push(("File or dir", *err)),
+            _ => attempts.push(("File path", *err)),
         },
     }
 
