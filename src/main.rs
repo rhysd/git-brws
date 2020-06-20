@@ -1,3 +1,6 @@
+#![forbid(unsafe_code)]
+#![warn(clippy::dbg_macro)]
+
 use git_brws::argv::Parsed;
 use git_brws::{error, url};
 use std::env::args;
