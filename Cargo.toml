@@ -31,7 +31,7 @@ serde = "1.0"
 path-slash = "0.1"
 envy = "0.4"
 tokio = { version = "0.2", default-features = false }
-lazy_static = "1.4.0"
+lazy_static = "1.4"
 # Only for futures::join!
 futures = { version = "0.3", default-features = false, features = ["async-await"] }
 
