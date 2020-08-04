@@ -9,29 +9,33 @@ use std::ffi::OsStr;
 use std::fs;
 use std::path::PathBuf;
 
-fn fix_ssh_url(mut url: String) -> String {
-    if url.starts_with("git@") {
-        // Examples:
-        //  git@service.com:user/repo.git -> ssh://git@service.com:user/repo.git
-        url.insert_str(0, "ssh://");
+fn handle_scp_like_syntax(mut url: String) -> String {
+    // ref: https://git-scm.com/book/en/v2/Git-on-the-Server-The-Protocols
+
+    if url.contains("://") {
+        // When url is a URL like https://server/project.git
+        return url;
     }
-    if url.starts_with("ssh://") {
-        // Note: Convert SSH protocol URL port number. In Git protocol port number can be omitted
-        // but url::Url::parse does not allow it. So if port number is not provided but colon is
-        // put, we append default SSH port number 22.
-        //
-        // Examples:
-        //  ssh://git@service.com:user/repo.git -> ssh://git@service.com:22/user/repo.git
-        //  ssh://git@ssh.dev.azure.com:v3/team/repo/repo -> ssh://git@ssh.dev.azure.com:22/v3/team/repo/repo
-        let scheme_len = "ssh://".len();
-        if let Some(i) = &url[scheme_len..].find(':') {
-            // Check if port number is omitted
-            let after_colon = url[scheme_len + i + 1..].as_bytes();
-            if after_colon.is_empty() || !after_colon[0].is_ascii_digit() {
-                url.insert_str(scheme_len + i + 1, "22/"); // Insert port number after colon
-            }
+
+    // When the target is an scp-like syntax: [user@]server:project.git
+    // Handle ':' in the syntax. Note that GitHub user name may start with number (#24)
+    if let Some(i) = url.find(':') {
+        let after_colon = i + 1;
+        if let Some(i) = url[after_colon..].find(':') {
+            // When port number exists
+            //  git@service.com:123:user/repo.git -> git@service.com:123/user/repo.git
+            let i = after_colon + i;
+            url.replace_range(i..i + 1, "/");
+        } else {
+            // When a port number is omitted, default SSH port is 22
+            //  git@service.com:user/repo.git -> git@service.com:22/user/repo.git
+            url.insert_str(after_colon, "22/"); // Insert port number after colon
         }
     }
+
+    // Examples:
+    //  git@service.com:22/user/repo.git -> ssh://git@service.com:22/user/repo.git
+    url.insert_str(0, "ssh://");
     url
 }
 
@@ -43,15 +47,40 @@ pub enum Parsed {
     OpenPage(Config),
 }
 
+fn is_scp_like_syntax_with_user(s: &str) -> bool {
+    // SCP-like syntax like user@project:project
+    // user@ cannot be omitted in SCP-like syntax because `s` can be a search query
+    //
+    // Note that checking it starts with "git@" does not work because SSH protocol for
+    // visualstudio.com is "mycompany@vs-ssh.visualstudio.com:v3/project.git"
+    if s.contains(char::is_whitespace) {
+        return false; // Containing whitespace means it's a search query
+    }
+    for (i, c) in s.char_indices() {
+        match c {
+            '@' if i == 0 => return false,          // Seems query like "@rhysd"
+            '@' => return s[i + 1..].contains(':'), // SCP-like syntax must also contain ':'
+            ':' => return false,                    // '@' must be put before ':'
+            _ => continue,
+        }
+    }
+    false
+}
+
 fn normalize_repo_format(mut slug: String, env: &EnvConfig) -> Result<String> {
     if slug.is_empty() {
         return Error::err(ErrorKind::BrokenRepoFormat { input: slug });
     }
 
-    if slug.starts_with("git@")
-        || slug.starts_with("https://")
-        || slug.starts_with("http://")
+    // - URL like https://server/project
+    // - SCP-like syntax user@project:project
+    //
+    // Note: user@ cannot be omitted in SCP-like syntax because `slug` can be search word
+    if slug.starts_with("https://")
         || slug.starts_with("ssh://")
+        || slug.starts_with("http://")
+        || slug.starts_with("file://")
+        || is_scp_like_syntax_with_user(&slug)
     {
         if !slug.ends_with(".git") {
             slug.push_str(".git");
@@ -231,7 +260,7 @@ impl Parsed {
             }
         };
 
-        let repo_url = fix_ssh_url(repo_url);
+        let repo_url = handle_scp_like_syntax(repo_url);
 
         Ok(Parsed::OpenPage(Config {
             repo_url,
