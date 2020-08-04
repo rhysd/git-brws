@@ -80,30 +80,39 @@ fn fix_ssh_repo_url() {
             "ssh://git@github.com:22/user/repo.git",
         ),
         (
-            "ssh://git@github.com:user/repo.git",
-            "ssh://git@github.com:22/user/repo.git",
+            "ssh://git@github.com/user/repo.git",
+            "ssh://git@github.com/user/repo.git",
         ),
         (
             "ssh://git@github.com:22/user/repo.git",
-            "ssh://git@github.com:22/user/repo.git",
-        ),
-        (
-            "ssh://git@github.com:user/repo",
             "ssh://git@github.com:22/user/repo.git",
         ),
         // Azure DevOps URLs
         (
-            "ssh://team@vs-ssh.visualstudio.com:v3/team/repo/repo",
+            "team@vs-ssh.visualstudio.com:v3/team/repo/repo",
             "ssh://team@vs-ssh.visualstudio.com:22/v3/team/repo/repo.git",
         ),
         (
-            "ssh://git@ssh.dev.azure.com:v3/team/repo/repo",
+            "git@ssh.dev.azure.com:v3/team/repo/repo",
             "ssh://git@ssh.dev.azure.com:22/v3/team/repo/repo.git",
         ),
         // Port number is not omitted
         (
-            "git@github.somewhere.com:123/user/repo.git",
+            "git@github.somewhere.com:123:user/repo.git",
             "ssh://git@github.somewhere.com:123/user/repo.git",
+        ),
+        // Issue #24. When a user name is integer
+        (
+            "git@github.com:1234/repo.git",
+            "ssh://git@github.com:22/1234/repo.git",
+        ),
+        (
+            "git@github.com:0x7FFFFFFFFFFFFFFF/repo.git",
+            "ssh://git@github.com:22/0x7FFFFFFFFFFFFFFF/repo.git",
+        ),
+        (
+            "git@github.somewhere.com:123:456/repo.git",
+            "ssh://git@github.somewhere.com:123/456/repo.git",
         ),
     ] {
         match Parsed::parse_iter(&["git-brws", "-r", url]).unwrap() {
