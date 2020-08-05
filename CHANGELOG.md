@@ -1,3 +1,12 @@
+<a name="v0.11.10"></a>
+# [v0.11.10](https://github.com/rhysd/git-brws/releases/tag/v0.11.10) - 05 Aug 2020
+
+- **Fix:** Parsing SCP-like syntax `user@server:user/repo.git` failed when `user` starts with number value (#24)
+- **Fix:** Only `git@` was considered as user of above SCP-like syntax. Actually `vs-ssh.visualstudio.com` service provides user names other than `git@`
+
+[Changes][v0.11.10]
+
+
 <a name="v0.11.9"></a>
 # [v0.11.9](https://github.com/rhysd/git-brws/releases/tag/v0.11.9) - 27 Apr 2020
 
@@ -247,6 +256,7 @@ First binaries release for Linux (32bit/64bit) and macOS (64bit) using Travis CI
 [Changes][v0.4.2]
 
 
+[v0.11.10]: https://github.com/rhysd/git-brws/compare/v0.11.9...v0.11.10
 [v0.11.9]: https://github.com/rhysd/git-brws/compare/v0.11.8...v0.11.9
 [v0.11.8]: https://github.com/rhysd/git-brws/compare/v0.11.7...v0.11.8
 [v0.11.7]: https://github.com/rhysd/git-brws/compare/v0.11.6...v0.11.7
