@@ -384,7 +384,7 @@ dependencies = [
 
 [[package]]
 name = "git-brws"
-version = "0.11.9"
+version = "0.11.10"
 dependencies = [
  "cargo-husky",
  "criterion",
