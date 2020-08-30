@@ -188,12 +188,7 @@ impl Parsed {
         let mut opts = Options::new();
 
         opts.optopt("r", "repo", "Shorthand format (repo, user/repo, host/user/repo) or Git URL you want to see. When only repo name is specified, most popular repository will be searched from GitHub", "REPO");
-        opts.optopt(
-            "b",
-            "branch",
-            "Branch name to browse. Default value is current branch",
-            "BRANCH",
-        );
+        opts.optopt("b", "branch", "Branch name to browse", "BRANCH");
         opts.optopt(
             "d",
             "dir",
