@@ -241,3 +241,22 @@ fn repo_specified_but_argument_is_not_empty() {
         e => assert!(false, "Unexpected error: {}", e),
     }
 }
+
+#[test]
+fn current_branch_flag() {
+    match Parsed::parse_iter(&["git-brws", "-c"]).unwrap() {
+        Parsed::OpenPage(c) => {
+            assert!(c.branch.is_some());
+        }
+        p => panic!("{:?}", p),
+    }
+
+    // When --current-branch and --branch are both specified, --branch is prioritized.
+    // Note: -r is necessary to avoid "no such branch 'dev'" error.
+    match Parsed::parse_iter(&["git-brws", "-r", "foo/bar", "-c", "-b", "dev"]).unwrap() {
+        Parsed::OpenPage(c) => {
+            assert_eq!(c.branch, Some("dev".to_string()));
+        }
+        p => panic!("{:?}", p),
+    }
+}
