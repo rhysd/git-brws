@@ -260,3 +260,11 @@ fn current_branch_flag() {
         p => panic!("{:?}", p),
     }
 }
+
+// #26
+#[test]
+fn branch_name_is_empty() {
+    let e = Parsed::parse_iter(&["git-brws", "-b", ""]).unwrap_err();
+    let k = e.kind();
+    assert!(matches!(k, ErrorKind::BranchNameEmpty), "{:?}", k);
+}

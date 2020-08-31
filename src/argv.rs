@@ -240,6 +240,9 @@ impl Parsed {
         let cwd = get_cwd(matches.opt_str("d"))?;
         let git = Git::new(&cwd, &env.git_command);
         let branch = if let Some(b) = matches.opt_str("b") {
+            if b.is_empty() {
+                return Error::err(ErrorKind::BranchNameEmpty);
+            }
             Some(b)
         } else if matches.opt_present("c") {
             Some(git.current_branch()?)

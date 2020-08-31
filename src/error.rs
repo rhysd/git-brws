@@ -166,6 +166,7 @@ pub enum ErrorKind {
     SpecifiedDirNotExist {
         dir: String,
     },
+    BranchNameEmpty,
 }
 
 impl fmt::Display for ErrorKind {
@@ -223,6 +224,7 @@ impl fmt::Display for ErrorKind {
             CannotBlameDirectory{dir} => write!(f, "Cannot blame directory '{}'. Please specify file path", dir),
             UserBrowseCommandFailed{cmd, url, msg} => write!(f, "Command '{}' failed to open URL {}. Please check $GIT_BRWS_BROWSE_COMMAND. stderr: {}", cmd, url, msg),
             SpecifiedDirNotExist{dir} => write!(f, "Specified directory '{}' with -d option does not exist", dir),
+            BranchNameEmpty => write!(f, "Branch name cannot be empty"),
         }
     }
 }
