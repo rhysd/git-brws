@@ -216,6 +216,11 @@ impl Parsed {
             "blame",
             "Open blame page instead of repository page. File path to blame must be passed also.",
         );
+        opts.optflag(
+            "c",
+            "current-branch",
+            "Open the current branch instead of default branch",
+        );
         opts.optflag("h", "help", "Print this help");
         opts.optflag("v", "version", "Show version");
 
@@ -233,7 +238,14 @@ impl Parsed {
 
         let env = EnvConfig::from_iter(env::vars())?.with_global_env();
         let cwd = get_cwd(matches.opt_str("d"))?;
-        let branch = matches.opt_str("b");
+        let git = Git::new(&cwd, &env.git_command);
+        let branch = if let Some(b) = matches.opt_str("b") {
+            Some(b)
+        } else if matches.opt_present("c") {
+            Some(git.current_branch()?)
+        } else {
+            None
+        };
         let (repo_url, remote) = match (matches.opt_str("r"), matches.opt_str("R")) {
             (Some(repo), remote) => {
                 if !matches.free.is_empty() {
@@ -245,7 +257,6 @@ impl Parsed {
                 (normalize_repo_format(repo, &env)?, remote)
             }
             (None, remote) => {
-                let git = Git::new(&cwd, &env.git_command);
                 let (url, remote) = if let Some(remote) = remote {
                     (git.remote_url(&remote)?, remote)
                 } else {
