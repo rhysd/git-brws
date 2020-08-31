@@ -80,7 +80,7 @@ Options:
                         Git URL you want to see. When only repo name is
                         specified, most popular repository will be searched
                         from GitHub
-    -b, --branch BRANCH Branch name to browse. Default value is current branch
+    -b, --branch BRANCH Branch name to browse
     -d, --dir PATH      Directory path to the repository. Default value is
                         current working directory
     -R, --remote REMOTE Remote name (e.g. origin). Default value is a remote
@@ -93,6 +93,8 @@ Options:
                         URL for GitHub, GitLab pages, Bitbucket Cloud)
     -B, --blame         Open blame page instead of repository page. File path
                         to blame must be passed also.
+    -c, --current-branch
+                        Open the current branch instead of default branch
     -h, --help          Print this help
     -v, --version       Show version
 ```

@@ -85,6 +85,9 @@ arguments. All are optional.
   * `-B`, `--blame`:
     Open blame page instead of repository page. File path to blame must be passed also.
 
+  * `-c`, `--current-branch`:
+    Open the current branch instead of default branch.
+
   * `-h`, `--help`:
     Print this help.
 
