@@ -88,10 +88,12 @@ fn parse_file_or_dir() {
                 hash,
                 line: None,
                 blame,
+                is_dir,
             } => {
                 assert_eq!(relative_path, relative.to_str().unwrap());
                 assert!(!hash.is_empty());
                 assert!(!blame);
+                assert_eq!(is_dir, relative.is_dir());
             }
             p => assert!(false, "Unexpected result: {:?}", p),
         }

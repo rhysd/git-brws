@@ -44,6 +44,7 @@ pub enum Page {
         hash: String,
         line: Option<Line>,
         blame: bool,
+        is_dir: bool,
     },
     Issue {
         number: usize,
@@ -181,8 +182,9 @@ impl<'a> BrowsePageParser<'a> {
 
         let (path, line) = self.parse_path_and_line();
         let path = fs::canonicalize(path)?;
+        let is_dir = path.is_dir();
 
-        if path.is_dir() {
+        if is_dir {
             if self.cfg.blame {
                 return Error::err(ErrorKind::CannotBlameDirectory {
                     dir: path.to_string_lossy().into(),
@@ -235,6 +237,7 @@ impl<'a> BrowsePageParser<'a> {
             hash,
             line,
             blame: self.cfg.blame,
+            is_dir,
         })
     }
 

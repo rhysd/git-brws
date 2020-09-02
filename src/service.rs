@@ -183,20 +183,30 @@ fn build_github_like_url(
             ref hash,
             line,
             blame,
-        } => Ok(format!(
-            "https://{host}/{user}/{repo}/{feat}/{hash}/{path}{anchor}",
-            host = host,
-            user = user,
-            repo = repo,
-            feat = if *blame { "blame" } else { "blob" },
-            hash = hash,
-            path = to_slash(relative_path),
-            anchor = match line {
-                None => "".to_string(),
-                Some(Line::At(line)) => format!("#L{}", line),
-                Some(Line::Range(start, end)) => format!("#L{}-L{}", start, end),
-            },
-        )),
+            is_dir,
+        } => {
+            let feat = if *blame {
+                "blame"
+            } else if *is_dir {
+                "tree"
+            } else {
+                "blob"
+            };
+            Ok(format!(
+                "https://{host}/{user}/{repo}/{feat}/{hash}/{path}{anchor}",
+                host = host,
+                user = user,
+                repo = repo,
+                feat = feat,
+                hash = hash,
+                path = to_slash(relative_path),
+                anchor = match line {
+                    None => "".to_string(),
+                    Some(Line::At(line)) => format!("#L{}", line),
+                    Some(Line::Range(start, end)) => format!("#L{}-L{}", start, end),
+                },
+            ))
+        }
         Page::Issue { number } => Ok(format!(
             "https://{}/{}/{}/issues/{}",
             host, user, repo, number
@@ -263,6 +273,7 @@ fn build_bitbucket_url(user: &str, repo: &str, cfg: &Config, page: &Page) -> Res
             ref hash,
             line,
             blame,
+            is_dir: _,
         } => Ok(format!(
             "https://bitbucket.org/{user}/{repo}/{feat}/{hash}/{path}{anchor}",
             user = user,
@@ -319,6 +330,7 @@ fn build_azure_devops_url(team: &str, repo: &str, cfg: &Config, page: &Page) -> 
             ref hash,
             line: None,
             blame,
+            is_dir: _,
         } => Ok(format!(
             "https://dev.azure.com/{}/_git/{}/commit/{}?path={}{}",
             team,

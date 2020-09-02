@@ -262,12 +262,14 @@ fn file_path_with_file_path() {
         .to_string_lossy()
         .into_owned();
     let hash = "561848bad7164d7568658456088b107ec9efd9f3".to_string();
+    let is_dir = false;
 
     let page = move |line: Option<Line>, blame: bool| Page::FileOrDir {
         relative_path: relative_path.clone(),
         hash: hash.clone(),
         line,
         blame,
+        is_dir,
     };
 
     for (
