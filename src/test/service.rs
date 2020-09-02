@@ -256,7 +256,7 @@ fn diff_page_for_azuredevops_url() {
 }
 
 #[test]
-fn file_path_with_file_path() {
+fn file_page_url() {
     let relative_path = Path::new("src")
         .join("main.rs")
         .to_string_lossy()
@@ -337,6 +337,43 @@ fn file_path_with_file_path() {
 
         let p = page(Some(Line::Range(1, 2)), true);
         assert_eq!(build_page_url(&p, &c).unwrap(), blame_with_range);
+    }
+}
+
+#[test]
+fn directory_page_url() {
+    let page = Page::FileOrDir {
+        relative_path: "src".to_string(),
+        hash: "561848bad7164d7568658456088b107ec9efd9f3".to_string(),
+        line: None,
+        blame: false,
+        is_dir: true,
+    };
+
+    for (
+        repo,
+        expected_url,
+    ) in vec![
+        (
+            "https://github.com/user/repo.git",
+            "https://github.com/user/repo/tree/561848bad7164d7568658456088b107ec9efd9f3/src",
+        ),
+        (
+            "https://bitbucket.org/user/repo.git",
+            "https://bitbucket.org/user/repo/src/561848bad7164d7568658456088b107ec9efd9f3/src",
+        ),
+        (
+            "https://github.somewhere.com/user/repo.git",
+            "https://github.somewhere.com/user/repo/tree/561848bad7164d7568658456088b107ec9efd9f3/src",
+        ),
+        (
+            "https://gitlab.com/user/repo.git",
+            "https://gitlab.com/user/repo/tree/561848bad7164d7568658456088b107ec9efd9f3/src",
+        ),
+    ] {
+        let config = config(repo, None, None);
+        let url = build_page_url(&page, &config).unwrap();
+        assert_eq!(url, expected_url);
     }
 }
 
