@@ -28,7 +28,7 @@ fn first_available_url(
     https_proxy: &Option<impl AsRef<str>>,
 ) -> String {
     let mut builder = reqwest::Client::builder();
-    if let Some(ref p) = https_proxy {
+    if let Some(p) = https_proxy {
         let p = p.as_ref();
         if !p.is_empty() {
             if let Ok(p) = reqwest::Proxy::https(p) {
@@ -97,9 +97,7 @@ fn build_github_like_url(
                 //   https://help.github.com/enterprise/user/articles/user-organization-and-project-pages/
                 host => {
                     // Token is always required for GitHub Enterprise
-                    if let (Some(ref endpoint), Some(ref token)) =
-                        (api_endpoint, &cfg.env.ghe_token)
-                    {
+                    if let (Some(endpoint), Some(token)) = (&api_endpoint, &cfg.env.ghe_token) {
                         if let Ok(Some(homepage)) = fetch_homepage(
                             endpoint.as_ref(),
                             Some(token),
@@ -156,31 +154,27 @@ fn build_github_like_url(
             }
         }
         Page::Open { .. } => {
-            if let Some(ref b) = cfg.branch {
+            if let Some(b) = &cfg.branch {
                 Ok(format!("https://{}/{}/{}/tree/{}", host, user, repo, b))
             } else {
                 Ok(format!("https://{}/{}/{}", host, user, repo))
             }
         }
-        Page::Tag { ref tagname, .. } => Ok(format!(
+        Page::Tag { tagname, .. } => Ok(format!(
             "https://{}/{}/{}/tree/{}",
             host, user, repo, tagname,
         )),
-        Page::Diff {
-            ref lhs,
-            ref rhs,
-            ref op,
-        } => Ok(format!(
+        Page::Diff { lhs, rhs, op } => Ok(format!(
             "https://{}/{}/{}/compare/{}{}{}",
             host, user, repo, lhs, op, rhs,
         )),
-        Page::Commit { ref hash } => Ok(format!(
+        Page::Commit { hash } => Ok(format!(
             "https://{}/{}/{}/commit/{}",
             host, user, repo, hash
         )),
         Page::FileOrDir {
-            ref relative_path,
-            ref hash,
+            relative_path,
+            hash,
             line,
             blame,
             is_dir,
@@ -248,7 +242,7 @@ fn build_bitbucket_url(user: &str, repo: &str, cfg: &Config, page: &Page) -> Res
             service: "bitbucket.org".to_string(),
         }),
         Page::Open { .. } => {
-            if let Some(ref b) = cfg.branch {
+            if let Some(b) = &cfg.branch {
                 Ok(format!(
                     "https://bitbucket.org/{}/{}/branch/{}",
                     user, repo, b,
@@ -258,19 +252,19 @@ fn build_bitbucket_url(user: &str, repo: &str, cfg: &Config, page: &Page) -> Res
             }
         }
         Page::Diff { .. } => Error::err(ErrorKind::BitbucketDiffNotSupported),
-        Page::Commit { ref hash } => Ok(format!(
+        Page::Commit { hash } => Ok(format!(
             "https://bitbucket.org/{}/{}/commits/{}",
             user, repo, hash,
         )),
         // On Bitbucket, there is no tag-specific page. However, unlike GitHub, bitbucket supports
         // tag commit. Open the tag commit page instead.
-        Page::Tag { ref commit, .. } => Ok(format!(
+        Page::Tag { commit, .. } => Ok(format!(
             "https://bitbucket.org/{}/{}/commits/{}",
             user, repo, commit,
         )),
         Page::FileOrDir {
-            ref relative_path,
-            ref hash,
+            relative_path,
+            hash,
             line,
             blame,
             is_dir: _,
@@ -299,7 +293,7 @@ fn build_azure_devops_url(team: &str, repo: &str, cfg: &Config, page: &Page) -> 
         Page::Open {
             pull_request: true, ..
         } => {
-            if let Some(ref b) = cfg.branch {
+            if let Some(b) = &cfg.branch {
                 Ok(format!("https://dev.azure.com/{}/_git/{}/pullrequestcreate?sourceRef={}&targetRef=master", team, repo, b))
             } else {
                 Error::err(ErrorKind::NoLocalRepoFound {
@@ -308,7 +302,7 @@ fn build_azure_devops_url(team: &str, repo: &str, cfg: &Config, page: &Page) -> 
             }
         }
         Page::Open { .. } => {
-            if let Some(ref b) = cfg.branch {
+            if let Some(b) = &cfg.branch {
                 Ok(format!(
                     "https://dev.azure.com/{}/_git/{}?version=GB{}",
                     team, repo, b
@@ -317,17 +311,17 @@ fn build_azure_devops_url(team: &str, repo: &str, cfg: &Config, page: &Page) -> 
                 Ok(format!("https://dev.azure.com/{}/{}", team, repo))
             }
         }
-        Page::Commit { ref hash } => Ok(format!(
+        Page::Commit { hash } => Ok(format!(
             "https://dev.azure.com/{}/_git/{}/commit/{}",
             team, repo, hash
         )),
-        Page::Tag { ref tagname, .. } => Ok(format!(
+        Page::Tag { tagname, .. } => Ok(format!(
             "https://dev.azure.com/{}/_git/{}?version=GT{}",
             team, repo, tagname
         )),
         Page::FileOrDir {
-            ref relative_path,
-            ref hash,
+            relative_path,
+            hash,
             line: None,
             blame,
             is_dir: _,
@@ -466,8 +460,8 @@ pub fn build_page_url(page: &Page, cfg: &Config) -> Result<String> {
             } else if is_gitlab {
                 env.gitlab_ssh_port
             } else {
-                match env.ghe_url_host {
-                    Some(ref v) if v == host => env.ghe_ssh_port,
+                match &env.ghe_url_host {
+                    Some(v) if v == host => env.ghe_ssh_port,
                     _ => {
                         return Error::err(ErrorKind::UnknownHostingService {
                             url: repo_url.to_string(),

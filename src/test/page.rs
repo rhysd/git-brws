@@ -120,7 +120,7 @@ fn parse_file_or_dir_for_blame() {
 
 #[test]
 fn parse_file_single_line() {
-    for &(ref file, ref expected) in &[
+    for (file, expected) in &[
         (Path::new(".").join("README.md#21"), Some(Line::At(21))),
         (
             Path::new(".").join("src").join("main.rs#10"),
@@ -139,7 +139,7 @@ fn parse_file_single_line() {
             vec![&file.to_str().unwrap()],
         );
         match parse_page(&c).unwrap() {
-            Page::FileOrDir { ref line, .. } => assert_eq!(line, expected, "input: {:?}", file),
+            Page::FileOrDir { line, .. } => assert_eq!(&line, expected, "input: {:?}", file),
             p => assert!(false, "Unexpected result: {:?}, input: {:?}", p, file),
         }
     }
@@ -304,7 +304,7 @@ fn file_for_unknown_commit() {
 
 #[test]
 fn diff_lhs_or_rhs_empty() {
-    for ref path in &[
+    for path in &[
         Path::new("..").join("foo.txt"),
         Path::new("foo").join(".."),
         PathBuf::from(".."),

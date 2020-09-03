@@ -28,7 +28,7 @@ macro_rules! skip_if_no_token {
     () => {
         match ::std::env::var("GIT_BRWS_GITHUB_TOKEN").or_else(|_| ::std::env::var("GITHUB_TOKEN"))
         {
-            Ok(ref v) if v == "" => return,
+            Ok(v) if v == "" => return,
             Ok(v) => Some(v),
             Err(_) => return,
         }
@@ -41,7 +41,7 @@ macro_rules! skip_if_no_token {
 // sometimes hits the limit.
 macro_rules! skip_if_no_token_for_search {
     () => {{
-        if let Ok(ref v) = ::std::env::var("GIT_BRWS_CI_SKIP_TEST_FOR_SEARCH_API") {
+        if let Ok(v) = ::std::env::var("GIT_BRWS_CI_SKIP_TEST_FOR_SEARCH_API") {
             if v == "true" {
                 return;
             }

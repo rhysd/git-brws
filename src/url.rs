@@ -43,7 +43,7 @@ fn error_without_status(_status: ExitStatus) -> String {
 }
 
 pub fn browse(url: &str, env: &EnvConfig) -> Result<()> {
-    if let Some(ref cmd) = env.browse_command {
+    if let Some(cmd) = &env.browse_command {
         return browse_with_cmd(url, cmd);
     }
 

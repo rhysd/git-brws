@@ -235,7 +235,7 @@ fn search_repo_from_github_by_name() {
 fn repo_specified_but_argument_is_not_empty() {
     let err = Parsed::parse_iter(&["git-brws", "-r", "foo", "HEAD"]).unwrap_err();
     match err.kind() {
-        ErrorKind::ArgsNotAllowed { ref args, .. } => {
+        ErrorKind::ArgsNotAllowed { args, .. } => {
             assert!(format!("{}", err).contains("\"HEAD\""), "{:?}", args);
         }
         e => assert!(false, "Unexpected error: {}", e),

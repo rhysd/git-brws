@@ -176,7 +176,7 @@ fn commit_page_url() {
 
 #[test]
 fn diff_page_url() {
-    for (ref op, ref opstr) in &[(DiffOp::TwoDots, ".."), (DiffOp::ThreeDots, "...")] {
+    for (op, opstr) in &[(DiffOp::TwoDots, ".."), (DiffOp::ThreeDots, "...")] {
         let p = Page::Diff {
             lhs: "561848bad7164d7568658456088b107ec9efd9f3".to_string(),
             rhs: "90601f1037142605a32426f9ece0c07d479b9cc5".to_string(),

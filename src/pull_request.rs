@@ -89,17 +89,16 @@ pub async fn find_page<'a, 'b>(
     repo: &'b str,
     cfg: &Config,
 ) -> Result<Page<'a, 'b>> {
-    match cfg.branch {
-        Some(ref b) => find_github_pr_url_for_branch(b, endpoint, author, repo, &cfg.env).await,
-        None => {
-            find_github_pr_url_for_branch(
-                cfg.git().current_branch()?,
-                endpoint,
-                author,
-                repo,
-                &cfg.env,
-            )
-            .await
-        }
+    if let Some(b) = &cfg.branch {
+        find_github_pr_url_for_branch(b, endpoint, author, repo, &cfg.env).await
+    } else {
+        find_github_pr_url_for_branch(
+            cfg.git().current_branch()?,
+            endpoint,
+            author,
+            repo,
+            &cfg.env,
+        )
+        .await
     }
 }

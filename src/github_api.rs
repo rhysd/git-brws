@@ -56,7 +56,7 @@ impl<'a> Client<'a> {
         // GitHub API requires user agent in headers: https://developer.github.com/v3/#user-agent-required
         let mut b = ReqwestClient::builder().user_agent("git-brws");
 
-        if let Some(ref p) = https_proxy {
+        if let Some(p) = https_proxy {
             let p = p.as_ref();
             if !p.is_empty() {
                 b = b.proxy(Proxy::https(p)?);

@@ -10,8 +10,8 @@ fn run() -> error::Result<()> {
     match Parsed::parse_iter(args())? {
         Parsed::Help(usage) => eprintln!("{}", usage),
         Parsed::Version(version) => println!("{}", version),
-        Parsed::OpenPage(ref opts) if opts.stdout => println!("{}", url::build_url(opts)?),
-        Parsed::OpenPage(ref opts) => url::browse(&url::build_url(opts)?, &opts.env)?,
+        Parsed::OpenPage(opts) if opts.stdout => println!("{}", url::build_url(&opts)?),
+        Parsed::OpenPage(opts) => url::browse(&url::build_url(&opts)?, &opts.env)?,
     }
     Ok(())
 }
