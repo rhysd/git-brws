@@ -39,7 +39,7 @@ pub enum Page {
     Commit {
         hash: String,
     },
-    FileOrDir {
+    FilePath {
         relative_path: String,
         hash: String,
         line: Option<Line>,
@@ -232,7 +232,7 @@ impl<'a> BrowsePageParser<'a> {
             hash = self.shorten_hash(hash);
         };
 
-        Ok(Page::FileOrDir {
+        Ok(Page::FilePath {
             relative_path,
             hash,
             line,

@@ -172,7 +172,7 @@ fn build_github_like_url(
             "https://{}/{}/{}/commit/{}",
             host, user, repo, hash
         )),
-        Page::FileOrDir {
+        Page::FilePath {
             relative_path,
             hash,
             line,
@@ -262,7 +262,7 @@ fn build_bitbucket_url(user: &str, repo: &str, cfg: &Config, page: &Page) -> Res
             "https://bitbucket.org/{}/{}/commits/{}",
             user, repo, commit,
         )),
-        Page::FileOrDir {
+        Page::FilePath {
             relative_path,
             hash,
             line,
@@ -319,7 +319,7 @@ fn build_azure_devops_url(team: &str, repo: &str, cfg: &Config, page: &Page) -> 
             "https://dev.azure.com/{}/_git/{}?version=GT{}",
             team, repo, tagname
         )),
-        Page::FileOrDir {
+        Page::FilePath {
             relative_path,
             hash,
             line: None,

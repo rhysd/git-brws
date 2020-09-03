@@ -83,7 +83,7 @@ fn parse_file_or_dir() {
             vec![&entry.to_str().unwrap()],
         );
         match parse_page(&c).unwrap() {
-            Page::FileOrDir {
+            Page::FilePath {
                 relative_path,
                 hash,
                 line: None,
@@ -113,7 +113,7 @@ fn parse_file_or_dir_for_blame() {
     let c = c;
 
     match parse_page(&c).unwrap() {
-        Page::FileOrDir { blame, .. } => assert!(blame),
+        Page::FilePath { blame, .. } => assert!(blame),
         p => assert!(false, "Unexpected result: {:?}", p),
     }
 }
@@ -139,7 +139,7 @@ fn parse_file_single_line() {
             vec![&file.to_str().unwrap()],
         );
         match parse_page(&c).unwrap() {
-            Page::FileOrDir { line, .. } => assert_eq!(&line, expected, "input: {:?}", file),
+            Page::FilePath { line, .. } => assert_eq!(&line, expected, "input: {:?}", file),
             p => assert!(false, "Unexpected result: {:?}, input: {:?}", p, file),
         }
     }
@@ -363,7 +363,7 @@ fn parse_file_line_range() {
             vec![&file.to_str().unwrap()],
         );
         match parse_page(&c).unwrap() {
-            Page::FileOrDir { line, .. } => {
+            Page::FilePath { line, .. } => {
                 assert_eq!(line, Some(Line::Range(1, 2)), "input: {:?}", file)
             }
             p => assert!(false, "Unexpected result: {:?}, input: {:?}", p, file),
@@ -488,7 +488,7 @@ fn shorten_commit_hash() {
     ]);
     let p = parse_page(&c).unwrap();
     assert!(
-        matches!(&p, Page::FileOrDir{ hash, .. } if hash == "dbb66be"),
+        matches!(&p, Page::FilePath{ hash, .. } if hash == "dbb66be"),
         "{:?}",
         p,
     );

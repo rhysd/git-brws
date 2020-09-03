@@ -264,7 +264,7 @@ fn file_page_url() {
     let hash = "561848bad7164d7568658456088b107ec9efd9f3".to_string();
     let is_dir = false;
 
-    let page = move |line: Option<Line>, blame: bool| Page::FileOrDir {
+    let page = move |line: Option<Line>, blame: bool| Page::FilePath {
         relative_path: relative_path.clone(),
         hash: hash.clone(),
         line,
@@ -342,7 +342,7 @@ fn file_page_url() {
 
 #[test]
 fn directory_page_url() {
-    let page = Page::FileOrDir {
+    let page = Page::FilePath {
         relative_path: "src".to_string(),
         hash: "561848bad7164d7568658456088b107ec9efd9f3".to_string(),
         line: None,
