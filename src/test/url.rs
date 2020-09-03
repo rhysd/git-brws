@@ -18,10 +18,8 @@ fn executable_path(cmd: &str) -> String {
     use std::path::PathBuf;
     let mut p = PathBuf::from(file!());
     p.pop(); // git-brws/src/test
-    p.pop(); // git-brws/src
-    p.pop(); // git-brws
-    p.push("testdata"); // git-brws/testdata
-    p.push(format!("{}.exe", cmd)); // git-brws/testdata/true.exe
+    p.push("testdata"); // git-brws/src/test/testdata
+    p.push(format!("{}.exe", cmd)); // git-brws/src/test/testdata/true.exe
     p.to_str().unwrap().to_string()
 }
 
