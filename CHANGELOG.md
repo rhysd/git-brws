@@ -1,3 +1,14 @@
+<a name="v0.11.11"></a>
+# [v0.11.11](https://github.com/rhysd/git-brws/releases/tag/v0.11.11) - 03 Sep 2020
+
+- **New:** Add `--current-branch` option (`-c` in short option) to open current branch in browser. For example, when `git brws` opens `https://github.com/foo/bar` and current branch is `some-branch`, `git brws -c` opens `https://github.com/foo/bar/tree/some-branch`.
+- **Fix:** Handle invalid empty branch name at `-b` option correctly (#26)
+- **Fix:** URL is not correct when a directory path is given (#25)
+- **Improve:** Update dependent crates
+
+[Changes][v0.11.11]
+
+
 <a name="v0.11.10"></a>
 # [v0.11.10](https://github.com/rhysd/git-brws/releases/tag/v0.11.10) - 05 Aug 2020
 
@@ -256,6 +267,7 @@ First binaries release for Linux (32bit/64bit) and macOS (64bit) using Travis CI
 [Changes][v0.4.2]
 
 
+[v0.11.11]: https://github.com/rhysd/git-brws/compare/v0.11.10...v0.11.11
 [v0.11.10]: https://github.com/rhysd/git-brws/compare/v0.11.9...v0.11.10
 [v0.11.9]: https://github.com/rhysd/git-brws/compare/v0.11.8...v0.11.9
 [v0.11.8]: https://github.com/rhysd/git-brws/compare/v0.11.7...v0.11.8
