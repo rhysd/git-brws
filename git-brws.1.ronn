@@ -265,7 +265,7 @@ the command may not open a pull request page you want.
     Setting 'true' will use 7-letters short commit hash like '78fbce6' for URLs.
 
   * `$https_proxy`:
-    This variable is used for '--pr' (or '-p') only. A HTTPS Proxy server URL if you use a web
+    This variable is used for '--pr' (or '-p') only. An HTTPS Proxy server URL if you use a web.
     proxy.
 
 
