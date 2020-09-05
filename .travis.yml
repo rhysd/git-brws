@@ -47,7 +47,12 @@ script:
             git fetch origin master:master
             git fetch --prune origin '+refs/heads/master:refs/remotes/origin/master'
             git rev-parse HEAD
-            cargo test --verbose
+            if [[ "${TARGET}" == "x86_64-unknown-linux-gnu" ]]; then
+                cargo install cargo-tarpaulin
+                cargo tarpaulin -v
+            else
+                cargo test --verbose
+            fi
         fi
     else
         rustup component add clippy
