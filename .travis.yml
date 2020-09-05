@@ -1,6 +1,7 @@
 language: rust
 rust: stable
-dist: xenial
+# tarpaulin has only been tested on bionic and trusty other distros may have issues
+dist: bionic
 
 env:
   global:
@@ -48,7 +49,8 @@ script:
             git fetch --prune origin '+refs/heads/master:refs/remotes/origin/master'
             git rev-parse HEAD
             if [[ "${TARGET}" == "x86_64-unknown-linux-gnu" ]]; then
-                cargo install cargo-tarpaulin
+                bash <(curl https://raw.githubusercontent.com/xd009642/tarpaulin/master/travis-install.sh)
+                cargo tarpaulin --version
                 cargo tarpaulin -v --out Xml
                 bash <(curl -s https://codecov.io/bash)
             else
