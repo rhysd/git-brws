@@ -170,6 +170,7 @@ pub enum ErrorKind {
 }
 
 impl fmt::Display for ErrorKind {
+    #[cfg(not(tarpaulin_include))]
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         use ErrorKind::*;
         match self {

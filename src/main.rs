@@ -1,5 +1,6 @@
 #![forbid(unsafe_code)]
 #![warn(clippy::dbg_macro)]
+#![cfg(not(tarpaulin_include))]
 
 use git_brws::argv::Parsed;
 use git_brws::{error, url};
