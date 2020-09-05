@@ -3,6 +3,7 @@ git brws
 [![crates.io][crate-badge]][crate]
 [![Linux and macOS CI][travis-badge]][travis-ci]
 [![Windows CI][appveyor-badge]][appveyor]
+[![Coverage][codecov-badge]][codecov]
 
 `git brws` is a command line tool to open a repository, file, commit, diff, tag, blame, pull request,
 issue or project's website in your web browser from command line. 'brws' is an abbreviation of 'browse'.
@@ -348,6 +349,8 @@ Distributed under [the MIT license](LICENSE.txt).
 [travis-badge]: https://travis-ci.org/rhysd/git-brws.svg?branch=master
 [appveyor-badge]: https://ci.appveyor.com/api/projects/status/q9gvpd30k1k5jsf0/branch/master?svg=true
 [appveyor]: https://ci.appveyor.com/project/rhysd/git-brws/branch/master
+[codecov-badge]: https://codecov.io/gh/rhysd/git-brws/branch/master/graph/badge.svg
+[codecov]: https://codecov.io/gh/rhysd/git-brws
 [release page]: https://github.com/rhysd/git-brws/releases
 [gitlab-pages]: https://docs.gitlab.com/ee/user/project/pages/getting_started_part_one.html#project-websites
 [bitbucket-cloud]: https://confluence.atlassian.com/bitbucket/publishing-a-website-on-bitbucket-cloud-221449776.html
