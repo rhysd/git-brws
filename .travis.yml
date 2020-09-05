@@ -49,7 +49,8 @@ script:
             git rev-parse HEAD
             if [[ "${TARGET}" == "x86_64-unknown-linux-gnu" ]]; then
                 cargo install cargo-tarpaulin
-                cargo tarpaulin -v
+                cargo tarpaulin -v --out Xml
+                bash <(curl -s https://codecov.io/bash)
             else
                 cargo test --verbose
             fi
