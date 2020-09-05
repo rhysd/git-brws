@@ -23,8 +23,8 @@ matrix:
       addons:
         apt:
           packages:
-            - gcc-5-multilib
-            - lib32gcc-5-dev
+            - gcc-7-multilib
+            - lib32gcc-7-dev
             - libssl-dev:i386
           update: true
     - os: linux
