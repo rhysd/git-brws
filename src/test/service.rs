@@ -780,18 +780,39 @@ fn subgroups_for_gitlab() {
     }
 }
 
-// #28
 #[test]
 fn no_user_name_found_in_path() {
+    for repo in &["https://gitlab.com/repo.git", "https://gitlab.com/repo"] {
+        let c = config(repo, None, None);
+        let err = build_page_url(&OPEN, &c).unwrap_err();
+        let kind = err.kind();
+        assert!(
+            matches!(kind, ErrorKind::NoUserInPath { .. }),
+            "{:?} {:?}",
+            kind,
+            repo
+        );
+    }
+}
+
+#[test]
+fn no_repo_name_found_in_path() {
     for repo in &[
-        "https://gitlab.com/repo.git",
+        "https://gitlab.com/user/",
+        "https://gitlab.com/user/.git",
         "https://gitlab.com/",
-        "https://gitlab.com",
+        "https://gitlab.com/.git",
+        "https://gitlab.com//",
     ] {
         let c = config(repo, None, None);
         let err = build_page_url(&OPEN, &c).unwrap_err();
         let kind = err.kind();
-        assert!(matches!(kind, ErrorKind::NoUserInPath { .. }), "{:?}", kind);
+        assert!(
+            matches!(kind, ErrorKind::NoRepoInPath { .. }),
+            "{:?} {:?}",
+            kind,
+            repo
+        );
     }
 }
 
@@ -805,6 +826,11 @@ fn slash_in_github_user_name() {
         let c = config(repo, None, None);
         let err = build_page_url(&OPEN, &c).unwrap_err();
         let kind = err.kind();
-        assert!(matches!(kind, ErrorKind::InvalidUser { .. }), "{:?}", kind);
+        assert!(
+            matches!(kind, ErrorKind::InvalidUser { .. }),
+            "{:?} {:?}",
+            kind,
+            repo
+        );
     }
 }

@@ -411,22 +411,19 @@ pub fn azure_devops_slug_from_path<'a>(path: &'a str) -> Result<(&'a str, &'a st
 //   e.g. 'sub1/sub2/sub3/repo' into 'sub1/sub2/sub3' and 'repo'
 pub fn slug_from_path<'a>(path: &'a str) -> Result<(&'a str, &'a str)> {
     // Byte offset at the last '/' in path
-    let offset = path.rfind('/').ok_or_else(|| {
-        Error::new(ErrorKind::NoRepoInPath {
+    match path.rfind('/').map(|offset| {
+        let user = path[0..offset].trim_start_matches('/');
+        let repo = path[offset + 1..].trim_end_matches(".git");
+        (user, repo)
+    }) {
+        None | Some((_, "")) => Err(Error::new(ErrorKind::NoRepoInPath {
             path: path.to_string(),
-        })
-    })?;
-
-    let repo = &path[offset + 1..].trim_end_matches(".git");
-    let user = &path[0..offset].trim_start_matches('/');
-
-    if user.is_empty() {
-        return Err(Error::new(ErrorKind::NoUserInPath {
+        })),
+        Some(("", _)) => Err(Error::new(ErrorKind::NoUserInPath {
             path: path.to_string(),
-        }));
+        })),
+        Some(found) => Ok(found),
     }
-
-    Ok((user, repo.trim_end_matches(".git")))
 }
 
 // Known URL formats
