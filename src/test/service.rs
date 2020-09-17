@@ -760,3 +760,32 @@ fn tab_page_for_bitbucket() {
         assert_eq!(actual, expected, "{}", url);
     }
 }
+
+#[test]
+fn subgroups_for_gitlab() {
+    for repo in &[
+        "https://gitlab.com/group/sub1/repo.git",
+        "https://gitlab.com/group/sub1/repo",
+        "https://gitlab.com/group/sub1/sub2/repo.git",
+        "https://gitlab.com/group/sub1/sub2/repo",
+        "https://gitlab.com/group/sub1/sub2/sub3/sub4/sub5/sub6repo.git",
+    ] {
+        let c = config(repo, None, None);
+        let expected = repo.trim_end_matches(".git");
+        assert_eq!(build_page_url(&OPEN, &c).unwrap(), expected);
+    }
+}
+
+#[test]
+fn invalid_user_name() {
+    for repo in &[
+        "https://gitlab.com/repo.git",
+        "https://gitlab.com/",
+        "https://gitlab.com",
+    ] {
+        let c = config(repo, None, None);
+        let err = build_page_url(&OPEN, &c).unwrap_err();
+        let kind = err.kind();
+        assert!(matches!(kind, ErrorKind::NoUserInPath { .. }), "{:?}", kind);
+    }
+}
