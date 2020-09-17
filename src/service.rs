@@ -396,29 +396,23 @@ pub fn azure_devops_slug_from_path<'a>(path: &'a str) -> Result<(&'a str, &'a st
 //   name (#28): https://docs.gitlab.com/ee/user/group/subgroups/
 //   e.g. 'sub1/sub2/sub3/repo' into 'sub1/sub2/sub3' and 'repo'
 pub fn slug_from_path<'a>(path: &'a str) -> Result<(&'a str, &'a str)> {
-    // e.g. '/sub1/sub2/repo.git' -> 'repo.git'
-    let mut repo = path.split('/').last().ok_or_else(|| {
+    // Byte offset at the last '/' in path
+    let offset = path.rfind('/').ok_or_else(|| {
         Error::new(ErrorKind::NoRepoInPath {
             path: path.to_string(),
         })
     })?;
 
-    let mut user = &path[0..path.len() - repo.len() - 1]; // `- 1` means '/' just before repo name
-    if user.starts_with('/') {
-        user = &user[1..];
-    }
+    let repo = &path[offset + 1..].trim_end_matches(".git");
+    let user = &path[0..offset].trim_start_matches('/');
+
     if user.is_empty() {
         return Err(Error::new(ErrorKind::NoUserInPath {
             path: path.to_string(),
         }));
     }
 
-    if repo.ends_with(".git") {
-        // e.g. 'repo.git' -> 'repo'
-        repo = &repo[0..repo.len() - 4];
-    }
-
-    Ok((user, repo))
+    Ok((user, repo.trim_end_matches(".git")))
 }
 
 // Known URL formats
