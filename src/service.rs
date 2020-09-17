@@ -63,6 +63,19 @@ fn fetch_homepage(
     async_runtime::blocking(client.repo_homepage(user, repo))
 }
 
+fn check_slash_in_user(user: &str) -> Result<()> {
+    if user.contains('/') {
+        // Enter here because slug_from_path() allows '/' in user name to support GitLab's
+        // subgroups feature (#28). But GitHub, GitHubEnterprise and Bitbucket does not allow a user
+        // name to include '/'.
+        Err(Error::new(ErrorKind::InvalidUser {
+            name: user.to_string(),
+        }))
+    } else {
+        Ok(())
+    }
+}
+
 fn build_github_like_url(
     host: &str,
     user: &str,
@@ -224,6 +237,7 @@ fn build_gitlab_url(
 }
 
 fn build_bitbucket_url(user: &str, repo: &str, cfg: &Config, page: &Page) -> Result<String> {
+    check_slash_in_user(user)?;
     match page {
         Page::Open { website: true, .. } => {
             // Build bitbucket cloud URL:
@@ -444,6 +458,7 @@ pub fn build_page_url(page: &Page, cfg: &Config) -> Result<String> {
 
     match host {
         "github.com" => {
+            check_slash_in_user(user)?;
             build_github_like_url(host, user, repo_name, Some("api.github.com"), cfg, page)
         }
         "gitlab.com" => build_gitlab_url(host, user, repo_name, cfg, page),
@@ -479,6 +494,7 @@ pub fn build_page_url(page: &Page, cfg: &Config) -> Result<String> {
             if is_gitlab {
                 build_gitlab_url(&host, user, repo_name, cfg, page)
             } else {
+                check_slash_in_user(user)?;
                 build_github_like_url(
                     &host,
                     user,

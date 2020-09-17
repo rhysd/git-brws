@@ -167,6 +167,9 @@ pub enum ErrorKind {
         dir: String,
     },
     BranchNameEmpty,
+    InvalidUser {
+        name: String,
+    },
 }
 
 impl fmt::Display for ErrorKind {
@@ -226,6 +229,7 @@ impl fmt::Display for ErrorKind {
             UserBrowseCommandFailed{cmd, url, msg} => write!(f, "Command '{}' failed to open URL {}. Please check $GIT_BRWS_BROWSE_COMMAND. stderr: {}", cmd, url, msg),
             SpecifiedDirNotExist{dir} => write!(f, "Specified directory '{}' with -d option does not exist", dir),
             BranchNameEmpty => write!(f, "Branch name cannot be empty"),
+            InvalidUser{name} => write!(f, "Invalid user or organization name '{}'", name),
         }
     }
 }
