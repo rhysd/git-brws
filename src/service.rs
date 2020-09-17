@@ -391,23 +391,30 @@ pub fn azure_devops_slug_from_path<'a>(path: &'a str) -> Result<(&'a str, &'a st
     Ok((team, repo))
 }
 
-// Note: Parse '/user/repo.git' or '/user/repo' or 'user/repo' into 'user' and 'repo'
+// Note: Parse '/user/repo.git' or '/user/repo' or 'user/repo' into 'user' and 'repo'.
+// Note: GitLab has subgroups feature. The last '/' needs to be searched to get correct repository
+//   name (#28): https://docs.gitlab.com/ee/user/group/subgroups/
+//   e.g. 'sub1/sub2/sub3/repo' into 'sub1/sub2/sub3' and 'repo'
 pub fn slug_from_path<'a>(path: &'a str) -> Result<(&'a str, &'a str)> {
-    let mut split = path.split('/').skip_while(|s| s.is_empty());
-    let user = split.next().ok_or_else(|| {
-        Error::new(ErrorKind::NoUserInPath {
-            path: path.to_string(),
-        })
-    })?;
-
-    let mut repo = split.next().ok_or_else(|| {
+    // e.g. '/sub1/sub2/repo.git' -> 'repo.git'
+    let mut repo = path.split('/').last().ok_or_else(|| {
         Error::new(ErrorKind::NoRepoInPath {
             path: path.to_string(),
         })
     })?;
 
+    let mut user = &path[0..path.len() - repo.len() - 1]; // `- 1` means '/' just before repo name
+    if user.starts_with('/') {
+        user = &user[1..];
+    }
+    if user.is_empty() {
+        return Err(Error::new(ErrorKind::NoUserInPath {
+            path: path.to_string(),
+        }));
+    }
+
     if repo.ends_with(".git") {
-        // Slice '.git' from 'repo.git'
+        // e.g. 'repo.git' -> 'repo'
         repo = &repo[0..repo.len() - 4];
     }
 
