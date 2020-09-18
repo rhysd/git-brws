@@ -1,3 +1,13 @@
+<a name="v0.11.12"></a>
+# [v0.11.12](https://github.com/rhysd/git-brws/releases/tag/v0.11.12) - 18 Sep 2020
+
+- **Fix:** Support [GitLab's subgroups](https://docs.gitlab.com/ee/user/group/subgroups/) (#28)
+- **Improve:** Check repository name and user/org name more strictly
+- **Improve:** Update crate dependencies
+
+[Changes][v0.11.12]
+
+
 <a name="v0.11.11"></a>
 # [v0.11.11](https://github.com/rhysd/git-brws/releases/tag/v0.11.11) - 03 Sep 2020
 
@@ -257,7 +267,7 @@ Fix x86 build was broken
 
 
 <a name="v0.4.2"></a>
-# [version 0.4.2 (v0.4.2)](https://github.com/rhysd/git-brws/releases/tag/v0.4.2) - 31 Dec 2016
+# [v0.4.2](https://github.com/rhysd/git-brws/releases/tag/v0.4.2) - 31 Dec 2016
 
 First binaries release for Linux (32bit/64bit) and macOS (64bit) using Travis CI.
 - Fix converting `git@` protocol when user specifies it directly via `-r` option
@@ -267,6 +277,7 @@ First binaries release for Linux (32bit/64bit) and macOS (64bit) using Travis CI
 [Changes][v0.4.2]
 
 
+[v0.11.12]: https://github.com/rhysd/git-brws/compare/v0.11.11...v0.11.12
 [v0.11.11]: https://github.com/rhysd/git-brws/compare/v0.11.10...v0.11.11
 [v0.11.10]: https://github.com/rhysd/git-brws/compare/v0.11.9...v0.11.10
 [v0.11.9]: https://github.com/rhysd/git-brws/compare/v0.11.8...v0.11.9
