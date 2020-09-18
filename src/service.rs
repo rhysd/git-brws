@@ -63,6 +63,19 @@ fn fetch_homepage(
     async_runtime::blocking(client.repo_homepage(user, repo))
 }
 
+fn check_slash_in_user(user: &str) -> Result<()> {
+    if user.contains('/') {
+        // Enter here because slug_from_path() allows '/' in user name to support GitLab's
+        // subgroups feature (#28). But GitHub, GitHubEnterprise and Bitbucket does not allow a user
+        // name to include '/'.
+        Err(Error::new(ErrorKind::InvalidUser {
+            name: user.to_string(),
+        }))
+    } else {
+        Ok(())
+    }
+}
+
 fn build_github_like_url(
     host: &str,
     user: &str,
@@ -224,6 +237,7 @@ fn build_gitlab_url(
 }
 
 fn build_bitbucket_url(user: &str, repo: &str, cfg: &Config, page: &Page) -> Result<String> {
+    check_slash_in_user(user)?;
     match page {
         Page::Open { website: true, .. } => {
             // Build bitbucket cloud URL:
@@ -391,27 +405,25 @@ pub fn azure_devops_slug_from_path<'a>(path: &'a str) -> Result<(&'a str, &'a st
     Ok((team, repo))
 }
 
-// Note: Parse '/user/repo.git' or '/user/repo' or 'user/repo' into 'user' and 'repo'
+// Note: Parse '/user/repo.git' or '/user/repo' or 'user/repo' into 'user' and 'repo'.
+// Note: GitLab has subgroups feature. The last '/' needs to be searched to get correct repository
+//   name (#28): https://docs.gitlab.com/ee/user/group/subgroups/
+//   e.g. 'sub1/sub2/sub3/repo' into 'sub1/sub2/sub3' and 'repo'
 pub fn slug_from_path<'a>(path: &'a str) -> Result<(&'a str, &'a str)> {
-    let mut split = path.split('/').skip_while(|s| s.is_empty());
-    let user = split.next().ok_or_else(|| {
-        Error::new(ErrorKind::NoUserInPath {
+    // Byte offset at the last '/' in path
+    match path.rfind('/').map(|offset| {
+        let user = path[0..offset].trim_start_matches('/');
+        let repo = path[offset + 1..].trim_end_matches(".git");
+        (user, repo)
+    }) {
+        None | Some((_, "")) => Err(Error::new(ErrorKind::NoRepoInPath {
             path: path.to_string(),
-        })
-    })?;
-
-    let mut repo = split.next().ok_or_else(|| {
-        Error::new(ErrorKind::NoRepoInPath {
+        })),
+        Some(("", _)) => Err(Error::new(ErrorKind::NoUserInPath {
             path: path.to_string(),
-        })
-    })?;
-
-    if repo.ends_with(".git") {
-        // Slice '.git' from 'repo.git'
-        repo = &repo[0..repo.len() - 4];
+        })),
+        Some(found) => Ok(found),
     }
-
-    Ok((user, repo))
 }
 
 // Known URL formats
@@ -443,6 +455,7 @@ pub fn build_page_url(page: &Page, cfg: &Config) -> Result<String> {
 
     match host {
         "github.com" => {
+            check_slash_in_user(user)?;
             build_github_like_url(host, user, repo_name, Some("api.github.com"), cfg, page)
         }
         "gitlab.com" => build_gitlab_url(host, user, repo_name, cfg, page),
@@ -478,6 +491,7 @@ pub fn build_page_url(page: &Page, cfg: &Config) -> Result<String> {
             if is_gitlab {
                 build_gitlab_url(&host, user, repo_name, cfg, page)
             } else {
+                check_slash_in_user(user)?;
                 build_github_like_url(
                     &host,
                     user,

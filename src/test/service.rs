@@ -760,3 +760,77 @@ fn tab_page_for_bitbucket() {
         assert_eq!(actual, expected, "{}", url);
     }
 }
+
+#[test]
+fn subgroups_for_gitlab() {
+    for repo in &[
+        "https://gitlab.com/group/sub1/repo.git",
+        "https://gitlab.com/group/sub1/repo",
+        "https://gitlab.com/group/sub1/sub2/repo.git",
+        "https://gitlab.com/group/sub1/sub2/repo",
+        "https://gitlab.com/group/sub1/sub2/sub3/sub4/sub5/sub6/repo.git",
+        "https://gitlab.somewhere.com/group/sub1/sub2/repo.git",
+        "https://my-gitlab.example.com/group/sub1/sub2/repo.git",
+    ] {
+        let mut env = empty_env();
+        env.gitlab_url_host = Some("my-gitlab.example.com".to_string());
+        let c = config(repo, None, Some(env));
+        let expected = repo.trim_end_matches(".git");
+        assert_eq!(build_page_url(&OPEN, &c).unwrap(), expected);
+    }
+}
+
+#[test]
+fn no_user_name_found_in_path() {
+    for repo in &["https://gitlab.com/repo.git", "https://gitlab.com/repo"] {
+        let c = config(repo, None, None);
+        let err = build_page_url(&OPEN, &c).unwrap_err();
+        let kind = err.kind();
+        assert!(
+            matches!(kind, ErrorKind::NoUserInPath { .. }),
+            "{:?} {:?}",
+            kind,
+            repo
+        );
+    }
+}
+
+#[test]
+fn no_repo_name_found_in_path() {
+    for repo in &[
+        "https://gitlab.com/user/",
+        "https://gitlab.com/user/.git",
+        "https://gitlab.com/",
+        "https://gitlab.com/.git",
+        "https://gitlab.com//",
+    ] {
+        let c = config(repo, None, None);
+        let err = build_page_url(&OPEN, &c).unwrap_err();
+        let kind = err.kind();
+        assert!(
+            matches!(kind, ErrorKind::NoRepoInPath { .. }),
+            "{:?} {:?}",
+            kind,
+            repo
+        );
+    }
+}
+
+#[test]
+fn slash_in_github_user_name() {
+    for repo in &[
+        "https://github.com/foo/bar/repo.git",
+        "https://github.somewhere.com/foo/bar/repo.git",
+        "https://bitbucket.org/foo/bar/repo.git",
+    ] {
+        let c = config(repo, None, None);
+        let err = build_page_url(&OPEN, &c).unwrap_err();
+        let kind = err.kind();
+        assert!(
+            matches!(kind, ErrorKind::InvalidUser { .. }),
+            "{:?} {:?}",
+            kind,
+            repo
+        );
+    }
+}
