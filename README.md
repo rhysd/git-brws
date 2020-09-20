@@ -11,16 +11,16 @@ issue or project's website in your web browser from command line. 'brws' is an a
 Features:
 
 - Opens a page of
-  - Repository ([e.g.](https://github.com/rhysd/git-brws))
-  - File ([e.g.](https://github.com/rhysd/git-brws/blob/master/Cargo.toml))
-  - Commit ([e.g.](https://github.com/rhysd/git-brws/commit/60024ab1280f9f10423b22bc708f3f6ef97db6b5))
-  - Diff ([e.g.](https://github.com/rhysd/git-brws/compare/e3c18d0d50252112d37bde97061370204b3cdab7..60024ab1280f9f10423b22bc708f3f6ef97db6b5), [e.g.](https://github.com/rhysd/git-brws/compare/e3c18d0d50252112d37bde97061370204b3cdab7...60024ab1280f9f10423b22bc708f3f6ef97db6b5))
-  - Tag ([e.g.](https://github.com/rhysd/git-brws/tree/0.10.0))
-  - Pull request (only for GitHub and GitHub Enterprise) ([e.g.](https://github.com/rust-lang/rust.vim/pull/290))
-  - Issue ([e.g.](https://github.com/rhysd/git-brws/issues/8))
-  - Website ([e.g.](https://rhysd.github.io/git-brws/))
+  - Repository ([example](https://github.com/rhysd/git-brws))
+  - File ([example](https://github.com/rhysd/git-brws/blob/master/Cargo.toml))
+  - Commit ([example](https://github.com/rhysd/git-brws/commit/60024ab1280f9f10423b22bc708f3f6ef97db6b5))
+  - Diff ([example](https://github.com/rhysd/git-brws/compare/e3c18d0d50252112d37bde97061370204b3cdab7..60024ab1280f9f10423b22bc708f3f6ef97db6b5), [example](https://github.com/rhysd/git-brws/compare/e3c18d0d50252112d37bde97061370204b3cdab7...60024ab1280f9f10423b22bc708f3f6ef97db6b5))
+  - Tag ([example](https://github.com/rhysd/git-brws/tree/0.10.0))
+  - Pull request (only for GitHub and GitHub Enterprise) ([example](https://github.com/rust-lang/rust.vim/pull/290))
+  - Issue ([example](https://github.com/rhysd/git-brws/issues/8))
+  - Website ([example](https://rhysd.github.io/git-brws/))
     - Homepage of the repository for GitHub or GitHub Enterprise, [GitLab pages][gitlab-pages], [Bitbucket Cloud][bitbucket-cloud]
-  - Blame ([e.g.](https://github.com/rhysd/git-brws/blame/9ab093f6720c2c2fe8375408f7f3ab40a3d3337a/src/service.rs))
+  - Blame ([example](https://github.com/rhysd/git-brws/blame/9ab093f6720c2c2fe8375408f7f3ab40a3d3337a/src/service.rs))
 - Supports following services
   - [GitHub](https://github.com)
   - [Bitbucket](https://bitbucket.org)
@@ -54,22 +54,31 @@ cd git-brws
 makepkg -si
 ```
 
+### Download from [release page][]
+
+Pre-built binary executables are available at [release page][] for following targets:
+
+- Linux 64bit (x86_64-unknown-linux-gnu)
+- macOS 64bit (x86_64-apple-darwin)
+- Windows 64bit (x86_64-pc-windows-msvc)
+- Linux 32bit (i686-unknown-linux-gnu)
+- Windows 32bit (i686-pc-windows-msvc)
+
+Download and unarchive the binary then put the executable in `$PATH`.
+
+Manpage for `man` command is available. Please find `git-brws.1` in the unarchived directory or download
+it from [here](https://raw.githubusercontent.com/rhysd/git-brws/master/git-brws.1) and copy it to the
+`man` directory in your system (e.g. `/usr/local/share/man/man1/`).
+
+Note: `git brws --help` only works when it is installed. `git brws -h` is always available.
+
 ### With [cargo](https://crates.io/)
 
 ```
 $ cargo install git-brws
 ```
 
-### As a single executable binary
-
-Pre-built binary executables are available at [release page][] for macOS (64bit), Linux (64bit, 32bit)
-and Windows (64bit, 32bit). Download and unarchive the binary then put the executable in `$PATH`.
-
-Manpage for `man` command is available. Please find `git-brws.1` in the unarchived directory or download
-it from [here](https://raw.githubusercontent.com/rhysd/git-brws/master/git-brws.1) and copy it to the
-`man` directory in your system (e.g. `/usr/local/share/man/man1/`).
-
-Note: `git brws --help` only works when it is installed.
+It requires Rust toolchain to build git-brws from sources.
 
 ## Usage
 
