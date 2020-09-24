@@ -7,7 +7,7 @@ lazy_static! {
     static ref RUNTIME: Mutex<Runtime> = Mutex::new(
         Builder::new()
             .basic_scheduler() // Do not make a new thread since this runtime is only used for network requests
-            .enable_all()
+            .enable_io()
             .build()
             .unwrap()
     );
