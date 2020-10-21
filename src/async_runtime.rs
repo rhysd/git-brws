@@ -5,8 +5,8 @@ use tokio::runtime::{Builder, Runtime};
 
 lazy_static! {
     static ref RUNTIME: Mutex<Runtime> = Mutex::new(
-        Builder::new()
-            .basic_scheduler() // Do not make a new thread since this runtime is only used for network requests
+        // Do not make a new thread since this runtime is only used for network requests
+        Builder::new_current_thread()
             .enable_all()
             .build()
             .unwrap()
