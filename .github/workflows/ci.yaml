@@ -10,6 +10,7 @@ jobs:
       fail-fast: false
     runs-on: ${{ matrix.os }}
     steps:
+      - run: env
       - uses: actions/checkout@v2
         with:
           fetch-depth: 0
