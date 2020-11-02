@@ -1,6 +1,7 @@
 git brws
 ========
 [![crates.io][crate-badge]][crate]
+[![Github Actions CI][ga-badge]][ga]
 [![Linux and macOS CI][travis-badge]][travis-ci]
 [![Windows CI][appveyor-badge]][appveyor]
 [![Coverage][codecov-badge]][codecov]
@@ -354,6 +355,8 @@ Distributed under [the MIT license](LICENSE.txt).
 
 [crate-badge]: https://img.shields.io/crates/v/git-brws.svg
 [crate]: https://crates.io/crates/git-brws
+[ga-badge]: https://github.com/rhysd/git-brws/workflows/CI/badge.svg?branch=master&event=push
+[ga]: https://github.com/rhysd/git-brws/actions?query=workflow%3ACI+branch%3Amaster+event%3Apush
 [travis-ci]: https://travis-ci.org/rhysd/git-brws
 [travis-badge]: https://travis-ci.org/rhysd/git-brws.svg?branch=master
 [appveyor-badge]: https://ci.appveyor.com/api/projects/status/q9gvpd30k1k5jsf0/branch/master?svg=true
