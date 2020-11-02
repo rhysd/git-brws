@@ -24,6 +24,7 @@ jobs:
           command: test
         env:
           GIT_BRWS_GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          RUST_BACKTRACE: full
       - name: Build
         uses: actions-rs/cargo@v1
         with:
