@@ -11,6 +11,8 @@ jobs:
     runs-on: ${{ matrix.os }}
     steps:
       - uses: actions/checkout@v2
+        with:
+          fetch-depth: 0
       - uses: actions-rs/toolchain@v1
         with:
           profile: minimal
@@ -18,10 +20,12 @@ jobs:
           override: true
       - uses: actions-rs/cargo@v1
         with:
-          command: build
+          command: test
+        env:
+          GIT_BRWS_GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       - uses: actions-rs/cargo@v1
         with:
-          command: test
+          command: build
   linters:
     name: Clippy and rustfmt
     runs-on: ubuntu-latest
