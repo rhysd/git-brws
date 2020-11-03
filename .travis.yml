@@ -48,14 +48,7 @@ script:
             git fetch origin master:master
             git fetch --prune origin '+refs/heads/master:refs/remotes/origin/master'
             git rev-parse HEAD
-            if [[ "${TARGET}" == "x86_64-unknown-linux-gnu" ]]; then
-                bash <(curl https://raw.githubusercontent.com/xd009642/tarpaulin/master/travis-install.sh)
-                cargo tarpaulin --version
-                cargo tarpaulin -v --out Xml
-                bash <(curl -s https://codecov.io/bash)
-            else
-                cargo test --verbose
-            fi
+            cargo test --verbose
         fi
     else
         rustup component add clippy
