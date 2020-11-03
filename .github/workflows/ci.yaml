@@ -21,6 +21,8 @@ jobs:
         env:
           GIT_BRWS_GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           RUST_BACKTRACE: full
+        with:
+          args: -- --color always
       - name: Upload to codecov.io
         uses: codecov/codecov-action@v1
       - name: Archive code coverage results
@@ -31,7 +33,7 @@ jobs:
       - name: Build
         uses: actions-rs/cargo@v1
         with:
-          command: build
+          command: build --color always
 
   tests-mac-win:
     name: Tests (Mac and Windows)
@@ -54,7 +56,7 @@ jobs:
       - name: Run tests except for ones using search API
         uses: actions-rs/cargo@v1
         with:
-          command: test
+          command: test --color always
         env:
           GIT_BRWS_GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           RUST_BACKTRACE: full
@@ -62,7 +64,7 @@ jobs:
       - name: Build
         uses: actions-rs/cargo@v1
         with:
-          command: build
+          command: build --color always
 
   linters:
     name: Clippy and rustfmt
@@ -79,10 +81,10 @@ jobs:
         uses: actions-rs/cargo@v1
         with:
           command: clippy
-          args: -- -D warnings
+          args: --color always -- -D warnings
       - run: rustup component add rustfmt
       - name: rustfmt
         uses: actions-rs/cargo@v1
         with:
           command: fmt
-          args: --all -- --check
+          args: -- --check --color always
