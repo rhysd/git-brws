@@ -1,0 +1,46 @@
+name: CI
+on: [push, pull_request]
+
+jobs:
+  build-linux-mac-64bit:
+    name: Build 64bit Linux and macOS binary
+    strategy:
+      matrix:
+        build: [linux]
+        include:
+          - build: linux
+            os: ubuntu-latest
+            target: x86_64-unknown-linux-gnu
+    runs-on: ${{ matrix.os }}
+    outputs:
+      asset-path: ${{ steps.asset.outputs.path }}
+    steps:
+      - uses: actions/checkout@v2
+        with:
+          fetch-depth: 0
+      - name: Build
+        uses: actions-rs/cargo@v1
+        with:
+          command: build
+          # TODO: Add --release
+          args: --color always --target=${{ matrix.target }}
+      - id: dir
+        # $GITHUB_REF will have a value like "refs/tags/0.3.1". Extract "0.3.1" from it
+        # TODO: run: echo "::set-output name=name::git-brws-${GITHUB_REF##refs/tags/}-${{ matrix.target }}"
+        run: echo "::set-output name=name::git-brws-${GITHUB_REF##*/}-${{ matrix.target }}"
+      - run: mkdir ${{ steps.dir.outputs.name }}
+        # TODO: Replace "/debug/" with "/release/"
+      - run: cp target/${{ matrix.target }}/debug/git-brws LICENSE.txt README.md git-brws.1 ${{ steps.dir.outputs.name }}
+      - id: asset
+        run: echo "::set-output name=path::$(pwd)/${{ steps.dir.outputs.name }}.zip"
+      - run: zip ${{ steps.asset.outputs.path }} -r ${{ steps.dir.outputs.name }}
+  release-linux-64bit:
+    name: Release 64bit Linux binary
+    strategy:
+      matrix:
+        os: [ubuntu-latest]
+    runs-on: ${{ matrix.os }}
+    needs: build-linux-mac-64bit
+    steps:
+      - run: echo ${{ needs.build-linux-64bit.outputs.asset-path }}
+      - run: ls /home/runner/work/git-brws/
