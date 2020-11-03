@@ -21,7 +21,7 @@ jobs:
           profile: minimal
           toolchain: stable
           override: true
-      - name: Run tests
+      - name: Run tests except for ones using search API
         uses: actions-rs/cargo@v1
         with:
           command: test
@@ -29,15 +29,15 @@ jobs:
           GIT_BRWS_GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           RUST_BACKTRACE: full
           GIT_BRWS_CI_SKIP_TEST_FOR_SEARCH_API: true
-        if: matrix.os == 'ubuntu-latest'
-      - name: Run tests
+        if: matrix.os != 'ubuntu-latest'
+      - name: Run all tests
         uses: actions-rs/cargo@v1
         with:
           command: test
         env:
           GIT_BRWS_GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           RUST_BACKTRACE: full
-        if: matrix.os != 'ubuntu-latest'
+        if: matrix.os == 'ubuntu-latest'
       - name: Build
         uses: actions-rs/cargo@v1
         with:
