@@ -14,9 +14,7 @@ jobs:
     steps:
       - id: get_version
         # $GITHUB_REF will have a value like "refs/tags/0.3.1". Extract "0.3.1" from it
-        # TODO: run: echo "::set-output name=version::${GITHUB_REF##refs/tags/}"
-        run: echo "::set-output name=version::${GITHUB_REF##*/}"
-      # TODO: Fail this workflow if version is empty
+        run: echo "::set-output name=version::${GITHUB_REF##refs/tags/}"
       - name: Create Release
         id: create_release
         uses: actions/create-release@v1
@@ -72,8 +70,7 @@ jobs:
         uses: actions-rs/cargo@v1
         with:
           command: build
-          # TODO: Add --release
-          args: --color always --target=${{ matrix.target }} --verbose
+          args: --release --color always --target=${{ matrix.target }} --verbose
         env:
           PKG_CONFIG_ALLOW_CROSS: 1
           RUST_BACKTRACE: 1
@@ -83,16 +80,14 @@ jobs:
         if: matrix.build == 'linux-64' || matrix.build == 'linux-32' || matrix.build == 'mac'
         run: |
           mkdir ${{ steps.dir.outputs.name }}
-          # TODO: Replace "/debug/" with "/release/"
-          cp target/${{ matrix.target }}/debug/git-brws LICENSE.txt README.md git-brws.1 ${{ steps.dir.outputs.name }}
+          cp target/${{ matrix.target }}/release/git-brws LICENSE.txt README.md git-brws.1 ${{ steps.dir.outputs.name }}
           zip ${{ steps.asset.outputs.path }}.zip -r ${{ steps.dir.outputs.name }}
       - name: Archive files
         if: matrix.build == 'win-64' || matrix.build == 'win-32'
         shell: bash
         run: |
           mkdir ${{ steps.dir.outputs.name }}
-          # TODO: Replace "/debug/" with "/release/"
-          cp target/${{ matrix.target }}/debug/git-brws.exe LICENSE.txt README.md git-brws.1 ${{ steps.dir.outputs.name }}
+          cp target/${{ matrix.target }}/release/git-brws.exe LICENSE.txt README.md git-brws.1 ${{ steps.dir.outputs.name }}
           7z a ${{ steps.asset.outputs.path }}.zip ${{ steps.dir.outputs.name }}
       - name: Upload Release Asset
         uses: actions/upload-release-asset@v1
