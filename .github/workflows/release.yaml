@@ -11,16 +11,18 @@ jobs:
     steps:
       - id: get_version
         # $GITHUB_REF will have a value like "refs/tags/0.3.1". Extract "0.3.1" from it
-        # tODO: run: echo "::set-output name=version::${GITHUB_REF##refs/tags/}"
+        # TODO: run: echo "::set-output name=version::${GITHUB_REF##refs/tags/}"
         run: echo "::set-output name=version::${GITHUB_REF##*/}"
       # TODO: Fail this workflow if version is empty
+      # TODO: Create release and set upload-url output
 
-  build-linux-mac-64bit:
-    name: 64bit Linux and macOS
+  build:
+    name: Build
     needs: [create-release]
     strategy:
+      fail-fast: false
       matrix:
-        build: [linux, mac]
+        build: [linux, mac, win-64, win-32]
         include:
           - build: linux
             os: ubuntu-latest
@@ -28,6 +30,12 @@ jobs:
           - build: mac
             os: macos-latest
             target: x86_64-apple-darwin
+          - build: win-64
+            os: windows-latest
+            target: x86_64-pc-windows-msvc
+          - build: win-32
+            os: windows-latest
+            target: i686-pc-windows-msvc
     runs-on: ${{ matrix.os }}
     steps:
       - uses: actions/checkout@v2
@@ -38,15 +46,28 @@ jobs:
           profile: minimal
           toolchain: stable
           override: true
+          target: ${{ matrix.target }}
       - name: Build
         uses: actions-rs/cargo@v1
         with:
           command: build
           # TODO: Add --release
-          args: --color always --target=${{ matrix.target }}
+          args: --color always --target=${{ matrix.target }} --verbose
       - id: dir
         run: echo "::set-output name=name::git-brws-${{ needs.create-release.outputs.version }}-${{ matrix.target }}"
-      - run: mkdir ${{ steps.dir.outputs.name }}
-        # TODO: Replace "/debug/" with "/release/"
-      - run: cp target/${{ matrix.target }}/debug/git-brws LICENSE.txt README.md git-brws.1 ${{ steps.dir.outputs.name }}
-      - run: zip ${{ steps.asset.outputs.path }}.zip -r ${{ steps.dir.outputs.name }}
+      - name: Archive files
+        if: matrix.build == 'linux' || matrix.build == 'mac'
+        run: |
+          mkdir ${{ steps.dir.outputs.name }}
+          # TODO: Replace "/debug/" with "/release/"
+          cp target/${{ matrix.target }}/debug/git-brws LICENSE.txt README.md git-brws.1 ${{ steps.dir.outputs.name }}
+          zip ${{ steps.asset.outputs.path }}.zip -r ${{ steps.dir.outputs.name }}
+      - name: Archive files
+        if: matrix.build == 'win-64' || matrix.build == 'win-32'
+        shell: bash
+        run: |
+          mkdir ${{ steps.dir.outputs.name }}
+          # TODO: Replace "/debug/" with "/release/"
+          cp target/${{ matrix.target }}/debug/git-brws.exe LICENSE.txt README.md git-brws.1 ${{ steps.dir.outputs.name }}
+          7z a ${{ steps.asset.outputs.path }}.zip ${{ steps.dir.outputs.name }}
+      # TODO: Upload archive
