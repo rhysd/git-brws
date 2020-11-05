@@ -2,22 +2,42 @@ name: CI
 on: [push, pull_request]
 
 jobs:
+  create-release:
+    name: Create GitHub release
+    runs-on: ubuntu-latest
+    outputs:
+      version: ${{ steps.get_version.outputs.version }}
+      # upload-url: ${{ steps.TODO.outputs.TODO }}
+    steps:
+      - id: get_version
+        # $GITHUB_REF will have a value like "refs/tags/0.3.1". Extract "0.3.1" from it
+        # tODO: run: echo "::set-output name=version::${GITHUB_REF##refs/tags/}"
+        run: echo "::set-output name=version::${GITHUB_REF##*/}"
+      # TODO: Fail this workflow if version is empty
+
   build-linux-mac-64bit:
-    name: Build 64bit Linux and macOS binary
+    name: 64bit Linux and macOS
+    needs: [create-release]
     strategy:
       matrix:
-        build: [linux]
+        build: [linux, mac]
         include:
           - build: linux
             os: ubuntu-latest
             target: x86_64-unknown-linux-gnu
+          - build: mac
+            os: macos-latest
+            target: x86_64-apple-darwin
     runs-on: ${{ matrix.os }}
-    outputs:
-      asset-path: ${{ steps.asset.outputs.path }}
     steps:
       - uses: actions/checkout@v2
         with:
           fetch-depth: 0
+      - uses: actions-rs/toolchain@v1
+        with:
+          profile: minimal
+          toolchain: stable
+          override: true
       - name: Build
         uses: actions-rs/cargo@v1
         with:
@@ -25,22 +45,8 @@ jobs:
           # TODO: Add --release
           args: --color always --target=${{ matrix.target }}
       - id: dir
-        # $GITHUB_REF will have a value like "refs/tags/0.3.1". Extract "0.3.1" from it
-        # TODO: run: echo "::set-output name=name::git-brws-${GITHUB_REF##refs/tags/}-${{ matrix.target }}"
-        run: echo "::set-output name=name::git-brws-${GITHUB_REF##*/}-${{ matrix.target }}"
+        run: echo "::set-output name=name::git-brws-${{ needs.create-release.outputs.version }}-${{ matrix.target }}"
       - run: mkdir ${{ steps.dir.outputs.name }}
         # TODO: Replace "/debug/" with "/release/"
       - run: cp target/${{ matrix.target }}/debug/git-brws LICENSE.txt README.md git-brws.1 ${{ steps.dir.outputs.name }}
-      - id: asset
-        run: echo "::set-output name=path::$(pwd)/${{ steps.dir.outputs.name }}.zip"
-      - run: zip ${{ steps.asset.outputs.path }} -r ${{ steps.dir.outputs.name }}
-  release-linux-64bit:
-    name: Release 64bit Linux binary
-    strategy:
-      matrix:
-        os: [ubuntu-latest]
-    runs-on: ${{ matrix.os }}
-    needs: build-linux-mac-64bit
-    steps:
-      - run: echo ${{ needs.build-linux-64bit.outputs.asset-path }}
-      - run: ls /home/runner/work/git-brws/
+      - run: zip ${{ steps.asset.outputs.path }}.zip -r ${{ steps.dir.outputs.name }}
