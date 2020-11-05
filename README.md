@@ -2,8 +2,6 @@ git brws
 ========
 [![crates.io][crate-badge]][crate]
 [![Github Actions CI][ga-badge]][ga]
-[![Linux and macOS CI][travis-badge]][travis-ci]
-[![Windows CI][appveyor-badge]][appveyor]
 [![Coverage][codecov-badge]][codecov]
 
 `git brws` is a command line tool to open a repository, file, commit, diff, tag, blame, pull request,
@@ -357,10 +355,6 @@ Distributed under [the MIT license](LICENSE.txt).
 [crate]: https://crates.io/crates/git-brws
 [ga-badge]: https://github.com/rhysd/git-brws/workflows/CI/badge.svg?branch=master&event=push
 [ga]: https://github.com/rhysd/git-brws/actions?query=workflow%3ACI+branch%3Amaster+event%3Apush
-[travis-ci]: https://travis-ci.org/rhysd/git-brws
-[travis-badge]: https://travis-ci.org/rhysd/git-brws.svg?branch=master
-[appveyor-badge]: https://ci.appveyor.com/api/projects/status/q9gvpd30k1k5jsf0/branch/master?svg=true
-[appveyor]: https://ci.appveyor.com/project/rhysd/git-brws/branch/master
 [codecov-badge]: https://codecov.io/gh/rhysd/git-brws/branch/master/graph/badge.svg
 [codecov]: https://codecov.io/gh/rhysd/git-brws
 [release page]: https://github.com/rhysd/git-brws/releases

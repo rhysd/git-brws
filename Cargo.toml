@@ -14,8 +14,6 @@ license = "MIT"
 no-dev-version = true
 
 [badges]
-travis-ci = { repository = "rhysd/git-brws" }
-appveyor = { repository = "rhysd/git-brws" }
 maintenance = { status = "actively-developed" }
 
 [[bin]]
