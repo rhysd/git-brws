@@ -1,4 +1,4 @@
-name: CI
+name: Release
 on:
   push:
     tags:
@@ -81,14 +81,14 @@ jobs:
         run: |
           mkdir ${{ steps.dir.outputs.name }}
           cp target/${{ matrix.target }}/release/git-brws LICENSE.txt README.md git-brws.1 ${{ steps.dir.outputs.name }}
-          zip ${{ steps.asset.outputs.path }}.zip -r ${{ steps.dir.outputs.name }}
+          zip ${{ steps.dir.outputs.name }}.zip -r ${{ steps.dir.outputs.name }}
       - name: Archive files
         if: matrix.build == 'win-64' || matrix.build == 'win-32'
         shell: bash
         run: |
           mkdir ${{ steps.dir.outputs.name }}
           cp target/${{ matrix.target }}/release/git-brws.exe LICENSE.txt README.md git-brws.1 ${{ steps.dir.outputs.name }}
-          7z a ${{ steps.asset.outputs.path }}.zip ${{ steps.dir.outputs.name }}
+          7z a ${{ steps.dir.outputs.name }}.zip ${{ steps.dir.outputs.name }}
       - name: Upload Release Asset
         uses: actions/upload-release-asset@v1
         env:
