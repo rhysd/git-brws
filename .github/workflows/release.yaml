@@ -1,0 +1,100 @@
+name: CI
+on:
+  push:
+    tags:
+      - 'v[0-9]+.[0-9]+.[0-9]'
+
+jobs:
+  create_release:
+    name: Create GitHub release
+    runs-on: ubuntu-latest
+    outputs:
+      version: ${{ steps.get_version.outputs.version }}
+      upload_url: ${{ steps.create_release.outputs.upload_url }}
+    steps:
+      - id: get_version
+        # $GITHUB_REF will have a value like "refs/tags/0.3.1". Extract "0.3.1" from it
+        run: echo "::set-output name=version::${GITHUB_REF##refs/tags/}"
+      - name: Create Release
+        id: create_release
+        uses: actions/create-release@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          tag_name: ${{ steps.get_version.outputs.version }}
+          release_name: ${{ steps.get_version.outputs.version }}
+          draft: false
+          prerelease: false
+
+  upload:
+    name: Upload binary
+    needs: [create_release]
+    strategy:
+      fail-fast: false
+      matrix:
+        build: [linux-64, linux-32, mac, win-64, win-32]
+        include:
+          - build: linux-64
+            os: ubuntu-latest
+            target: x86_64-unknown-linux-gnu
+          - build: linux-32
+            os: ubuntu-latest
+            target: i686-unknown-linux-gnu
+          - build: mac
+            os: macos-latest
+            target: x86_64-apple-darwin
+          - build: win-64
+            os: windows-latest
+            target: x86_64-pc-windows-msvc
+          - build: win-32
+            os: windows-latest
+            target: i686-pc-windows-msvc
+    runs-on: ${{ matrix.os }}
+    steps:
+      - name: Install dependencies on 32bit Linux
+        if: matrix.build == 'linux-32'
+        run: |
+          sudo dpkg --add-architecture i386
+          sudo apt-get update
+          sudo apt-get install gcc-7-multilib lib32gcc-7-dev libssl-dev:i386
+      - uses: actions/checkout@v2
+        with:
+          fetch-depth: 0
+      - uses: actions-rs/toolchain@v1
+        with:
+          profile: minimal
+          toolchain: stable
+          override: true
+          target: ${{ matrix.target }}
+      - name: Build
+        uses: actions-rs/cargo@v1
+        with:
+          command: build
+          args: --release --color always --target=${{ matrix.target }} --verbose
+        env:
+          PKG_CONFIG_ALLOW_CROSS: 1
+          RUST_BACKTRACE: 1
+      - id: dir
+        run: echo "::set-output name=name::git-brws-${{ needs.create_release.outputs.version }}-${{ matrix.target }}"
+      - name: Archive files
+        if: matrix.build == 'linux-64' || matrix.build == 'linux-32' || matrix.build == 'mac'
+        run: |
+          mkdir ${{ steps.dir.outputs.name }}
+          cp target/${{ matrix.target }}/release/git-brws LICENSE.txt README.md git-brws.1 ${{ steps.dir.outputs.name }}
+          zip ${{ steps.asset.outputs.path }}.zip -r ${{ steps.dir.outputs.name }}
+      - name: Archive files
+        if: matrix.build == 'win-64' || matrix.build == 'win-32'
+        shell: bash
+        run: |
+          mkdir ${{ steps.dir.outputs.name }}
+          cp target/${{ matrix.target }}/release/git-brws.exe LICENSE.txt README.md git-brws.1 ${{ steps.dir.outputs.name }}
+          7z a ${{ steps.asset.outputs.path }}.zip ${{ steps.dir.outputs.name }}
+      - name: Upload Release Asset
+        uses: actions/upload-release-asset@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          upload_url: ${{ needs.create_release.outputs.upload_url }}
+          asset_path: ${{ steps.dir.outputs.name }}.zip
+          asset_name: ${{ steps.dir.outputs.name }}.zip
+          asset_content_type: application/zip
