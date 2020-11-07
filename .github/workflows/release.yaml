@@ -50,6 +50,9 @@ jobs:
             os: windows-latest
             target: i686-pc-windows-msvc
     runs-on: ${{ matrix.os }}
+    env:
+      ASSET_DIR: git-brws-${{ needs.create_release.outputs.version }}-${{ matrix.target }}
+      ZIP_FILE: git-brws-${{ needs.create_release.outputs.version }}-${{ matrix.target }}.zip
     steps:
       - name: Install dependencies on 32bit Linux
         if: matrix.build == 'linux-32'
@@ -72,27 +75,25 @@ jobs:
         env:
           PKG_CONFIG_ALLOW_CROSS: 1
           RUST_BACKTRACE: 1
-      - id: dir
-        run: echo "::set-output name=name::git-brws-${{ needs.create_release.outputs.version }}-${{ matrix.target }}"
       - name: Archive files
         if: matrix.build == 'linux-64' || matrix.build == 'linux-32' || matrix.build == 'mac'
         run: |
-          mkdir ${{ steps.dir.outputs.name }}
-          cp target/${{ matrix.target }}/release/git-brws LICENSE.txt README.md git-brws.1 ${{ steps.dir.outputs.name }}
-          zip ${{ steps.dir.outputs.name }}.zip -r ${{ steps.dir.outputs.name }}
+          mkdir $ASSET_DIR
+          cp target/${{ matrix.target }}/release/git-brws LICENSE.txt README.md git-brws.1 $ASSET_DIR
+          zip $ZIP_FILE -r $ASSET_DIR
       - name: Archive files
         if: matrix.build == 'win-64' || matrix.build == 'win-32'
         shell: bash
         run: |
-          mkdir ${{ steps.dir.outputs.name }}
-          cp target/${{ matrix.target }}/release/git-brws.exe LICENSE.txt README.md git-brws.1 ${{ steps.dir.outputs.name }}
-          7z a ${{ steps.dir.outputs.name }}.zip ${{ steps.dir.outputs.name }}
+          mkdir $ASSET_DIR
+          cp target/${{ matrix.target }}/release/git-brws.exe LICENSE.txt README.md git-brws.1 $ASSET_DIR
+          7z a $ZIP_FILE $ASSET_DIR
       - name: Upload release asset
         uses: actions/upload-release-asset@v1
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
           upload_url: ${{ needs.create_release.outputs.upload_url }}
-          asset_path: ${{ steps.dir.outputs.name }}.zip
-          asset_name: ${{ steps.dir.outputs.name }}.zip
+          asset_path: $ZIP_FILE
+          asset_name: $ZIP_FILE
           asset_content_type: application/zip
