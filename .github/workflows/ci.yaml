@@ -30,14 +30,16 @@ jobs:
         with:
           name: code-coverage-report
           path: cobertura.xml
-      # Unknown link error occurs on Linux CI
-      # https://github.com/rhysd/git-brws/runs/1385133084?check_suite_focus=true#step:8:93
-      #
-      # - name: Build and run
-      #   uses: actions-rs/cargo@v1
-      #   with:
-      #     command: run
-      #     args: --color always -- --version
+      # After running `cargo tarpaulin`, `cargo build` fails due to mysterious link error. Clean built things to avoid it
+      - name: Clean built things
+        uses: actions-rs/cargo@v1
+        with:
+          command: clean
+      - name: Build and run
+        uses: actions-rs/cargo@v1
+        with:
+          command: run
+          args: --color always -- --version
 
   tests-mac-win:
     name: Tests (Mac and Windows)
