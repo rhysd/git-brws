@@ -30,11 +30,11 @@ jobs:
         with:
           name: code-coverage-report
           path: cobertura.xml
-      - name: Build
+      - name: Build and run
         uses: actions-rs/cargo@v1
         with:
-          command: build
-          args: --color always
+          command: run
+          args: -- --version
 
   tests-mac-win:
     name: Tests (Mac and Windows)
@@ -63,11 +63,11 @@ jobs:
           GIT_BRWS_GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           RUST_BACKTRACE: full
           GIT_BRWS_CI_SKIP_TEST_FOR_SEARCH_API: true
-      - name: Build
+      - name: Build and run
         uses: actions-rs/cargo@v1
         with:
-          command: build
-          args: --color always
+          command: run
+          args: -- --version
 
   linters:
     name: Clippy and rustfmt
