@@ -30,6 +30,11 @@ jobs:
         with:
           name: code-coverage-report
           path: cobertura.xml
+      # After running `cargo tarpaulin`, `cargo build` fails due to mysterious link error. Clean built things to avoid it
+      - name: Clean built things
+        uses: actions-rs/cargo@v1
+        with:
+          command: clean
       - name: Build and run
         uses: actions-rs/cargo@v1
         with:
