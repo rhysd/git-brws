@@ -34,7 +34,7 @@ jobs:
         uses: actions-rs/cargo@v1
         with:
           command: run
-          args: -- --version
+          args: --color always -- --version
 
   tests-mac-win:
     name: Tests (Mac and Windows)
@@ -67,7 +67,7 @@ jobs:
         uses: actions-rs/cargo@v1
         with:
           command: run
-          args: -- --version
+          args: --color always -- --version
 
   linters:
     name: Clippy and rustfmt
