@@ -11,6 +11,8 @@ jobs:
           fetch-depth: 0
       - name: Ensure to fetch master branch for tests
         run: git fetch origin master:master || true
+      - name: Set upstream of master branch for tests
+        run: git branch -u origin/master master
       - uses: actions-rs/toolchain@v1
         with:
           profile: minimal
@@ -54,6 +56,8 @@ jobs:
           fetch-depth: 0
       - name: Ensure to fetch master branch for tests
         run: git fetch origin master:master || true
+      - name: Set upstream of master branch for tests
+        run: git branch -u origin/master master
       - uses: actions-rs/toolchain@v1
         with:
           profile: minimal
