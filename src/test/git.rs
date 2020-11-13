@@ -104,3 +104,25 @@ fn git_check_remote_contains() {
         &h
     );
 }
+
+#[test]
+fn git_get_tracking_remote() {
+    let cwd = env::current_dir().unwrap();
+    let g = Git::new(&cwd, "git");
+    let (url, _remote_name) = g.tracking_remote_url(&Some("master")).unwrap();
+    assert!(
+        url.starts_with("https://") || url.starts_with("git@") || url.starts_with("ssh://"),
+        "{:?}",
+        url
+    );
+}
+
+#[test]
+fn unknown_branch_for_tracking_remote() {
+    let cwd = env::current_dir().unwrap();
+    let g = Git::new(&cwd, "git");
+    let err = g
+        .tracking_remote_url(&Some("unknown-branch-this-is-not-existing"))
+        .unwrap_err();
+    assert!(matches!(err.kind(), ErrorKind::GitCommandError{ .. }));
+}
