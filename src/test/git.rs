@@ -126,3 +126,13 @@ fn unknown_branch_for_tracking_remote() {
         .unwrap_err();
     assert!(matches!(err.kind(), ErrorKind::GitCommandError{ .. }));
 }
+
+#[test]
+fn git_root_direcotry_not_found() {
+    let mut root = env::current_dir().unwrap();
+    while root.pop() {}
+    let root = root;
+    let g = Git::new(&root, "git");
+    let err = g.root_dir().unwrap_err();
+    assert!(matches!(err.kind(), ErrorKind::GitRootDirNotFound{ .. }));
+}
