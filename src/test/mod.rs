@@ -3,6 +3,7 @@ mod helper;
 
 mod argv;
 mod config;
+mod error;
 mod git;
 mod github_api;
 mod page;
