@@ -1,5 +1,6 @@
 use crate::config::EnvConfig;
 use crate::error::ErrorKind;
+use crate::test::helper::empty_env;
 use std::env;
 
 #[test]
@@ -41,4 +42,15 @@ fn with_global_env() {
         .or_else(|_| env::var("HTTPS_PROXY"))
         .ok();
     assert_eq!(env.https_proxy, https_proxy);
+}
+
+#[test]
+fn with_global_env_updates_none_values() {
+    let env = empty_env().with_global_env();
+    let https_proxy = env::var("https_proxy")
+        .or_else(|_| env::var("HTTPS_PROXY"))
+        .ok();
+    let github_token = env::var("GITHUB_TOKEN").ok();
+    assert_eq!(env.https_proxy, https_proxy);
+    assert_eq!(env.github_token, github_token);
 }
