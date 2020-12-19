@@ -128,7 +128,7 @@ fn unknown_branch_for_tracking_remote() {
 }
 
 #[test]
-fn git_root_direcotry_not_found() {
+fn git_root_directory_not_found() {
     let mut root = env::current_dir().unwrap();
     while root.pop() {}
     let root = root;
