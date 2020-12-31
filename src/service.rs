@@ -366,7 +366,7 @@ fn is_azure_devops_host(host: &str) -> bool {
 }
 
 // Note: Parse '/team/_git/repo' or '/team/repo' into 'team' and 'repo'
-pub fn azure_devops_slug_from_path<'a>(path: &'a str) -> Result<(&'a str, &'a str)> {
+pub fn azure_devops_slug_from_path(path: &str) -> Result<(&str, &str)> {
     let mut split = path.split('/').skip_while(|s| s.is_empty());
 
     let mut team = split.next().ok_or_else(|| {
@@ -409,7 +409,7 @@ pub fn azure_devops_slug_from_path<'a>(path: &'a str) -> Result<(&'a str, &'a st
 // Note: GitLab has subgroups feature. The last '/' needs to be searched to get correct repository
 //   name (#28): https://docs.gitlab.com/ee/user/group/subgroups/
 //   e.g. 'sub1/sub2/sub3/repo' into 'sub1/sub2/sub3' and 'repo'
-pub fn slug_from_path<'a>(path: &'a str) -> Result<(&'a str, &'a str)> {
+pub fn slug_from_path(path: &str) -> Result<(&str, &str)> {
     // Byte offset at the last '/' in path
     match path.rfind('/').map(|offset| {
         let user = path[0..offset].trim_start_matches('/');
