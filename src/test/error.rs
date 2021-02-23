@@ -27,7 +27,7 @@ fn error_message_formating() {
         kind: "diff".to_string(),
     });
 
-    assert!(matches!(err.kind(), ErrorKind::WrongNumberOfArgs{..}));
+    assert!(matches!(err.kind(), ErrorKind::WrongNumberOfArgs { .. }));
 
     let msg = format!("{}", err);
     assert!(msg.contains("Invalid number of arguments"), "{:?}", msg);

@@ -124,7 +124,7 @@ fn unknown_branch_for_tracking_remote() {
     let err = g
         .tracking_remote_url(&Some("unknown-branch-this-is-not-existing"))
         .unwrap_err();
-    assert!(matches!(err.kind(), ErrorKind::GitCommandError{ .. }));
+    assert!(matches!(err.kind(), ErrorKind::GitCommandError { .. }));
 }
 
 #[test]
@@ -134,5 +134,5 @@ fn git_root_directory_not_found() {
     let root = root;
     let g = Git::new(&root, "git");
     let err = g.root_dir().unwrap_err();
-    assert!(matches!(err.kind(), ErrorKind::GitRootDirNotFound{ .. }));
+    assert!(matches!(err.kind(), ErrorKind::GitRootDirNotFound { .. }));
 }
