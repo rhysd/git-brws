@@ -24,7 +24,7 @@ jobs:
           GIT_BRWS_GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           RUST_BACKTRACE: full
         with:
-          args: -- --color always
+          args: --color always
       - name: Upload to codecov.io
         uses: codecov/codecov-action@v1
       - name: Archive code coverage results
