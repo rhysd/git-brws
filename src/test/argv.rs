@@ -29,14 +29,14 @@ fn args_with_no_option() {
             assert!(!c.website);
             assert!(!c.blame);
         }
-        r => assert!(false, "Failed to parse args with no option: {:?}", r),
+        r => panic!("Failed to parse args with no option: {:?}", r),
     };
 
     match Parsed::parse_iter(&["git-brws", "foo", "bar"]).unwrap() {
         Parsed::OpenPage(c) => {
             assert_eq!(c.args.len(), 2);
         }
-        p => assert!(false, "{:?}", p),
+        p => panic!("{:?}", p),
     };
 }
 
@@ -66,7 +66,7 @@ fn multiple_options() {
             assert!(c.website);
             assert!(c.blame);
         }
-        p => assert!(false, "{:?}", p),
+        p => panic!("{:?}", p),
     };
 }
 
@@ -119,11 +119,7 @@ fn fix_ssh_repo_url() {
             Parsed::OpenPage(c) => {
                 assert_eq!(c.repo_url, *expected);
             }
-            p => assert!(
-                false,
-                "Parse must be succeeded but actually results in {:?}",
-                p
-            ),
+            p => panic!("Parse must be succeeded but actually results in {:?}", p),
         }
     }
 }
@@ -133,15 +129,15 @@ fn repo_formatting() {
     let p = |r| Parsed::parse_iter(&["git-brws", "-r", r]).unwrap();
     match p("bitbucket.org/foo/bar") {
         Parsed::OpenPage(c) => assert_eq!(c.repo_url, "https://bitbucket.org/foo/bar.git"),
-        p => assert!(false, "{:?}", p),
+        p => panic!("{:?}", p),
     }
     match p("https://gitlab.com/foo/bar") {
         Parsed::OpenPage(c) => assert_eq!(c.repo_url, "https://gitlab.com/foo/bar.git"),
-        p => assert!(false, "{:?}", p),
+        p => panic!("{:?}", p),
     }
     match p("foo/bar") {
         Parsed::OpenPage(c) => assert_eq!(c.repo_url, "https://github.com/foo/bar.git"),
-        p => assert!(false, "{:?}", p),
+        p => panic!("{:?}", p),
     }
 }
 
@@ -159,7 +155,7 @@ fn valid_remote_name() {
             "Unexpected remote URL for 'origin' remote: {}. For pull request, please ignore this test is failing",
             c.repo_url,
         ),
-        p => assert!(false, "{:?}", p),
+        p => panic!("{:?}", p),
     }
 }
 
@@ -173,7 +169,7 @@ fn invalid_remote_name() {
             assert_eq!(*kind, "remote");
             assert_eq!(object, "this-remote-is-never-existing");
         }
-        e => assert!(false, "Unexpected error: {}", e),
+        e => panic!("Unexpected error: {}", e),
     }
 }
 
@@ -183,7 +179,7 @@ fn help_option() {
         Parsed::Help(s) => {
             assert!(s.starts_with("Usage:"));
         }
-        p => assert!(false, "{:?}", p),
+        p => panic!("{:?}", p),
     }
 }
 
@@ -193,7 +189,7 @@ fn version_option() {
         Parsed::Version(s) => {
             assert!(!s.is_empty());
         }
-        p => assert!(false, "{:?}", p),
+        p => panic!("{:?}", p),
     }
 }
 
@@ -212,7 +208,7 @@ fn specify_repo_outside_repository() {
             assert_eq!(c.cwd, root);
             assert_eq!(&c.repo_url, "https://github.com/foo/bar.git");
         }
-        p => assert!(false, "{:?}", p),
+        p => panic!("{:?}", p),
     }
 }
 
@@ -227,7 +223,7 @@ fn search_repo_from_github_by_name() {
         Parsed::OpenPage(c) => {
             assert_eq!(&c.repo_url, "https://github.com/rhysd/vim.wasm.git");
         }
-        p => assert!(false, "{:?}", p),
+        p => panic!("{:?}", p),
     }
 }
 
@@ -238,7 +234,7 @@ fn repo_specified_but_argument_is_not_empty() {
         ErrorKind::ArgsNotAllowed { args, .. } => {
             assert!(format!("{}", err).contains("\"HEAD\""), "{:?}", args);
         }
-        e => assert!(false, "Unexpected error: {}", e),
+        e => panic!("Unexpected error: {}", e),
     }
 }
 

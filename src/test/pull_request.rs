@@ -84,7 +84,7 @@ async fn test_no_pr_found_at_own_repo() {
             assert_eq!(repo, "git-brws");
             assert_eq!(branch, "unknown-branch-which-does-not-exist-for-test")
         }
-        p => assert!(false, "{:?}", p),
+        p => panic!("{:?}", p),
     }
 }
 
@@ -106,6 +106,6 @@ async fn test_no_pr_found_at_parent_repo() {
             assert_eq!(fork_author, "rhysd");
             assert_eq!(branch, "unknown-branch-which-does-not-exist-for-test")
         }
-        p => assert!(false, "{:?}", p),
+        p => panic!("{:?}", p),
     }
 }

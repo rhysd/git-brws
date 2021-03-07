@@ -69,7 +69,7 @@ async fn request_failure() {
         Client::build("unknown.endpoint.example.com", &None::<&str>, &None::<&str>).unwrap();
     match client.repo("rhysd", "git-brws").await.unwrap_err().kind() {
         ErrorKind::HttpClientError(..) => { /* ok */ }
-        e => assert!(false, "unexpected error: {}", e),
+        e => panic!("unexpected error: {}", e),
     }
 }
 
@@ -94,7 +94,7 @@ async fn most_popular_repo_not_found() {
         .unwrap_err();
     match err.kind() {
         ErrorKind::NoSearchResult { .. } => { /* ok */ }
-        err => assert!(false, "Unexpected error: {}", err),
+        err => panic!("Unexpected error: {}", err),
     }
 }
 
@@ -105,7 +105,7 @@ async fn homepage() {
     let url = client.repo_homepage("rhysd", "git-brws").await.unwrap();
     match url {
         Some(url) => assert_eq!(&url, "https://rhysd.github.io/git-brws/"),
-        url => assert!(false, "Unexpected url: {:?}", url),
+        url => panic!("Unexpected url: {:?}", url),
     }
 }
 
@@ -119,7 +119,7 @@ async fn homepage_not_found() {
         .unwrap();
     match url {
         None => { /* OK */ }
-        url => assert!(false, "Unexpected url: {:?}", url),
+        url => panic!("Unexpected url: {:?}", url),
     }
 }
 

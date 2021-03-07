@@ -353,7 +353,7 @@ fn directory_page_url() {
     for (
         repo,
         expected_url,
-    ) in vec![
+    ) in &[
         (
             "https://github.com/user/repo.git",
             "https://github.com/user/repo/tree/561848bad7164d7568658456088b107ec9efd9f3/src",
@@ -373,7 +373,7 @@ fn directory_page_url() {
     ] {
         let config = config(repo, None, None);
         let url = build_page_url(&page, &config).unwrap();
-        assert_eq!(url, expected_url);
+        assert_eq!(url, *expected_url);
     }
 }
 
@@ -431,7 +431,7 @@ fn customized_ghe_host() {
         (None, "https://my-original-ghe.org/user/repo"),
         (Some(10022), "https://my-original-ghe.org:10022/user/repo"),
     ] {
-        env.ghe_ssh_port = port.clone();
+        env.ghe_ssh_port = *port;
         let c = config(
             "https://my-original-ghe.org/user/repo.git",
             None,
@@ -467,7 +467,7 @@ fn broken_repo_url() {
         let c = config(url, None, Some(env.clone()));
         match build_page_url(&OPEN, &c).unwrap_err().kind() {
             ErrorKind::BrokenUrl { .. } => { /* ok */ }
-            e => assert!(false, "Unexpected error: {:?}", e),
+            e => panic!("Unexpected error: {:?}", e),
         }
     }
 }
@@ -513,14 +513,14 @@ fn unknown_github_enterprise_url() {
     );
     match build_page_url(&OPEN, &c).unwrap_err().kind() {
         ErrorKind::UnknownHostingService { .. } => { /* OK */ }
-        err => assert!(false, "Unexpected error: {}", err),
+        err => panic!("Unexpected error: {}", err),
     }
 
     let mut c = config_for_pr(None, "https://github-othercompany.com/foo/bar.git", None);
     c.env.ghe_url_host = Some("github-yourcompany.com".to_string());
     match build_page_url(&OPEN_PR, &c).unwrap_err().kind() {
         ErrorKind::UnknownHostingService { .. } => { /* OK */ }
-        err => assert!(false, "Unexpected error: {}", err),
+        err => panic!("Unexpected error: {}", err),
     }
 }
 
@@ -677,7 +677,7 @@ fn pull_request_page_url_retrieving_branch_inside_repo() {
                 url
             );
         }
-        result => assert!(false, "Unexpected result: {:?}", result),
+        result => panic!("Unexpected result: {:?}", result),
     }
 }
 
@@ -687,7 +687,7 @@ fn pull_request_page_url_without_branch_outside_git_repo() {
     cfg.cwd = get_root_dir();
     match build_page_url(&OPEN_PR, &cfg).unwrap_err().kind() {
         ErrorKind::GitCommandError { .. } => { /* OK */ }
-        err => assert!(false, "Unexpected error: {} at {:?}", err, &cfg.cwd),
+        err => panic!("Unexpected error: {} at {:?}", err, &cfg.cwd),
     }
 }
 
@@ -705,7 +705,7 @@ fn pull_request_unsupported_services() {
         let cfg = config_for_pr(None, url, None);
         match build_page_url(&OPEN_PR, &cfg).unwrap_err().kind() {
             ErrorKind::PullReqNotSupported { .. } => { /* OK */ }
-            err => assert!(false, "Unexpected error for URL {}: {}", url, err),
+            err => panic!("Unexpected error for URL {}: {}", url, err),
         }
     }
 }
@@ -715,7 +715,7 @@ fn pull_request_github_enterprise_with_no_token() {
     let cfg = config_for_pr(None, "https://github.yourcompany.com/foo/bar.git", None);
     match build_page_url(&OPEN_PR, &cfg).unwrap_err().kind() {
         ErrorKind::GheTokenRequired => { /* OK */ }
-        err => assert!(false, "Unexpected error: {}", err),
+        err => panic!("Unexpected error: {}", err),
     }
 }
 

@@ -49,7 +49,7 @@ fn smoke() {
             "Unexpected URL: {}",
             u
         ),
-        Err(e) => assert!(false, "url::build_url() was not processed properly: {}", e),
+        Err(e) => panic!("url::build_url() was not processed properly: {}", e),
     }
 }
 
@@ -69,7 +69,7 @@ fn fail_to_browse_url_with_user_command() {
             assert_eq!(cmd, &exe);
             assert_eq!(url, "https://example.com");
         }
-        e => assert!(false, "Unexpected error: {:?}", e),
+        e => panic!("Unexpected error: {:?}", e),
     }
 }
 
@@ -78,6 +78,6 @@ fn browse_command_is_not_found() {
     let env = browse_env_config("this-command-is-not-existing-yeah".to_string());
     match url::browse("https://example.com", &env).unwrap_err().kind() {
         ErrorKind::IoError { .. } => { /* ok */ }
-        e => assert!(false, "Unexpected error: {:?}", e),
+        e => panic!("Unexpected error: {:?}", e),
     }
 }

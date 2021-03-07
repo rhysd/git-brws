@@ -11,7 +11,7 @@ fn invalid_env_value() {
             let msg = format!("{}", e);
             assert!(msg.contains("invalid digit found in string"), "{}", msg);
         }
-        err => assert!(false, "Unexpected error: {}", err),
+        err => panic!("Unexpected error: {}", err),
     }
 }
 

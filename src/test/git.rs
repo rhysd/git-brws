@@ -23,7 +23,7 @@ fn git_get_commit_hash() {
                     assert!(c.is_ascii_hexdigit(), "{:?}", h);
                 }
             }
-            Err(err) => assert!(false, "{:?}", err),
+            Err(err) => panic!("{:?}", err),
         };
     }
 }
@@ -34,7 +34,7 @@ fn git_get_invalid_hash() {
     let g = Git::new(&cwd, "git");
     match g.hash("HEAD~114514").unwrap_err().kind() {
         ErrorKind::GitObjectNotFound { kind, .. } => assert_eq!(*kind, "commit"),
-        e => assert!(false, "Unexpected error: {:?}", e),
+        e => panic!("Unexpected error: {:?}", e),
     }
 }
 
@@ -52,7 +52,7 @@ fn git_get_invalid_tag_hash() {
     let g = Git::new(&cwd, "git");
     match g.tag_hash("this-tag-is-not-existing").unwrap_err().kind() {
         ErrorKind::GitObjectNotFound { kind, .. } => assert_eq!(*kind, "tag name"),
-        e => assert!(false, "Unexpected error: {:?}", e),
+        e => panic!("Unexpected error: {:?}", e),
     }
 }
 
@@ -80,7 +80,7 @@ fn git_get_invalid_remote_url() {
         .kind()
     {
         ErrorKind::GitObjectNotFound { kind, .. } => assert_eq!(*kind, "remote"),
-        e => assert!(false, "Unexpected error: {:?}", e),
+        e => panic!("Unexpected error: {:?}", e),
     }
 }
 

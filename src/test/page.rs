@@ -28,7 +28,7 @@ fn parse_empty_args() {
             website: false,
             pull_request: false,
         } => { /* OK */ }
-        p => assert!(false, "{:?}", p),
+        p => panic!("{:?}", p),
     }
 
     // It still works even if .git was not found (#9)
@@ -38,7 +38,7 @@ fn parse_empty_args() {
             website: false,
             pull_request: false,
         } => { /* OK */ }
-        p => assert!(false, "{:?}", p),
+        p => panic!("{:?}", p),
     }
 }
 
@@ -95,7 +95,7 @@ fn parse_file_or_dir() {
                 assert!(!blame);
                 assert_eq!(is_dir, relative.is_dir());
             }
-            p => assert!(false, "Unexpected result: {:?}", p),
+            p => panic!("Unexpected result: {:?}", p),
         }
     }
 }
@@ -114,7 +114,7 @@ fn parse_file_or_dir_for_blame() {
 
     match parse_page(&c).unwrap() {
         Page::FilePath { blame, .. } => assert!(blame),
-        p => assert!(false, "Unexpected result: {:?}", p),
+        p => panic!("Unexpected result: {:?}", p),
     }
 }
 
@@ -140,7 +140,7 @@ fn parse_file_single_line() {
         );
         match parse_page(&c).unwrap() {
             Page::FilePath { line, .. } => assert_eq!(&line, expected, "input: {:?}", file),
-            p => assert!(false, "Unexpected result: {:?}, input: {:?}", p, file),
+            p => panic!("Unexpected result: {:?}, input: {:?}", p, file),
         }
     }
 }
@@ -174,7 +174,7 @@ fn parse_commit_ref() {
         let c = config("https://github.com/user/repo.git", None, vec![cm]);
         match parse_page(&c).unwrap() {
             Page::Commit { hash } => assert!(!hash.is_empty(), "{} for {}", hash, cm),
-            p => assert!(false, "Unexpected result: {:?} for {}", p, cm),
+            p => panic!("Unexpected result: {:?} for {}", p, cm),
         }
     }
 }
@@ -185,7 +185,7 @@ fn parse_commit_branch_ref() {
         let c = config("https://github.com/user/repo.git", None, vec![spec]);
         match parse_page(&c).unwrap() {
             Page::Commit { hash } => assert!(!hash.is_empty(), "{} for {}", hash, spec),
-            p => assert!(false, "Unexpected result: {:?} for {}", p, spec),
+            p => panic!("Unexpected result: {:?} for {}", p, spec),
         }
     }
 }
@@ -202,7 +202,7 @@ fn parse_short_commit_hash() {
         let c = config("https://github.com/user/repo.git", None, vec![cm]);
         match parse_page(&c).unwrap() {
             Page::Commit { hash } => assert_eq!(hash, expected),
-            p => assert!(false, "Unexpected result: {:?}", p),
+            p => panic!("Unexpected result: {:?}", p),
         }
     }
 }
@@ -220,7 +220,7 @@ fn parse_diff_ref_name() {
                 assert!(!rhs.is_empty());
                 assert_eq!(op, expected_op, "arg is {}", arg);
             }
-            p => assert!(false, "Unexpected result: {:?}", p),
+            p => panic!("Unexpected result: {:?}", p),
         }
     }
 }
@@ -238,7 +238,7 @@ fn parse_diff_branch_spec() {
                 assert!(!rhs.is_empty());
                 assert_eq!(op, expected_op, "arg is {}", arg);
             }
-            p => assert!(false, "Unexpected result: {:?}", p),
+            p => panic!("Unexpected result: {:?}", p),
         }
     }
 }
@@ -256,7 +256,7 @@ fn parse_diff_revisions() {
                 assert_eq!(rhs, "bc869a14617a131fefe8fa1a3dcdeba0745880d5");
                 assert_eq!(op, expected_op, "arg is {}", arg);
             }
-            p => assert!(false, "Unexpected result: {:?}", p),
+            p => panic!("Unexpected result: {:?}", p),
         }
     }
 }
@@ -274,11 +274,11 @@ fn wrong_num_of_args() {
             for (_, err) in attempts {
                 match err.kind() {
                     ErrorKind::WrongNumberOfArgs { actual, .. } => assert_eq!(*actual, 4),
-                    err => assert!(false, "Unexpected error: {}", err),
+                    err => panic!("Unexpected error: {}", err),
                 }
             }
         }
-        e => assert!(false, "Unexpected error: {:?}", e),
+        e => panic!("Unexpected error: {:?}", e),
     }
 }
 
@@ -314,9 +314,8 @@ fn diff_lhs_or_rhs_empty() {
             None,
             vec![path.to_str().unwrap()],
         );
-        match parse_page(&c) {
-            Ok(p @ Page::Diff { .. }) => assert!(false, "Unexpectedly parsed as diff: {:?}", p),
-            _ => { /*ok*/ }
+        if let Ok(p @ Page::Diff { .. }) = parse_page(&c) {
+            panic!("Unexpectedly parsed as diff: {:?}", p);
         }
     }
 }
@@ -326,7 +325,7 @@ fn issue_number() {
     let c = config("https://github.com/user/repo.git", None, vec!["#123"]);
     match parse_page(&c) {
         Ok(Page::Issue { number }) => assert_eq!(number, 123),
-        v => assert!(false, "Unexpected result {:?}", v),
+        v => panic!("Unexpected result {:?}", v),
     }
 }
 
@@ -344,7 +343,7 @@ fn line_cannot_be_set_to_dir() {
                 attempts,
                 arg,
             ),
-            e => assert!(false, "Unexpected error {:?} for {}", e, arg),
+            e => panic!("Unexpected error {:?} for {}", e, arg),
         }
     }
 }
@@ -366,7 +365,7 @@ fn parse_file_line_range() {
             Page::FilePath { line, .. } => {
                 assert_eq!(line, Some(Line::Range(1, 2)), "input: {:?}", file)
             }
-            p => assert!(false, "Unexpected result: {:?}, input: {:?}", p, file),
+            p => panic!("Unexpected result: {:?}, input: {:?}", p, file),
         }
     }
 }
@@ -381,7 +380,7 @@ fn setting_website_returns_open_always() {
                 website: true,
                 pull_request: false,
             } => { /* OK */ }
-            page => assert!(false, "Unexpected parse result: {:?}", page),
+            page => panic!("Unexpected parse result: {:?}", page),
         }
     }
 }
@@ -396,7 +395,7 @@ fn setting_pull_request_returns_open_always() {
                 website: false,
                 pull_request: true,
             } => { /* OK */ }
-            page => assert!(false, "Unexpected parse result: {:?}", page),
+            page => panic!("Unexpected parse result: {:?}", page),
         }
     }
 }
@@ -413,7 +412,7 @@ fn parse_tag_ref() {
             assert_eq!(&tagname, "0.10.0");
             assert_eq!(&commit, "0b412dc7b223dd3a7fc16b6406e7b2cc866e3ed3");
         }
-        page => assert!(false, "Unexpected parse result: {:?}", page),
+        page => panic!("Unexpected parse result: {:?}", page),
     }
 }
 
@@ -426,7 +425,7 @@ fn parse_blame_without_file_path() {
 
         match parse_page(&c).unwrap_err().kind() {
             ErrorKind::BlameWithoutFilePath => { /* ok */ }
-            e => assert!(false, "Unexpected error: {:?}", e),
+            e => panic!("Unexpected error: {:?}", e),
         }
     }
 }
@@ -441,7 +440,7 @@ fn parse_blame_directory() {
         ErrorKind::CannotBlameDirectory { dir } => {
             assert!(dir.ends_with("src"), "{:?}", dir);
         }
-        e => assert!(false, "Unexpected parse error: {:?}", e),
+        e => panic!("Unexpected parse error: {:?}", e),
     }
 }
 

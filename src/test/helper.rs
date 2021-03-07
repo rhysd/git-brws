@@ -51,9 +51,7 @@ macro_rules! skip_if_no_token_for_search {
 }
 
 pub fn get_root_dir() -> PathBuf {
-    let mut root = fs::canonicalize(env::current_dir().unwrap())
-        .unwrap()
-        .clone();
+    let mut root = fs::canonicalize(env::current_dir().unwrap()).unwrap();
     loop {
         let prev = root.clone();
         root.pop();
