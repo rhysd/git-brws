@@ -21,14 +21,14 @@ name = "git-brws"
 
 [dependencies]
 getopts = "0.2"
-url = "2.1"
-open = "1.4"
-reqwest = { version = "0.10", features = ["json"] }
+url = "2.2"
+open = "1.7"
+reqwest = { version = "0.11", features = ["json"] }
 serde_derive = "1.0"
 serde = "1.0"
 path-slash = "0.1"
 envy = "0.4"
-tokio = { version = "0.2", default-features = false }
+tokio = { version = "1.5", default-features = false }
 lazy_static = "1.4"
 # Only for futures::join!
 futures = { version = "0.3", default-features = false, features = ["async-await"] }
@@ -38,7 +38,7 @@ criterion = "0.3"
 
 # For tokio::test
 [dev-dependencies.tokio]
-version = "0.2"
+version = "1.5"
 default-features = false
 features = ["macros"]
 
