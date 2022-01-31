@@ -39,12 +39,12 @@ fn first_available_url(
         }
     }
     if let Ok(client) = builder.build() {
-        for mut candidate in candidates.iter_mut() {
+        for candidate in candidates.iter_mut() {
             let req = client.head(candidate.as_str());
             if let Ok(res) = async_runtime::blocking(req.send()) {
                 let status = res.status();
                 if status == reqwest::StatusCode::OK {
-                    return mem::replace(&mut candidate, String::new());
+                    return mem::take(candidate);
                 }
             }
         }
@@ -431,7 +431,7 @@ pub fn slug_from_path(path: &str) -> Result<(&str, &str)> {
 //  2. git@hosting_service.com:user/repo.git (-> ssh://git@hosting_service.com:22/user/repo.git)
 pub fn build_page_url(page: &Page, cfg: &Config) -> Result<String> {
     let repo_url = &cfg.repo_url;
-    let url = Url::parse(&repo_url).map_err(|e| {
+    let url = Url::parse(repo_url).map_err(|e| {
         Error::new(ErrorKind::BrokenUrl {
             url: repo_url.to_string(),
             msg: format!("{}", e),

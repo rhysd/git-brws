@@ -113,7 +113,7 @@ impl<'a> Client<'a> {
         if issues.items.is_empty() {
             Ok(None)
         } else {
-            let html_url = mem::replace(&mut issues.items[0].html_url, String::new());
+            let html_url = mem::take(&mut issues.items[0].html_url);
             Ok(Some(html_url))
         }
     }

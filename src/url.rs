@@ -5,8 +5,8 @@ use crate::service;
 use std::process::{Command, ExitStatus, Stdio};
 
 pub fn build_url(cfg: &Config) -> Result<String> {
-    let page = parse_page(&cfg)?;
-    service::build_page_url(&page, &cfg)
+    let page = parse_page(cfg)?;
+    service::build_page_url(&page, cfg)
 }
 
 fn browse_with_cmd(url: &str, cmd: &str) -> Result<()> {

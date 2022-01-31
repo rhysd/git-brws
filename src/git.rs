@@ -50,7 +50,7 @@ impl<'a> Git<'a> {
             .command(&["show-ref", "--tags", tagname])
             .map_err(|e| object_not_found("tag name", e, tagname))?;
         // Output must be in format '{rev} {ref name}'
-        Ok(stdout.splitn(2, ' ').next().unwrap().to_string())
+        Ok(stdout.split_once(' ').unwrap().0.to_string())
     }
 
     pub fn remote_url(&self, name: impl AsRef<str>) -> Result<String> {
@@ -84,8 +84,8 @@ impl<'a> Git<'a> {
         };
 
         // out is formatted as '{remote-name}/{branch-name}'
-        match out.splitn(2, '/').next() {
-            Some(u) => Ok((self.remote_url(u)?, u.to_string())),
+        match out.split_once('/') {
+            Some((u, _)) => Ok((self.remote_url(u)?, u.to_string())),
             None => Error::err(ErrorKind::UnexpectedRemoteName(out.clone())),
         }
     }
