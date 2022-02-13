@@ -80,7 +80,7 @@ fn parse_file_or_dir() {
         let c = config(
             "https://github.com/user/repo.git",
             None,
-            vec![&entry.to_str().unwrap()],
+            vec![entry.to_str().unwrap()],
         );
         match parse_page(&c).unwrap() {
             Page::FilePath {
@@ -107,7 +107,7 @@ fn parse_file_or_dir_for_blame() {
     let mut c = config(
         "https://github.com/user/repo.git",
         None,
-        vec![&entry.to_str().unwrap()],
+        vec![entry.to_str().unwrap()],
     );
     c.blame = true;
     let c = c;
@@ -136,7 +136,7 @@ fn parse_file_single_line() {
         let c = config(
             "https://github.com/user/repo.git",
             None,
-            vec![&file.to_str().unwrap()],
+            vec![file.to_str().unwrap()],
         );
         match parse_page(&c).unwrap() {
             Page::FilePath { line, .. } => assert_eq!(&line, expected, "input: {:?}", file),
@@ -359,7 +359,7 @@ fn parse_file_line_range() {
         let c = config(
             "https://github.com/user/repo.git",
             None,
-            vec![&file.to_str().unwrap()],
+            vec![file.to_str().unwrap()],
         );
         match parse_page(&c).unwrap() {
             Page::FilePath { line, .. } => {
