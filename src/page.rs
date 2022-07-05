@@ -113,9 +113,7 @@ impl<'a> BrowsePageParser<'a> {
             return Error::err(ErrorKind::DiffDotsNotFound);
         };
 
-        let mut split = arg.splitn(2, dots);
-        let lhs = split.next().unwrap();
-        let rhs = split.next().unwrap();
+        let (lhs, rhs) = arg.split_once(dots).unwrap();
 
         if lhs.is_empty() || rhs.is_empty() {
             return Error::err(ErrorKind::DiffHandIsEmpty {
