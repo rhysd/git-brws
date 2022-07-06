@@ -4,22 +4,11 @@ use crate::error::{Error, ErrorKind, Result};
 use crate::github_api::Client;
 use crate::page::{DiffOp, Line, Page};
 use crate::pull_request;
+use path_slash::PathExt as _;
 use std::borrow::Cow;
 use std::mem;
+use std::path::Path;
 use url::Url;
-
-#[cfg(target_os = "windows")]
-fn to_slash(s: &str) -> String {
-    use path_slash::PathExt;
-    use std::path::Path;
-    Path::new(s).to_slash_lossy()
-}
-
-// Do nothing on Windows
-#[cfg(not(target_os = "windows"))]
-fn to_slash(s: &str) -> &str {
-    s
-}
 
 // TODO: Omit fallback and return Result<String>
 fn first_available_url(
@@ -206,7 +195,7 @@ fn build_github_like_url(
                 repo = repo,
                 feat = feat,
                 hash = hash,
-                path = to_slash(relative_path),
+                path = Path::new(relative_path).to_slash().unwrap(),
                 anchor = match line {
                     None => "".to_string(),
                     Some(Line::At(line)) => format!("#L{}", line),
@@ -288,7 +277,7 @@ fn build_bitbucket_url(user: &str, repo: &str, cfg: &Config, page: &Page) -> Res
             repo = repo,
             feat = if *blame { "annotate" } else { "src" },
             hash = hash,
-            path = to_slash(relative_path),
+            path = Path::new(relative_path).to_slash().unwrap(),
             anchor = match line {
                 None => "".to_string(),
                 Some(Line::At(line)) => format!("#lines-{}", line),
@@ -344,7 +333,7 @@ fn build_azure_devops_url(team: &str, repo: &str, cfg: &Config, page: &Page) -> 
             team,
             repo,
             hash,
-            to_slash(relative_path),
+            Path::new(relative_path).to_slash().unwrap(),
             if *blame { "?_a=annotate" } else { "" },
         )),
         Page::Issue { number } => Ok(format!(
