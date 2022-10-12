@@ -3,7 +3,7 @@ use crate::error::{Error, ErrorKind, Result};
 use crate::github_api;
 use std::borrow::Cow;
 
-#[derive(PartialEq, Debug)]
+#[derive(PartialEq, Debug, Eq)]
 pub enum Page<'a, 'b> {
     Existing {
         url: String,

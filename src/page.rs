@@ -4,7 +4,7 @@ use crate::git::Git;
 use std::fmt;
 use std::fs;
 
-#[derive(Debug, PartialEq, Copy, Clone)]
+#[derive(Debug, PartialEq, Copy, Clone, Eq)]
 pub enum DiffOp {
     TwoDots,   // '..'
     ThreeDots, // '...'
@@ -19,13 +19,13 @@ impl fmt::Display for DiffOp {
     }
 }
 
-#[derive(Debug, PartialEq, Clone)]
+#[derive(Debug, PartialEq, Clone, Eq)]
 pub enum Line {
     At(usize),
     Range(usize, usize), // start and end
 }
 
-#[derive(Debug, PartialEq)]
+#[derive(Debug, PartialEq, Eq)]
 pub enum Page {
     Open {
         website: bool,
@@ -151,13 +151,13 @@ impl<'a> BrowsePageParser<'a> {
         let path = &arg[..line_start];
         let line_spec = &arg[idx + 1..];
         if let Some(mut dash_idx) = line_spec.find('-') {
-            let start = (&line_spec[..dash_idx]).parse().ok();
+            let start = line_spec[..dash_idx].parse().ok();
 
             if line_spec.chars().nth(dash_idx + 1) == Some('L') {
                 // Skip second 'L' of file#L123-L345
                 dash_idx += 1;
             }
-            let end = (&line_spec[dash_idx + 1..]).parse().ok();
+            let end = line_spec[dash_idx + 1..].parse().ok();
 
             (
                 path,

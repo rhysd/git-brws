@@ -29,7 +29,7 @@ fn default_git_command() -> String {
     "git".to_string()
 }
 
-#[derive(Deserialize, Debug, PartialEq, Clone)]
+#[derive(Deserialize, Debug, PartialEq, Clone, Eq)]
 pub struct EnvConfig {
     #[serde(default = "default_git_command")]
     pub git_command: String,
