@@ -121,8 +121,8 @@ impl<'a> BrowsePageParser<'a> {
             });
         }
 
-        let lhs = self.git.hash(&lhs)?;
-        let rhs = self.git.hash(&rhs)?;
+        let lhs = self.git.hash(lhs)?;
+        let rhs = self.git.hash(rhs)?;
         Ok(Page::Diff {
             lhs: self.shorten_hash(lhs),
             rhs: self.shorten_hash(rhs),
@@ -217,7 +217,7 @@ impl<'a> BrowsePageParser<'a> {
         // Ignore this check when the local branch does not point to any remote branch
         let remote_contains_hash = match self.git.remote_branch(&self.cfg.remote, &self.cfg.branch)
         {
-            Ok(remote_branch) => self.git.remote_contains(&hash, &remote_branch)?,
+            Ok(remote_branch) => self.git.remote_contains(&hash, remote_branch)?,
             Err(_) => true, // Ignore check
         };
         if !remote_contains_hash {

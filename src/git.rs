@@ -21,7 +21,7 @@ pub struct Git<'a> {
 
 impl<'a> Git<'a> {
     pub fn command<S: AsRef<OsStr> + Debug>(&self, args: &[S]) -> Result<String> {
-        let out = Command::new(&self.command)
+        let out = Command::new(self.command)
             .arg("-C")
             .arg(self.cwd)
             .args(args)
