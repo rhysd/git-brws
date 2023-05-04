@@ -13,6 +13,8 @@ jobs:
       - uses: actions/checkout@v3
         with:
           fetch-depth: 0
+      - name: Install cargo-llvm-cov
+        uses: taiki-e/install-action@cargo-llvm-cov
       - name: Ensure to fetch master branch for tests
         run: git fetch origin master:master || true
       - name: Set upstream of master branch for tests
@@ -22,20 +24,22 @@ jobs:
           profile: minimal
           toolchain: stable
           override: true
-      - name: Run tests
-        uses: actions-rs/cargo@v1
-        with:
-          command: test
-          args: --color always
-        env:
-          GIT_BRWS_GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          RUST_BACKTRACE: full
-          GIT_BRWS_CI_SKIP_TEST_FOR_SEARCH_API: ${{ matrix.os != 'ubuntu-latest' }}
       - name: Build and run
         uses: actions-rs/cargo@v1
         with:
           command: run
           args: --color always -- --version
+      - name: Run tests
+        run: |
+          cargo llvm-cov --color always --lcov --output-path lcov.info
+          cargo llvm-cov --color always --no-run
+        env:
+          GIT_BRWS_GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          RUST_BACKTRACE: full
+          GIT_BRWS_CI_SKIP_TEST_FOR_SEARCH_API: ${{ matrix.os != 'ubuntu-latest' }}
+      - uses: codecov/codecov-action@v3
+        with:
+          files: lcov.info
 
   rustfmt:
     name: rustfmt
