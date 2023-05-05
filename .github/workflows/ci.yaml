@@ -19,16 +19,9 @@ jobs:
         run: git fetch origin master:master || true
       - name: Set upstream of master branch for tests
         run: git branch -u origin/master master
-      - uses: actions-rs/toolchain@v1
-        with:
-          profile: minimal
-          toolchain: stable
-          override: true
+      - uses: dtolnay/rust-toolchain@stable
       - name: Build and run
-        uses: actions-rs/cargo@v1
-        with:
-          command: run
-          args: --color always -- --version
+        run: cargo run --color always -- --version
       - name: Run tests
         run: |
           cargo llvm-cov --color always --lcov --output-path lcov.info
@@ -46,30 +39,17 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v3
-      - uses: actions-rs/toolchain@v1
+      - uses: dtolnay/rust-toolchain@stable
         with:
-          profile: minimal
-          toolchain: stable
-          components: rustfmt
-          override: true
-      - name: rustfmt
-        uses: actions-rs/cargo@v1
-        with:
-          command: fmt
-          args: -- --check --color always
+          comopnents: rustfmt
+      - run: cargo fmt -- --check --color always
 
   clippy:
     name: clippy
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v3
-      - uses: actions-rs/toolchain@v1
+      - uses: dtolnay/rust-toolchain@stable
         with:
-          profile: minimal
-          toolchain: stable
-          components: clippy
-          override: true
-      - uses: actions-rs/cargo@v1
-        with:
-          command: clippy
-          args: --color always --tests --benches -- -D warnings
+          comopnents: clippy
+      - run: cargo clippy --color always --tests --benches -- -D warnings
