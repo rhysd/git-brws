@@ -34,22 +34,13 @@ jobs:
         with:
           files: lcov.info
 
-  rustfmt:
-    name: rustfmt
+  lints:
+    name: Lints
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v3
       - uses: dtolnay/rust-toolchain@stable
         with:
-          comopnents: rustfmt
+          comopnents: rustfmt,clippy
       - run: cargo fmt -- --check --color always
-
-  clippy:
-    name: clippy
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v3
-      - uses: dtolnay/rust-toolchain@stable
-        with:
-          comopnents: clippy
       - run: cargo clippy --color always --tests --benches -- -D warnings
